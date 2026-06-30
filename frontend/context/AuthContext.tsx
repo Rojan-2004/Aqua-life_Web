@@ -33,6 +33,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const refreshUser = async () => {
         try {
+            if (typeof window !== "undefined") {
+                const match = document.cookie.match(/(^| )user_data=([^;]+)/);
+                if (match) {
+                    try {
+                        const parsed = JSON.parse(decodeURIComponent(match[2]));
+                        setUser(parsed);
+                        setLoading(false);
+                        return;
+                    } catch (e) {
+                        console.error("Error parsing user_data cookie directly:", e);
+                    }
+                }
+            }
             const data = await getUserData();
             setUser(data);
         } catch (err) {
