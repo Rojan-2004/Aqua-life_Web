@@ -14,6 +14,7 @@ export default function ProfilePage() {
     const { user, loading, updateUser, refreshUser } = useAuth();
     const router = useRouter();
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const [mounted, setMounted] = useState(false);
 
     // Profile Details State
     const [firstName, setFirstName] = useState("");
@@ -41,6 +42,7 @@ export default function ProfilePage() {
 
     // Sync state with user context data once loaded
     useEffect(() => {
+        setMounted(true);
         if (user) {
             setFirstName(user.firstName || "");
             setLastName(user.lastName || "");
@@ -50,7 +52,7 @@ export default function ProfilePage() {
     }, [user]);
 
     // Handle initial loading
-    if (loading) {
+    if (loading || !mounted) {
         return (
             <div style={{ background: "#0a0e1a", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Outfit', sans-serif" }}>
                 <p style={{ color: "#4dd9e8", fontSize: 18, fontWeight: 600 }}>Loading profile...</p>
@@ -189,7 +191,7 @@ export default function ProfilePage() {
     };
 
     // Determine avatar display
-    const userInitials = `${firstName.charAt(0) || user.firstName?.charAt(0) || ""}${lastName.charAt(0) || user.lastName?.charAt(0) || ""}`.toUpperCase();
+    const userInitials = `${(firstName || "").charAt(0) || (user?.firstName || "").charAt(0) || ""}${(lastName || "").charAt(0) || (user?.lastName || "").charAt(0) || ""}`.toUpperCase();
     const hasProfilePic = user.profilePicture && user.profilePicture !== "default-profile.png";
     const profilePicUrl = hasProfilePic ? `/profile_pictures/${user.profilePicture}` : null;
 

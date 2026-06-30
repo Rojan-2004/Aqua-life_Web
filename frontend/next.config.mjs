@@ -13,6 +13,10 @@ const nextConfig = {
         source: "/profile_pictures/:path*",
         destination: "http://localhost:3000/profile_pictures/:path*",
       },
+      {
+        source: "/item_photos/:path*",
+        destination: "http://localhost:3000/item_photos/:path*",
+      },
     ];
   },
 };
