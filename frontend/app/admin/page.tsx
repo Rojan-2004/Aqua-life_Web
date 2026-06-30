@@ -132,10 +132,12 @@ export default function AdminPage() {
 
                 {/* Quick Actions */}
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 20, marginBottom: 40 }}>
-                    <div style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, padding: 24, cursor: "pointer" }}>
-                        <h3 style={{ color: "#fff", fontSize: 18, fontWeight: 600, marginBottom: 12 }}>Manage Products</h3>
-                        <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 14 }}>Add, edit, or remove fish, food, and aquarium supplies.</p>
-                    </div>
+                    <Link href="/admin/products" style={{ textDecoration: "none", display: "block" }}>
+                        <div style={{ background: "linear-gradient(135deg, #2d9cdb, #4dd9e8)", borderRadius: 12, padding: 24, cursor: "pointer" }}>
+                            <h3 style={{ color: "#fff", fontSize: 18, fontWeight: 600, marginBottom: 12 }}>Manage Products</h3>
+                            <p style={{ color: "rgba(255,255,255,0.8)", fontSize: 14 }}>Add, edit, or remove fish, food, and aquarium supplies.</p>
+                        </div>
+                    </Link>
                     <div style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, padding: 24, cursor: "pointer" }}>
                         <h3 style={{ color: "#fff", fontSize: 18, fontWeight: 600, marginBottom: 12 }}>Manage Orders</h3>
                         <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 14 }}>Review, update, and fulfill customer orders.</p>

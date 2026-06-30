@@ -24,6 +24,13 @@ export const API = {
             CREATE: "/api/v1/admin/users",
             UPDATE: (id: string) => `/api/v1/admin/users/${id}`,
             DELETE: (id: string) => `/api/v1/admin/users/${id}`,
+        },
+        PRODUCTS: {
+            GET_ALL: "/api/v1/admin/products",
+            GET_BY_ID: (id: string) => `/api/v1/admin/products/${id}`,
+            CREATE: "/api/v1/admin/products",
+            UPDATE: (id: string) => `/api/v1/admin/products/${id}`,
+            DELETE: (id: string) => `/api/v1/admin/products/${id}`,
         }
     }
 }
