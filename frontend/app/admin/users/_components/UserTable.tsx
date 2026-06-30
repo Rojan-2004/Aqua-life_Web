@@ -54,7 +54,13 @@ export default function UserTable({
         <div className="mx-auto w-full max-w-[1100px] py-6 font-sans">
             <div className="mb-6 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
                 <div>
-                    <h2 className="text-3xl font-bold text-white">Users</h2>
+                    <Link
+                        href="/admin"
+                        className="text-xs font-semibold text-cyan-400 hover:text-cyan-300 mb-2 inline-flex items-center gap-1 no-underline"
+                    >
+                        ← Back to Admin Panel
+                    </Link>
+                    <h2 className="text-3xl font-bold text-white mt-1">Users</h2>
                     <p className="text-sm text-slate-400">{total} total users</p>
                 </div>
                 <Link
