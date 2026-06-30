@@ -51,6 +51,28 @@ export default function DashboardPage() {
                     </div>
 
                     <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
+                        {user.role === "admin" && (
+                            <Link 
+                                href="/admin" 
+                                style={{ 
+                                    display: "flex", 
+                                    alignItems: "center", 
+                                    gap: 6, 
+                                    textDecoration: "none", 
+                                    background: "rgba(77, 217, 232, 0.1)", 
+                                    border: "1px solid rgba(77, 217, 232, 0.3)",
+                                    padding: "6px 14px", 
+                                    borderRadius: 30,
+                                    color: "#4dd9e8",
+                                    fontSize: 13, 
+                                    fontWeight: 600,
+                                    transition: "0.2s all"
+                                }}
+                            >
+                                🛡️ Admin Panel
+                            </Link>
+                        )}
+
                         <Link 
                             href="/dashboard/profile" 
                             style={{ 

@@ -2,18 +2,26 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { handleRegisterUser } from "@/lib/actions/auth-action";
 import { RegisterFormData, registerSchema } from "../_components/schema";
+import { useAuth } from "@/context/AuthContext";
 
 type RegisterApiData = Omit<RegisterFormData, "confirmPassword">;
 
 export default function RegisterPage() {
     const router = useRouter();
+    const { user, loading } = useAuth();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState('');
+
+    useEffect(() => {
+        if (!loading && user) {
+            router.push("/dashboard");
+        }
+    }, [user, loading, router]);
 
     const {
         register,

@@ -2,8 +2,28 @@ export const API = {
     AUTH: {
         REGISTER: "/api/v1/auth/register",
         LOGIN: "/api/v1/auth/login",
-        PROFILE: "/api/v1/auth/profile",
-        PASSWORD: "/api/v1/auth/password",
+        WHOAMI: "/api/v1/auth/whoami",
+        UPDATE: "/api/v1/auth/update",
+        PROFILE_UPDATE: "/api/v1/auth/profile",
+        PASSWORD_UPDATE: "/api/v1/auth/password",
         UPLOAD_PICTURE: "/api/v1/auth/upload-profile-picture",
+        REQUEST_PASSWORD_RESET: "/api/v1/auth/request-password-reset",
+        RESET_PASSWORD: (token: string): string => `/api/v1/auth/reset-password/${token}`,
+    },
+    ADMIN: {
+        BLOG: {
+            GET: "/api/v1/admin/blogs",
+            GET_ONE: (id: string) => `/api/v1/admin/blogs/${id}`,
+            CREATE: "/api/v1/admin/blogs",
+            UPDATE: (id: string): string => `/api/v1/admin/blogs/${id}`,
+            DELETE: (id: string): string => `/api/v1/admin/blogs/${id}`,
+        },
+        USERS: {
+            GET_ALL: "/api/v1/admin/users",
+            GET_BY_ID: (id: string) => `/api/v1/admin/users/${id}`,
+            CREATE: "/api/v1/admin/users",
+            UPDATE: (id: string) => `/api/v1/admin/users/${id}`,
+            DELETE: (id: string) => `/api/v1/admin/users/${id}`,
+        }
     }
-};
+}

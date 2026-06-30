@@ -1,4 +1,5 @@
 import axios from "axios";
+import { getTokenCookie } from "../cookies";
 
 const isServer = typeof window === "undefined";
 const BASE_URL = isServer
@@ -11,6 +12,16 @@ const axiosInstance = axios.create({
         "Content-Type": "application/json",
     },
     withCredentials: true,
+});
+
+axiosInstance.interceptors.request.use(async (config) => {
+    const token = await getTokenCookie();
+    if (token) {
+        config.headers["Authorization"] = `Bearer ${token}`;
+    }
+    return config;
+}, (error) => {
+    return Promise.reject(error);
 });
 
 export default axiosInstance;

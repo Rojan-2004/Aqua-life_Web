@@ -2,16 +2,24 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { handleLoginUser } from "@/lib/actions/auth-action";
 import { LoginFormData, loginSchema } from "../_components/schema";
+import { useAuth } from "@/context/AuthContext";
 
 export default function LoginPage() {
     const router = useRouter();
+    const { user, loading, login } = useAuth();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState('');
+
+    useEffect(() => {
+        if (!loading && user) {
+            router.push("/dashboard");
+        }
+    }, [user, loading, router]);
 
     const {
         register,
@@ -29,6 +37,9 @@ export default function LoginPage() {
             const result = await handleLoginUser(data);
             console.log('Login result:', result);
             if (result.success) {
+                if (result.data) {
+                    login(result.data);
+                }
                 router.push("/dashboard");
             } else {
                 setError(result.message || 'Login failed');

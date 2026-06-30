@@ -1,5 +1,7 @@
 import { AuthProvider } from "@/context/AuthContext";
 import "./globals.css";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export const metadata = {
   title: "Aqua Life",
@@ -16,6 +18,7 @@ export default function RootLayout({
       <body>
         <AuthProvider>
           {children}
+          <ToastContainer position="top-right" theme="dark" />
         </AuthProvider>
       </body>
     </html>
