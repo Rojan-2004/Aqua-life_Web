@@ -1,17 +1,72 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+import { getAdminStats, getRecentOrders } from "@/lib/api/dashboard";
+
+interface AdminStats {
+    revenue: number;
+    ordersToday: number;
+    productsLive: number;
+    activeUsers: number;
+}
+
+interface AdminOrder {
+    id: string;
+    customer: string;
+    status: string;
+    total?: number;
+}
+
+const statusColors: Record<string, { bg: string; text: string }> = {
+    Delivered: { bg: "rgba(74,222,128,0.15)", text: "#4ade80" },
+    Shipped: { bg: "rgba(77,217,232,0.15)", text: "#4dd9e8" },
+    Pending: { bg: "rgba(251,191,36,0.15)", text: "#fbbf24" },
+    Cancelled: { bg: "rgba(248,113,113,0.15)", text: "#f87171" },
+};
 
 export default function AdminPage() {
     const { user, loading, logout } = useAuth();
     const router = useRouter();
 
+    const [stats, setStats] = useState<AdminStats>({
+        revenue: 0,
+        ordersToday: 0,
+        productsLive: 0,
+        activeUsers: 0,
+    });
+    const [orders, setOrders] = useState<AdminOrder[]>([]);
+    const [loadingData, setLoadingData] = useState(true);
+
+    useEffect(() => {
+        async function fetchData() {
+            try {
+                const [statsRes, ordersRes] = await Promise.all([
+                    getAdminStats(),
+                    getRecentOrders(),
+                ]);
+                const s = statsRes?.data;
+                setStats({
+                    revenue: s?.revenue ?? 0,
+                    ordersToday: s?.ordersToday ?? 0,
+                    productsLive: s?.productsLive ?? 0,
+                    activeUsers: s?.activeUsers ?? 0,
+                });
+                setOrders(ordersRes?.data ?? []);
+            } catch (e) {
+                console.error("Failed to load admin data", e);
+            } finally {
+                setLoadingData(false);
+            }
+        }
+        if (user && user.role === "admin") fetchData();
+    }, [user]);
+
     if (loading) {
         return (
-            <div style={{ background: "#0a0e1a", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Outfit', sans-serif" }}>
+            <div style={{ background: "#0a0e1a", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-outfit), 'Outfit', sans-serif" }}>
                 <p style={{ color: "#4dd9e8", fontSize: 18, fontWeight: 600 }}>Loading admin panel...</p>
             </div>
         );
@@ -27,28 +82,22 @@ export default function AdminPage() {
         router.push("/frontend/login");
     };
 
-    const stats = [
-        { label: "Total Revenue", value: "Rs. 2.4L", change: "+12%", up: true },
-        { label: "Orders Today", value: "186", change: "+5%", up: true },
-        { label: "Products Live", value: "1,204", change: "-3%", up: false },
-        { label: "Active Users", value: "8,940", change: "+9%", up: true },
+    const statCards = [
+        { label: "Total Revenue", value: `Rs. ${stats.revenue}` },
+        { label: "Orders Today", value: stats.ordersToday },
+        { label: "Products Live", value: stats.productsLive },
+        { label: "Active Users", value: stats.activeUsers },
     ];
 
-    const orders = [
-        { name: "Neon Tetra Bundle", customer: "Maya Chen", id: "#4821", status: "Delivered" },
-        { name: "Premium Coral", customer: "Arjun Rao", id: "#4820", status: "Shipped" },
-        { name: "60-Gallon Aquarium", customer: "Priya Shah", id: "#4819", status: "Pending" },
+    const quickLinks = [
+        { label: "Products", href: "/admin/products", desc: "Add, edit, archive listings" },
+        { label: "Users", href: "/admin/users", desc: "View accounts and roles" },
+        // Orders route not built yet — enable once /admin/orders exists:
+        // { label: "Orders", href: "/admin/orders", desc: "Fulfil and update orders" },
     ];
-
-    const statusColors: Record<string, { bg: string; text: string }> = {
-        Delivered: { bg: "rgba(74,222,128,0.15)", text: "#4ade80" },
-        Shipped: { bg: "rgba(77,217,232,0.15)", text: "#4dd9e8" },
-        Pending: { bg: "rgba(251,191,36,0.15)", text: "#fbbf24" },
-    };
 
     return (
-        <div style={{ fontFamily: "'Outfit', sans-serif", background: "#0a0e1a", minHeight: "100vh" }}>
-            <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet" />
+        <div style={{ fontFamily: "var(--font-outfit), 'Outfit', sans-serif", background: "#0a0e1a", minHeight: "100vh" }}>
 
             {/* Header Navigation Bar */}
             <header style={{
@@ -113,77 +162,81 @@ export default function AdminPage() {
                         Store Overview
                     </h1>
                     <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 14, marginTop: 8 }}>
-                        Manage products, orders, and users across the AquaLife platform.
+                        Live metrics from across the AquaLife platform.
                     </p>
                 </div>
 
                 {/* Stat Cards */}
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 20, marginBottom: 40 }}>
-                    {stats.map((s) => (
+                    {statCards.map((s) => (
                         <div key={s.label} style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, padding: 20 }}>
-                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 13 }}>{s.label}</p>
-                                <span style={{ color: s.up ? "#4ade80" : "#f87171", fontSize: 12, fontWeight: 600 }}>{s.change}</span>
-                            </div>
+                            <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 13 }}>{s.label}</p>
                             <p style={{ color: "#fff", fontSize: 26, fontWeight: 700, marginTop: 8 }}>{s.value}</p>
                         </div>
                     ))}
                 </div>
 
-                {/* Quick Actions */}
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 20, marginBottom: 40 }}>
-                    <Link href="/admin/products" style={{ textDecoration: "none", display: "block" }}>
-                        <div style={{ background: "linear-gradient(135deg, #2d9cdb, #4dd9e8)", borderRadius: 12, padding: 24, cursor: "pointer" }}>
-                            <h3 style={{ color: "#fff", fontSize: 18, fontWeight: 600, marginBottom: 12 }}>Manage Products</h3>
-                            <p style={{ color: "rgba(255,255,255,0.8)", fontSize: 14 }}>Add, edit, or remove fish, food, and aquarium supplies.</p>
-                        </div>
-                    </Link>
-                    <div style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, padding: 24, cursor: "pointer" }}>
-                        <h3 style={{ color: "#fff", fontSize: 18, fontWeight: 600, marginBottom: 12 }}>Manage Orders</h3>
-                        <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 14 }}>Review, update, and fulfill customer orders.</p>
-                    </div>
-                    <Link href="/admin/users" style={{ textDecoration: "none", display: "block" }}>
-                        <div style={{ background: "linear-gradient(135deg, #2d9cdb, #4dd9e8)", borderRadius: 12, padding: 24, cursor: "pointer" }}>
-                            <h3 style={{ color: "#fff", fontSize: 18, fontWeight: 600, marginBottom: 12 }}>Manage Users</h3>
-                            <p style={{ color: "rgba(255,255,255,0.8)", fontSize: 14 }}>View accounts, roles, and customer activity.</p>
-                        </div>
-                    </Link>
+                {/* Quick Links */}
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 20, marginBottom: 40 }}>
+                    {quickLinks.map((q) => (
+                        <Link key={q.label} href={q.href} style={{ textDecoration: "none", display: "block" }}>
+                            <div style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, padding: 20, cursor: "pointer", transition: "0.2s all" }}>
+                                <h3 style={{ color: "#fff", fontSize: 16, fontWeight: 600, marginBottom: 6 }}>{q.label}</h3>
+                                <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 13 }}>{q.desc}</p>
+                            </div>
+                        </Link>
+                    ))}
                 </div>
 
                 {/* Recent Orders Table */}
                 <div>
                     <h2 style={{ color: "#fff", fontSize: 20, fontWeight: 600, marginBottom: 16 }}>Recent Orders</h2>
-                    <div style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, overflow: "hidden" }}>
-                        {orders.map((o, i) => (
-                            <div
-                                key={o.id}
-                                style={{
-                                    display: "flex",
-                                    justifyContent: "space-between",
-                                    alignItems: "center",
-                                    padding: "16px 20px",
-                                    borderBottom: i !== orders.length - 1 ? "1px solid rgba(255,255,255,0.08)" : "none",
-                                }}
-                            >
-                                <div>
-                                    <p style={{ color: "#fff", fontSize: 14, fontWeight: 600 }}>{o.name}</p>
-                                    <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 12, marginTop: 2 }}>{o.customer} · {o.id}</p>
-                                </div>
-                                <span
+
+                    {loadingData ? (
+                        <div style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, padding: 24 }}>
+                            <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 14 }}>Loading recent orders...</p>
+                        </div>
+                    ) : orders.length === 0 ? (
+                        <div style={{ textAlign: "center", padding: "40px 0", color: "rgba(255,255,255,0.3)" }}>
+                            <p style={{ fontSize: 32 }}>🐟</p>
+                            <p style={{ marginTop: 8 }}>No orders yet.</p>
+                        </div>
+                    ) : (
+                        <div style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, overflow: "hidden" }}>
+                            {orders.map((o, i) => (
+                                <div
+                                    key={o.id}
                                     style={{
-                                        background: statusColors[o.status].bg,
-                                        color: statusColors[o.status].text,
-                                        fontSize: 12,
-                                        fontWeight: 600,
-                                        padding: "4px 12px",
-                                        borderRadius: 20,
+                                        display: "flex",
+                                        justifyContent: "space-between",
+                                        alignItems: "center",
+                                        padding: "16px 20px",
+                                        borderBottom: i !== orders.length - 1 ? "1px solid rgba(255,255,255,0.08)" : "none",
                                     }}
                                 >
-                                    {o.status}
-                                </span>
-                            </div>
-                        ))}
-                    </div>
+                                    <div>
+                                        <p style={{ color: "#fff", fontSize: 14, fontWeight: 600 }}>{o.customer || "Customer"}</p>
+                                        <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 12, marginTop: 2 }}>
+                                            {o.id}
+                                            {typeof o.total === "number" ? ` · Rs. ${o.total}` : ""}
+                                        </p>
+                                    </div>
+                                    <span
+                                        style={{
+                                            background: statusColors[o.status]?.bg || "rgba(255,255,255,0.1)",
+                                            color: statusColors[o.status]?.text || "rgba(255,255,255,0.6)",
+                                            fontSize: 12,
+                                            fontWeight: 600,
+                                            padding: "4px 12px",
+                                            borderRadius: 20,
+                                        }}
+                                    >
+                                        {o.status || "Pending"}
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </section>
         </div>

@@ -32,24 +32,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [loading, setLoading] = useState(true);
 
     const refreshUser = async () => {
+        setLoading(true);
         try {
-            if (typeof window !== "undefined") {
-                const match = document.cookie.match(/(^| )user_data=([^;]+)/);
-                if (match) {
-                    try {
-                        const parsed = JSON.parse(decodeURIComponent(match[2]));
-                        setUser(parsed);
-                        setLoading(false);
-                        return;
-                    } catch (e) {
-                        console.error("Error parsing user_data cookie directly:", e);
+            // First, try to get user data from server action
+            const data = await getUserData();
+            if (data) {
+                setUser(data);
+            } else {
+                // If no user data, try client-side cookie parsing as fallback
+                if (typeof window !== "undefined") {
+                    const match = document.cookie.match(/(^| )user_data=([^;]+)/);
+                    if (match) {
+                        try {
+                            const parsed = JSON.parse(decodeURIComponent(match[2]));
+                            setUser(parsed);
+                        } catch (e) {
+                            console.error("Error parsing user_data cookie directly:", e);
+                            setUser(null);
+                        }
+                    } else {
+                        setUser(null);
                     }
                 }
             }
-            const data = await getUserData();
-            setUser(data);
         } catch (err) {
             console.error("Error fetching user data from cookies:", err);
+            setUser(null);
         } finally {
             setLoading(false);
         }

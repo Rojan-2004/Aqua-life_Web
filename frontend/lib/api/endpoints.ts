@@ -32,5 +32,10 @@ export const API = {
             UPDATE: (id: string) => `/api/v1/admin/products/${id}`,
             DELETE: (id: string) => `/api/v1/admin/products/${id}`,
         }
+    },
+    DASHBOARD: {
+        ADMIN_STATS: "/api/v1/admin/stats",
+        ADMIN_RECENT_ORDERS: "/api/v1/admin/orders/recent",
+        USER_DASHBOARD: "/api/v1/user/dashboard",
     }
 }
