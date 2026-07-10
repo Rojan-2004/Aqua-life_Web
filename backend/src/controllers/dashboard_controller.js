@@ -1,6 +1,8 @@
-const mongoose = require("mongoose");
 const Product = require("../models/product_model");
 const User = require("../models/user_model");
+const Order = require("../models/order_model");
+const WishlistItem = require("../models/wishlist_item_model");
+const Review = require("../models/review_model");
 
 function startOfToday() {
     const d = new Date();
@@ -8,71 +10,38 @@ function startOfToday() {
     return d;
 }
 
-// Access collections that may not exist yet (orders, wishlist, tanks).
-// Returns 0 / [] gracefully so the UI shows real zero states instead of errors.
-function getCollection(name) {
-    return mongoose.connection.collection(name);
-}
-
-async function countCollection(name, query = {}) {
-    try {
-        return await getCollection(name).countDocuments(query);
-    } catch (e) {
-        return 0;
-    }
-}
-
-async function findRecentOrders(limit = 5) {
-    try {
-        const coll = getCollection("orders");
-        const docs = await coll
-            .aggregate([
-                { $sort: { createdAt: -1 } },
-                { $limit: limit },
-                {
-                    $lookup: {
-                        from: "users",
-                        localField: "user",
-                        foreignField: "_id",
-                        as: "user",
-                    },
-                },
-                { $unwind: { path: "$user", preserveNullAndEmptyArrays: true } },
-                {
-                    $project: {
-                        id: { $toString: "$_id" },
-                        total: 1,
-                        status: 1,
-                        createdAt: 1,
-                        customer: {
-                            $trim: {
-                                input: {
-                                    $concat: [
-                                        { $ifNull: ["$user.firstName", ""] },
-                                        " ",
-                                        { $ifNull: ["$user.lastName", ""] },
-                                    ],
-                                },
-                            },
-                        },
-                        productCount: { $size: { $ifNull: ["$products", []] } },
-                    },
-                },
-            ])
-            .toArray();
-        return docs;
-    } catch (e) {
-        return [];
-    }
+function mapOrder(o) {
+    return {
+        id: o._id.toString(),
+        total: o.total,
+        status: o.status,
+        createdAt: o.createdAt,
+        items: (o.items || []).map((it) => ({
+            quantity: it.quantity,
+            price: it.price,
+            product: it.product
+                ? {
+                      name: it.product.name,
+                      images:
+                          Array.isArray(it.product.images) &&
+                          it.product.images.length
+                              ? it.product.images
+                              : it.product.image
+                              ? [it.product.image]
+                              : [],
+                  }
+                : null,
+        })),
+    };
 }
 
 // GET /api/v1/admin/stats
 exports.getAdminStats = async (req, res, next) => {
     try {
         const [productsLive, activeUsers, ordersToday] = await Promise.all([
-            Product.countDocuments({ status: "active" }),
+            Product.countDocuments({ isActive: true }),
             User.countDocuments({ status: "active" }),
-            countCollection("orders", { createdAt: { $gte: startOfToday() } }),
+            Order.countDocuments({ createdAt: { $gte: startOfToday() } }),
         ]);
 
         // No delivered-order revenue recorded yet — show 0 until orders exist.
@@ -95,8 +64,24 @@ exports.getAdminStats = async (req, res, next) => {
 // GET /api/v1/admin/orders/recent
 exports.getRecentOrders = async (req, res, next) => {
     try {
-        const orders = await findRecentOrders(5);
-        res.status(200).json({ success: true, data: orders });
+        const orders = await Order.find()
+            .sort({ createdAt: -1 })
+            .limit(5)
+            .populate("user", "firstName lastName")
+            .lean();
+
+        const data = orders.map((o) => ({
+            id: o._id.toString(),
+            total: o.total,
+            status: o.status,
+            createdAt: o.createdAt,
+            customer:
+                [o.user?.firstName, o.user?.lastName]
+                    .filter(Boolean)
+                    .join(" ") || "Customer",
+        }));
+
+        res.status(200).json({ success: true, data });
     } catch (err) {
         next(err);
     }
@@ -107,26 +92,15 @@ exports.getUserDashboard = async (req, res, next) => {
     try {
         const userId = req.user._id;
 
-        const [orders, wishlist, tanks] = await Promise.all([
-            (async () => {
-                try {
-                    const docs = await getCollection("orders")
-                        .find({ user: userId })
-                        .sort({ createdAt: -1 })
-                        .limit(5)
-                        .toArray();
-                    return docs.map((o) => ({
-                        id: o._id.toString(),
-                        total: o.total,
-                        status: o.status,
-                        createdAt: o.createdAt,
-                    }));
-                } catch (e) {
-                    return [];
-                }
-            })(),
-            countCollection("wishlists", { user: userId }),
-            countCollection("tanks", { user: userId }),
+        const [orders, wishlist, reviews, recentOrders] = await Promise.all([
+            Order.countDocuments({ user: userId }),
+            WishlistItem.countDocuments({ user: userId }),
+            Review.countDocuments({ user: userId }),
+            Order.find({ user: userId })
+                .sort({ createdAt: -1 })
+                .limit(5)
+                .populate("items.product", "name image images")
+                .lean(),
         ]);
 
         res.status(200).json({
@@ -134,7 +108,8 @@ exports.getUserDashboard = async (req, res, next) => {
             data: {
                 orders,
                 wishlist,
-                tanks,
+                reviews,
+                recentOrders: recentOrders.map(mapOrder),
             },
         });
     } catch (err) {

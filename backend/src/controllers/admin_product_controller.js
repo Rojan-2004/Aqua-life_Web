@@ -82,9 +82,21 @@ const createProduct = async (req, res, next) => {
       imageFilename = req.file.filename;
     }
 
+    const images = Array.isArray(req.body.images)
+      ? req.body.images
+      : req.body.images
+      ? [req.body.images]
+      : [];
+
     const product = await Product.create({
       ...validatedData,
       image: imageFilename,
+      category: req.body.category || "Fish",
+      images,
+      isActive: true,
+      isFeatured: req.body.isFeatured === true || req.body.isFeatured === "true",
+      specs: req.body.specs && typeof req.body.specs === "object" ? req.body.specs : {},
+      stock: parseInt(req.body.stock, 10) || 0,
     });
 
     res.status(201).json({

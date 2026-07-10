@@ -96,12 +96,16 @@ const categoryRoute = require("./routes/category_route");
 const adminUserRoute = require("./routes/admin_user_route");
 const adminProductRoute = require("./routes/admin_product_route");
 const dashboardRoute = require("./routes/dashboard_route");
+const productRoute = require("./routes/product_route");
+const wishlistRoute = require("./routes/wishlist_route");
 
 app.use("/api/v1/auth", authRoute);
 app.use("/api/v1/categories", categoryRoute);
 app.use("/api/v1/admin/users", adminUserRoute);
 app.use("/api/v1/admin/products", adminProductRoute);
 app.use("/api/v1", dashboardRoute);
+app.use("/api/v1/products", productRoute);
+app.use("/api/v1/wishlist", wishlistRoute);
 
 // 404 handler
 app.use((req, res, next) => {

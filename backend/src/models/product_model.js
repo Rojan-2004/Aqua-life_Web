@@ -28,6 +28,27 @@ const productSchema = new mongoose.Schema(
       enum: ["active", "inactive"],
       default: "active",
     },
+    category: {
+      type: String,
+      enum: ["Fish", "Food", "Equipment", "Plants", "Decoration"],
+      default: "Fish",
+    },
+    images: {
+      type: [String],
+      default: [],
+    },
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
+    isFeatured: {
+      type: Boolean,
+      default: false,
+    },
+    specs: {
+      type: mongoose.Schema.Types.Mixed,
+      default: {},
+    },
   },
   {
     timestamps: true,

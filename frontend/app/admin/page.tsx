@@ -91,6 +91,7 @@ export default function AdminPage() {
 
     const quickLinks = [
         { label: "Products", href: "/admin/products", desc: "Add, edit, archive listings" },
+        { label: "Add Product", href: "/admin/products/add", desc: "Create a new catalogue item" },
         { label: "Users", href: "/admin/users", desc: "View accounts and roles" },
         // Orders route not built yet — enable once /admin/orders exists:
         // { label: "Orders", href: "/admin/orders", desc: "Fulfil and update orders" },

@@ -37,5 +37,13 @@ export const API = {
         ADMIN_STATS: "/api/v1/admin/stats",
         ADMIN_RECENT_ORDERS: "/api/v1/admin/orders/recent",
         USER_DASHBOARD: "/api/v1/user/dashboard",
+    },
+    PRODUCT: {
+        GET_ALL: "/api/v1/products",
+        GET_BY_ID: (id: string) => `/api/v1/products/${id}`,
+    },
+    WISHLIST: {
+        TOGGLE: "/api/v1/wishlist",
+        GET_ALL: "/api/v1/wishlist",
     }
 }

@@ -1,0 +1,332 @@
+"use client";
+
+import React, { useEffect, useState } from "react";
+import Link from "next/link";
+import { useParams } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
+import { getProduct } from "@/lib/api/product";
+import { toggleWishlist } from "@/lib/api/wishlist";
+
+interface Review {
+    id: string;
+    rating: number;
+    comment?: string;
+    user: { firstName?: string; lastName?: string } | null;
+}
+
+interface ProductDetail {
+    id: string;
+    name: string;
+    description: string;
+    price: number;
+    category: string;
+    images: string[];
+    specs?: Record<string, unknown>;
+}
+
+export default function ProductDetailPage() {
+    const params = useParams<{ id: string }>();
+    const { user } = useAuth();
+    const [product, setProduct] = useState<ProductDetail | null>(null);
+    const [reviews, setReviews] = useState<Review[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [activeImg, setActiveImg] = useState(0);
+    const [wishlisted, setWishlisted] = useState(false);
+    const [busy, setBusy] = useState(false);
+
+    useEffect(() => {
+        let active = true;
+        getProduct(params.id)
+            .then((data) => {
+                if (!active) return;
+                setProduct(data.product ?? null);
+                setReviews(data.reviews ?? []);
+            })
+            .catch((e) => {
+                console.error("Failed to load product", e);
+                if (active) setProduct(null);
+            })
+            .finally(() => {
+                if (active) setLoading(false);
+            });
+        return () => {
+            active = false;
+        };
+    }, [params.id]);
+
+    const handleWishlist = async () => {
+        if (!user) return;
+        setBusy(true);
+        try {
+            const res = await toggleWishlist(params.id);
+            setWishlisted(!!res.wishlisted);
+        } catch (e) {
+            console.error("Wishlist toggle failed", e);
+        } finally {
+            setBusy(false);
+        }
+    };
+
+    if (loading) {
+        return (
+            <div
+                style={{
+                    background: "#0a0e1a",
+                    minHeight: "100vh",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontFamily: "var(--font-outfit), 'Outfit', sans-serif",
+                }}
+            >
+                <p style={{ color: "#4dd9e8", fontSize: 18, fontWeight: 600 }}>
+                    Loading product...
+                </p>
+            </div>
+        );
+    }
+
+    if (!product) {
+        return (
+            <div
+                style={{
+                    background: "#0a0e1a",
+                    minHeight: "100vh",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 16,
+                    fontFamily: "var(--font-outfit), 'Outfit', sans-serif",
+                }}
+            >
+                <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 18 }}>
+                    Product not found.
+                </p>
+                <Link href="/catalogue" style={{ color: "#4dd9e8", fontWeight: 600 }}>
+                    ← Back to catalogue
+                </Link>
+            </div>
+        );
+    }
+
+    const images = product.images?.length ? product.images : [];
+
+    return (
+        <div
+            style={{
+                fontFamily: "var(--font-outfit), 'Outfit', sans-serif",
+                background: "#0a0e1a",
+                minHeight: "100vh",
+            }}
+        >
+            <header
+                style={{
+                    background: "rgba(17,24,39,0.8)",
+                    backdropFilter: "blur(12px)",
+                    borderBottom: "1px solid rgba(255,255,255,0.06)",
+                    position: "sticky",
+                    top: 0,
+                    zIndex: 100,
+                }}
+            >
+                <div
+                    style={{
+                        maxWidth: 1440,
+                        margin: "0 auto",
+                        padding: "16px 32px",
+                        display: "flex",
+                        alignItems: "center",
+                    }}
+                >
+                    <Link
+                        href="/catalogue"
+                        style={{
+                            color: "#4dd9e8",
+                            fontSize: 13,
+                            fontWeight: 600,
+                            textDecoration: "none",
+                        }}
+                    >
+                        ← Back to Catalogue
+                    </Link>
+                </div>
+            </header>
+
+            <div style={{ maxWidth: 1100, margin: "0 auto", padding: "40px 32px", display: "grid", gridTemplateColumns: "minmax(0,1fr) minmax(0,1fr)", gap: 40 }}>
+                {/* Gallery */}
+                <div>
+                    <div
+                        style={{
+                            height: 360,
+                            background: "rgba(255,255,255,0.03)",
+                            borderRadius: 14,
+                            overflow: "hidden",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                        }}
+                    >
+                        {images[activeImg] ? (
+                            <img
+                                src={images[activeImg]}
+                                alt={product.name}
+                                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                            />
+                        ) : (
+                            <span style={{ fontSize: 64 }}>🐟</span>
+                        )}
+                    </div>
+                    {images.length > 1 && (
+                        <div style={{ display: "flex", gap: 10, marginTop: 12 }}>
+                            {images.map((img, i) => (
+                                <button
+                                    key={i}
+                                    onClick={() => setActiveImg(i)}
+                                    style={{
+                                        width: 64,
+                                        height: 64,
+                                        borderRadius: 10,
+                                        overflow: "hidden",
+                                        border:
+                                            i === activeImg
+                                                ? "2px solid #4dd9e8"
+                                                : "1px solid rgba(255,255,255,0.1)",
+                                        cursor: "pointer",
+                                        padding: 0,
+                                        background: "rgba(255,255,255,0.03)",
+                                    }}
+                                >
+                                    <img
+                                        src={img}
+                                        alt={`thumb-${i}`}
+                                        style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                                    />
+                                </button>
+                            ))}
+                        </div>
+                    )}
+                </div>
+
+                {/* Details */}
+                <div>
+                    <span
+                        style={{
+                            fontSize: 11,
+                            color: "#4dd9e8",
+                            fontWeight: 600,
+                            textTransform: "uppercase",
+                            letterSpacing: 0.5,
+                        }}
+                    >
+                        {product.category}
+                    </span>
+                    <h1 style={{ color: "#fff", fontSize: 30, fontWeight: 700, margin: "6px 0 12px" }}>
+                        {product.name}
+                    </h1>
+                    <p style={{ color: "#4dd9e8", fontSize: 24, fontWeight: 700, marginBottom: 20 }}>
+                        Rs. {product.price.toLocaleString()}
+                    </p>
+                    <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 14, lineHeight: 1.6, marginBottom: 24 }}>
+                        {product.description}
+                    </p>
+
+                    {product.specs && Object.keys(product.specs).length > 0 && (
+                        <div
+                            style={{
+                                background: "rgba(255,255,255,0.05)",
+                                border: "1px solid rgba(255,255,255,0.1)",
+                                borderRadius: 12,
+                                padding: 16,
+                                marginBottom: 24,
+                            }}
+                        >
+                            <p style={{ color: "#fff", fontSize: 14, fontWeight: 600, marginBottom: 10 }}>
+                                Specifications
+                            </p>
+                            {Object.entries(product.specs).map(([k, v]) => (
+                                <div
+                                    key={k}
+                                    style={{
+                                        display: "flex",
+                                        justifyContent: "space-between",
+                                        fontSize: 13,
+                                        padding: "4px 0",
+                                        color: "rgba(255,255,255,0.6)",
+                                    }}
+                                >
+                                    <span style={{ textTransform: "capitalize" }}>{k}</span>
+                                    <span style={{ color: "#fff" }}>{String(v)}</span>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
+                    <button
+                        onClick={handleWishlist}
+                        disabled={!user || busy}
+                        style={{
+                            background: wishlisted
+                                ? "rgba(248,113,113,0.15)"
+                                : "linear-gradient(135deg,#2d9cdb,#4dd9e8)",
+                            border: "none",
+                            borderRadius: 10,
+                            padding: "12px 24px",
+                            color: wishlisted ? "#f87171" : "#fff",
+                            fontSize: 15,
+                            fontWeight: 700,
+                            cursor: !user || busy ? "not-allowed" : "pointer",
+                            fontFamily: "inherit",
+                            opacity: !user ? 0.6 : 1,
+                        }}
+                    >
+                        {wishlisted ? "♥ In Wishlist" : "♡ Add to Wishlist"}
+                    </button>
+                </div>
+            </div>
+
+            {/* Reviews */}
+            <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 32px 60px" }}>
+                <h2 style={{ color: "#fff", fontSize: 20, fontWeight: 600, marginBottom: 16 }}>
+                    Reviews ({reviews.length})
+                </h2>
+                {reviews.length === 0 ? (
+                    <p style={{ color: "rgba(255,255,255,0.3)", fontSize: 14 }}>
+                        No reviews yet.
+                    </p>
+                ) : (
+                    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                        {reviews.map((r) => (
+                            <div
+                                key={r.id}
+                                style={{
+                                    background: "rgba(255,255,255,0.05)",
+                                    border: "1px solid rgba(255,255,255,0.1)",
+                                    borderRadius: 12,
+                                    padding: 16,
+                                }}
+                            >
+                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                    <p style={{ color: "#fff", fontSize: 14, fontWeight: 600 }}>
+                                        {[r.user?.firstName, r.user?.lastName]
+                                            .filter(Boolean)
+                                            .join(" ") || "Anonymous"}
+                                    </p>
+                                    <span style={{ color: "#fbbf24", fontSize: 14 }}>
+                                        {"★".repeat(r.rating)}
+                                        {"☆".repeat(5 - r.rating)}
+                                    </span>
+                                </div>
+                                {r.comment && (
+                                    <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 13, marginTop: 8 }}>
+                                        {r.comment}
+                                    </p>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+}
