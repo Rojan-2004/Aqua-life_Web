@@ -21,6 +21,10 @@ const orderSchema = new mongoose.Schema(
             type: Number,
             default: 0,
         },
+        shippingInfo: {
+            type: mongoose.Schema.Types.Mixed,
+            default: {},
+        },
         status: {
             type: String,
             enum: ["pending", "shipped", "delivered", "cancelled"],

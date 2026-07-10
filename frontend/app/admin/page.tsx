@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { getAdminStats, getRecentOrders } from "@/lib/api/dashboard";
+import { getAdminNotifications, markNotificationsRead, AdminNotification } from "@/lib/api/admin/notification";
 
 interface AdminStats {
     revenue: number;
@@ -39,6 +40,27 @@ export default function AdminPage() {
     });
     const [orders, setOrders] = useState<AdminOrder[]>([]);
     const [loadingData, setLoadingData] = useState(true);
+    const [notifications, setNotifications] = useState<AdminNotification[]>([]);
+    const [showNotif, setShowNotif] = useState(false);
+
+    const unread = notifications.filter((n) => !n.isRead).length;
+
+    const markRead = async () => {
+        try {
+            await markNotificationsRead();
+            setNotifications((list) => list.map((n) => ({ ...n, isRead: true })));
+        } catch (e) {
+            console.error("Failed to mark notifications read", e);
+        }
+    };
+
+    useEffect(() => {
+        if (user && user.role === "admin") {
+            getAdminNotifications()
+                .then((res) => setNotifications(res.data ?? []))
+                .catch((e) => console.error("Failed to load notifications", e));
+        }
+    }, [user]);
 
     useEffect(() => {
         async function fetchData() {
@@ -134,6 +156,51 @@ export default function AdminPage() {
                         >
                             ⬅ Back to Dashboard
                         </Link>
+
+                        <div style={{ position: "relative" }}>
+                            <button
+                                onClick={() => {
+                                    setShowNotif((s) => !s);
+                                    if (!showNotif) markRead();
+                                }}
+                                style={{
+                                    background: "rgba(255,255,255,0.05)",
+                                    border: "1px solid rgba(255,255,255,0.1)",
+                                    borderRadius: 30,
+                                    padding: "7px 14px",
+                                    color: "#fff",
+                                    fontSize: 13,
+                                    cursor: "pointer",
+                                    fontFamily: "inherit",
+                                    position: "relative",
+                                }}
+                            >
+                                🔔
+                                {unread > 0 && (
+                                    <span style={{ background: "#f87171", color: "#fff", borderRadius: "50%", fontSize: 10, fontWeight: 700, padding: "1px 5px", marginLeft: 4 }}>
+                                        {unread}
+                                    </span>
+                                )}
+                            </button>
+
+                            {showNotif && (
+                                <div style={{ position: "absolute", top: 44, right: 0, width: 320, background: "#111827", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 14, overflow: "hidden", zIndex: 200, boxShadow: "0 8px 32px rgba(0,0,0,0.5)" }}>
+                                    <div style={{ padding: "14px 16px", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+                                        <p style={{ color: "#fff", fontWeight: 700, fontSize: 14 }}>Notifications</p>
+                                    </div>
+                                    {notifications.length === 0 ? (
+                                        <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 13, padding: 20, textAlign: "center" }}>No notifications yet.</p>
+                                    ) : (
+                                        notifications.map((n) => (
+                                            <div key={n.id} style={{ padding: "12px 16px", borderBottom: "1px solid rgba(255,255,255,0.06)", background: n.isRead ? "transparent" : "rgba(77,217,232,0.05)" }}>
+                                                <p style={{ color: n.isRead ? "rgba(255,255,255,0.6)" : "#fff", fontSize: 13, lineHeight: 1.5 }}>{n.message}</p>
+                                                <p style={{ color: "rgba(255,255,255,0.3)", fontSize: 11, marginTop: 4 }}>{new Date(n.createdAt).toLocaleString()}</p>
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
+                            )}
+                        </div>
 
                         <button
                             onClick={handleLogout}

@@ -82,11 +82,13 @@ const createProduct = async (req, res, next) => {
       imageFilename = req.file.filename;
     }
 
-    const images = Array.isArray(req.body.images)
+    const uploadedImages = req.file ? [req.file.filename] : [];
+    const bodyImages = Array.isArray(req.body.images)
       ? req.body.images
       : req.body.images
       ? [req.body.images]
       : [];
+    const images = [...uploadedImages, ...bodyImages];
 
     const product = await Product.create({
       ...validatedData,
@@ -157,6 +159,13 @@ const updateProduct = async (req, res, next) => {
         }
       }
       validatedData.image = req.file.filename;
+
+      // Keep the images array in sync: drop the previously stored file and
+      // put the newly uploaded one first.
+      const existingImages = Array.isArray(product.images)
+        ? product.images.filter((img) => img && img !== product.image)
+        : [];
+      validatedData.images = [req.file.filename, ...existingImages];
     }
 
     product = await Product.findByIdAndUpdate(req.params.id, validatedData, {

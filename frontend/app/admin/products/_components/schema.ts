@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+export const CATEGORIES = ["Fish", "Food", "Equipment", "Plants", "Decoration"] as const;
+
 export const productSchema = z.object({
   name: z
     .string()
@@ -17,6 +19,17 @@ export const productSchema = z.object({
     .string()
     .min(5, "Description must be at least 5 characters long"),
   status: z.enum(["active", "inactive"]).default("active"),
+  category: z.enum(CATEGORIES).optional(),
+  stock: z
+    .union([
+      z.string().refine((val) => val === "" || (!isNaN(parseInt(val, 10)) && parseInt(val, 10) >= 0), {
+        message: "Stock must be a non-negative number",
+      }),
+      z.number().min(0, "Stock cannot be negative"),
+    ])
+    .transform((val) => (typeof val === "string" ? (val === "" ? 0 : parseInt(val, 10)) : val))
+    .optional(),
+  isFeatured: z.boolean().optional(),
 });
 
 export type ProductFormData = z.infer<typeof productSchema>;

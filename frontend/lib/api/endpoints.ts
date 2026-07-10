@@ -45,5 +45,17 @@ export const API = {
     WISHLIST: {
         TOGGLE: "/api/v1/wishlist",
         GET_ALL: "/api/v1/wishlist",
+    },
+    CART: {
+        GET_ALL: "/api/v1/cart",
+        ADD: "/api/v1/cart",
+        REMOVE: "/api/v1/cart",
+    },
+    ORDERS: {
+        PLACE: "/api/v1/orders",
+    },
+    ADMIN_NOTIFICATIONS: {
+        GET_ALL: "/api/v1/admin/notifications",
+        MARK_READ: "/api/v1/admin/notifications",
     }
 }

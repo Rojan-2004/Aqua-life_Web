@@ -3,7 +3,7 @@ import { useState, useTransition, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { handleCreateProduct } from "@/lib/actions/admin/product-action";
-import { productSchema, ProductFormData } from "./schema";
+import { productSchema, CATEGORIES } from "./schema";
 
 export default function ProductForm() {
     const router = useRouter();
@@ -15,6 +15,9 @@ export default function ProductForm() {
     const [price, setPrice] = useState("");
     const [description, setDescription] = useState("");
     const [status, setStatus] = useState<"active" | "inactive">("active");
+    const [category, setCategory] = useState<string>("Fish");
+    const [stock, setStock] = useState("");
+    const [isFeatured, setIsFeatured] = useState(false);
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
 
@@ -91,6 +94,9 @@ export default function ProductForm() {
         formData.append("price", price);
         formData.append("description", description);
         formData.append("status", status);
+        formData.append("category", category);
+        formData.append("stock", stock);
+        formData.append("isFeatured", String(isFeatured));
         if (imageFile) {
             formData.append("itemPhoto", imageFile);
         }
@@ -232,6 +238,49 @@ export default function ProductForm() {
                         <option value="inactive">Inactive</option>
                     </select>
                     {errors.status && <p className={errClass}>{errors.status}</p>}
+                </div>
+
+                {/* Category */}
+                <div>
+                    <label className={labelClass}>Category</label>
+                    <select
+                        value={category}
+                        onChange={(e) => setCategory(e.target.value)}
+                        className={fieldClass}
+                    >
+                        {CATEGORIES.map((c) => (
+                            <option key={c} value={c}>
+                                {c}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+
+                {/* Stock */}
+                <div>
+                    <label className={labelClass}>Stock</label>
+                    <input
+                        type="number"
+                        min={0}
+                        value={stock}
+                        onChange={(e) => setStock(e.target.value)}
+                        placeholder="e.g. 50"
+                        className={fieldClass}
+                    />
+                </div>
+
+                {/* Featured */}
+                <div className="flex items-center gap-2">
+                    <input
+                        id="featured"
+                        type="checkbox"
+                        checked={isFeatured}
+                        onChange={(e) => setIsFeatured(e.target.checked)}
+                        className="h-4 w-4 accent-cyan-500"
+                    />
+                    <label htmlFor="featured" className="text-sm text-slate-300">
+                        Mark as Featured (shows in Shop spotlight)
+                    </label>
                 </div>
 
                 {/* Submit button */}

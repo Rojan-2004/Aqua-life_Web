@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 
 export interface ProductCardData {
@@ -13,6 +13,9 @@ export interface ProductCardData {
 }
 
 export default function ProductCard({ product }: { product: ProductCardData }) {
+    const [imgFailed, setImgFailed] = useState(false);
+    const imageSrc = product.images?.[0];
+
     return (
         <Link key={product.id} href={`/catalogue/${product.id}`} style={{ textDecoration: "none" }}>
             <div
@@ -34,10 +37,11 @@ export default function ProductCard({ product }: { product: ProductCardData }) {
                         overflow: "hidden",
                     }}
                 >
-                    {product.images?.[0] ? (
+                    {imageSrc && !imgFailed ? (
                         <img
-                            src={product.images[0]}
+                            src={imageSrc}
                             alt={product.name}
+                            onError={() => setImgFailed(true)}
                             style={{
                                 width: "100%",
                                 height: "100%",

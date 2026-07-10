@@ -45,13 +45,26 @@ export default function DashboardPage() {
     const [featured, setFeatured] = useState<ProductCardData[]>([]);
     const [loadingData, setLoadingData] = useState(true);
 
+    // Redirect to login when there is no authenticated user.
+    // Must run inside an effect (never during render) otherwise we update
+    // the Router component while DashboardPage is still rendering.
     useEffect(() => {
+        if (!loading && !user) {
+            router.replace("/frontend/login");
+        }
+    }, [loading, user, router]);
+
+    useEffect(() => {
+        if (!user) return;
+        let cancelled = false;
+
         async function load() {
             try {
                 const [statsRes, catRes] = await Promise.allSettled([
                     getUserDashboard(),
                     getCatalogue({ limit: 4, featured: true }),
                 ]);
+                if (cancelled) return;
 
                 if (statsRes.status === "fulfilled") {
                     const d = statsRes.value?.data;
@@ -62,6 +75,15 @@ export default function DashboardPage() {
                         recentOrders: d?.recentOrders ?? [],
                     });
                 } else {
+                    const status = (
+                        statsRes.reason as { response?: { status?: number } }
+                    )?.response?.status;
+                    if (status === 401) {
+                        // Token is invalid/expired: clear auth and send to login.
+                        await logout();
+                        router.replace("/frontend/login");
+                        return;
+                    }
                     console.error("Failed to load dashboard data", statsRes.reason);
                 }
 
@@ -71,23 +93,22 @@ export default function DashboardPage() {
                     console.error("Failed to load featured products", catRes.reason);
                 }
             } finally {
-                setLoadingData(false);
+                if (!cancelled) setLoadingData(false);
             }
         }
-        if (user) load();
-    }, [user]);
 
-    if (loading) {
+        load();
+        return () => {
+            cancelled = true;
+        };
+    }, [user, logout, router]);
+
+    if (loading || !user) {
         return (
             <div style={{ background: "#0a0e1a", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-outfit), 'Outfit', sans-serif" }}>
                 <p style={{ color: "#4dd9e8", fontSize: 18, fontWeight: 600 }}>Loading dashboard...</p>
             </div>
         );
-    }
-
-    if (!user) {
-        router.push("/frontend/login");
-        return null;
     }
 
     const name = user.firstName || user.username || user.name || user.email || "User";

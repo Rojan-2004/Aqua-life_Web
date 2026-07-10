@@ -9,6 +9,18 @@ function toImageArray(p) {
     return [];
 }
 
+// Map stored filenames to publicly servable URLs. The DB stores only the
+// filename (e.g. "itm-pic-123.jpeg"); static files live under
+// public/item_photos, exposed at /item_photos. Skip the placeholder default
+// so the client can fall back to its own empty-state UI.
+const DEFAULT_IMAGE = "default-product.png";
+
+function toImageUrls(p) {
+    return toImageArray(p)
+        .filter((img) => img && img !== DEFAULT_IMAGE && !img.startsWith("http"))
+        .map((img) => `/item_photos/${img}`);
+}
+
 // GET /api/v1/products  (public catalogue)
 router.get("/", async (req, res, next) => {
     try {
@@ -34,7 +46,7 @@ router.get("/", async (req, res, next) => {
 
         const mapped = products.map((p) => {
             const obj = p.toObject();
-            return { ...obj, images: toImageArray(obj), id: obj.id };
+            return { ...obj, images: toImageUrls(obj), id: obj.id };
         });
 
         res.status(200).json({
@@ -80,7 +92,7 @@ router.get("/:id", async (req, res, next) => {
 
         res.status(200).json({
             success: true,
-            product: { ...obj, images: toImageArray(obj), id: obj.id },
+            product: { ...obj, images: toImageUrls(obj), id: obj.id },
             reviews: mappedReviews,
         });
     } catch (err) {

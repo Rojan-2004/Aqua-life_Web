@@ -1,6 +1,7 @@
 import { handleGetProductById } from "@/lib/actions/admin/product-action";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { PRODUCT_PLACEHOLDER } from "@/lib/utils/placeholder";
 
 export default async function Page({
     params
@@ -16,7 +17,7 @@ export default async function Page({
 
     const p = result.data;
     const hasImage = p.image && p.image !== "default-product.png";
-    const imageUrl = hasImage ? `/item_photos/${p.image}` : "/default-product.png";
+    const imageUrl = hasImage ? `/item_photos/${p.image}` : PRODUCT_PLACEHOLDER;
 
     return (
         <div style={{ background: "#0a0e1a", minHeight: "100vh", padding: "40px 20px" }} className="font-sans text-white">

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { toast } from "react-toastify";
 import Modal from "../../_components/Modal";
 import { handleDeleteProduct } from "@/lib/actions/admin/product-action";
+import { PRODUCT_PLACEHOLDER } from "@/lib/utils/placeholder";
 
 export default function ProductTable({
     data,
@@ -116,7 +117,7 @@ export default function ProductTable({
                         {data?.length ? (
                             data.map((p) => {
                                 const hasImage = p.image && p.image !== "default-product.png";
-                                const imageUrl = hasImage ? `/item_photos/${p.image}` : "/default-product.png";
+                                const imageUrl = hasImage ? `/item_photos/${p.image}` : PRODUCT_PLACEHOLDER;
 
                                 return (
                                     <tr key={p.id || p._id} className="hover:bg-slate-900/50 transition-colors">
@@ -127,7 +128,7 @@ export default function ProductTable({
                                                     alt={p.name} 
                                                     className="h-full w-full object-cover" 
                                                     onError={(e) => {
-                                                        (e.target as HTMLImageElement).src = "/default-product.png";
+                                                        (e.target as HTMLImageElement).src = PRODUCT_PLACEHOLDER;
                                                     }}
                                                 />
                                             </div>

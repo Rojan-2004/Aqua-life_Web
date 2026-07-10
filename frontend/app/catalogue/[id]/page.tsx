@@ -6,6 +6,7 @@ import { useParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { getProduct } from "@/lib/api/product";
 import { toggleWishlist } from "@/lib/api/wishlist";
+import { addToCart } from "@/lib/api/cart";
 
 interface Review {
     id: string;
@@ -21,6 +22,7 @@ interface ProductDetail {
     price: number;
     category: string;
     images: string[];
+    stock?: number;
     specs?: Record<string, unknown>;
 }
 
@@ -33,6 +35,23 @@ export default function ProductDetailPage() {
     const [activeImg, setActiveImg] = useState(0);
     const [wishlisted, setWishlisted] = useState(false);
     const [busy, setBusy] = useState(false);
+    const [qty, setQty] = useState(1);
+    const [adding, setAdding] = useState(false);
+    const [added, setAdded] = useState(false);
+
+    const handleAddToCart = async () => {
+        if (!user) return;
+        setAdding(true);
+        try {
+            await addToCart(params.id, qty);
+            setAdded(true);
+            setTimeout(() => setAdded(false), 2000);
+        } catch (e) {
+            console.error("Add to cart failed", e);
+        } finally {
+            setAdding(false);
+        }
+    };
 
     useEffect(() => {
         let active = true;
@@ -230,6 +249,54 @@ export default function ProductDetailPage() {
                     <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 14, lineHeight: 1.6, marginBottom: 24 }}>
                         {product.description}
                     </p>
+
+                    {/* Add to cart */}
+                    <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 8, marginBottom: 24 }}>
+                        <div style={{ display: "flex", alignItems: "center", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 10 }}>
+                            <button
+                                onClick={() => setQty((q) => Math.max(1, q - 1))}
+                                style={{ width: 36, height: 44, background: "none", border: "none", color: "#fff", fontSize: 18, cursor: "pointer" }}
+                            >
+                                −
+                            </button>
+                            <span style={{ color: "#fff", fontWeight: 600, fontSize: 15, minWidth: 28, textAlign: "center" }}>{qty}</span>
+                            <button
+                                onClick={() => setQty((q) => Math.min(product.stock ?? 99, q + 1))}
+                                style={{ width: 36, height: 44, background: "none", border: "none", color: "#fff", fontSize: 18, cursor: "pointer" }}
+                            >
+                                +
+                            </button>
+                        </div>
+
+                        <button
+                            onClick={handleAddToCart}
+                            disabled={adding || !user || (product.stock ?? 0) === 0}
+                            style={{
+                                flex: 1,
+                                height: 44,
+                                background: added ? "rgba(74,222,128,0.2)" : "linear-gradient(135deg,#2d9cdb,#4dd9e8)",
+                                border: added ? "1px solid #4ade80" : "none",
+                                borderRadius: 10,
+                                color: added ? "#4ade80" : "#fff",
+                                fontSize: 14,
+                                fontWeight: 700,
+                                cursor: !user || (product.stock ?? 0) === 0 ? "not-allowed" : "pointer",
+                                fontFamily: "inherit",
+                                transition: "0.2s",
+                                opacity: adding ? 0.7 : 1,
+                            }}
+                        >
+                            {!user
+                                ? "Login to Add"
+                                : (product.stock ?? 0) === 0
+                                ? "Out of Stock"
+                                : adding
+                                ? "Adding..."
+                                : added
+                                ? "✓ Added to Cart"
+                                : "Add to Cart"}
+                        </button>
+                    </div>
 
                     {product.specs && Object.keys(product.specs).length > 0 && (
                         <div
