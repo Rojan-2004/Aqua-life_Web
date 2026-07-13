@@ -57,7 +57,14 @@ export default function AIAquaAssistantPage() {
         body: JSON.stringify({ messages: newMessages }),
       });
 
-      if (!res.ok) throw new Error("AI unavailable");
+      if (!res.ok) {
+        let errText = "AI unavailable";
+        try {
+          const err = await res.json();
+          errText = err.error || err.detail || errText;
+        } catch {}
+        throw new Error(errText);
+      }
 
       const reader = res.body?.getReader();
       const decoder = new TextDecoder();
@@ -74,12 +81,13 @@ export default function AIAquaAssistantPage() {
           });
         }
       }
-    } catch {
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Something went wrong.";
       setMessages((prev) => {
         const updated = [...prev];
         updated[updated.length - 1] = {
           role: "assistant",
-          content: "Sorry, I'm having trouble connecting right now. Please try again.",
+          content: `⚠ ${message}`,
         };
         return updated;
       });

@@ -24,7 +24,7 @@ export async function POST(req: Request) {
     const base64Data = imageBase64.includes(",") ? imageBase64.split(",")[1] : imageBase64;
 
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
 
     const result = await model.generateContent([
       {
