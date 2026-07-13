@@ -7,7 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 const NAV = [
     { label: "Home", href: "/dashboard" },
     { label: "Catalog", href: "/catalogue" },
-    { label: "AI Finder", href: "/ai-identifier" },
+    { label: "AI Aqua Assistant", href: "/ai-assistant" },
 ];
 
 export default function Header() {
