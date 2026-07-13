@@ -1,9 +1,29 @@
 @import "tailwindcss";
 
-body {
+* {
+  box-sizing: border-box;
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
-  font-family: var(--font-outfit), "Outfit", Arial, Helvetica, sans-serif;
-  background-color: #0f172a;
 }
+
+body {
+  background: #0a0e1a;
+  font-family: 'Outfit', sans-serif;
+  color: #fff;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #0a0e1a; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(77,217,232,0.3); }
+
+/* Input focus glow */
+input:focus, textarea:focus, select:focus {
+  border-color: rgba(77,217,232,0.5) !important;
+  box-shadow: 0 0 0 3px rgba(77,217,232,0.08);
+}
+
+/* Selection color */
+::selection { background: rgba(45,156,219,0.3); color: #fff; }

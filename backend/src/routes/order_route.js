@@ -4,6 +4,7 @@ const { protect } = require("../middleware/auth");
 const CartItem = require("../models/cart_item_model");
 const Order = require("../models/order_model");
 const Notification = require("../models/notification_model");
+const Product = require("../models/product_model");
 
 const VAT_RATE = 0.13;
 const SHIPPING_FLAT = 500;
@@ -55,6 +56,16 @@ router.post("/", async (req, res, next) => {
 
         // Clear the cart
         await CartItem.deleteMany({ user: userId });
+
+        // Decrement stock for each purchased item
+        await Promise.all(
+            validItems.map((i) =>
+                Product.findByIdAndUpdate(i.product._id, {
+                    $inc: { stock: -i.quantity },
+                    $set: { isSoldOut: i.product.stock - i.quantity <= 0 },
+                })
+            )
+        );
 
         // Notify admin
         const itemNames = validItems

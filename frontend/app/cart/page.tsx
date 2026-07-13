@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { getCart, removeCartItem, CartItemData } from "@/lib/api/cart";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 
 const VAT_RATE = 0.13;
 const SHIPPING_FLAT = 500;
@@ -60,12 +62,7 @@ export default function CartPage() {
 
     return (
         <div style={{ fontFamily: "var(--font-outfit), 'Outfit', sans-serif", background: "#0a0e1a", minHeight: "100vh" }}>
-            <header style={{ background: "rgba(17,24,39,0.8)", backdropFilter: "blur(12px)", borderBottom: "1px solid rgba(255,255,255,0.06)", position: "sticky", top: 0, zIndex: 100 }}>
-                <div style={{ maxWidth: 1200, margin: "0 auto", padding: "16px 32px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <Link href="/dashboard" style={{ fontSize: 22, fontWeight: 800, background: "linear-gradient(135deg,#2d9cdb,#4dd9e8)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", textDecoration: "none" }}>🌊 AquaLife</Link>
-                    <Link href="/catalogue" style={{ color: "rgba(255,255,255,0.5)", fontSize: 13, textDecoration: "none" }}>← Continue Shopping</Link>
-                </div>
-            </header>
+            <Header />
 
             <div style={{ maxWidth: 1200, margin: "0 auto", padding: "40px 32px" }}>
                 <h1 style={{ color: "#fff", fontSize: 30, fontWeight: 700, marginBottom: 28 }}>Your Cart</h1>
@@ -136,6 +133,8 @@ export default function CartPage() {
                     </div>
                 )}
             </div>
+
+            <Footer />
         </div>
     );
 }

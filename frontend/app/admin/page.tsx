@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { getAdminStats, getRecentOrders } from "@/lib/api/dashboard";
 import { getAdminNotifications, markNotificationsRead, AdminNotification } from "@/lib/api/admin/notification";
+import Footer from "@/components/Footer";
 
 interface AdminStats {
     revenue: number;
@@ -307,6 +308,8 @@ export default function AdminPage() {
                     )}
                 </div>
             </section>
+
+            <Footer />
         </div>
     );
 }

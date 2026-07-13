@@ -7,6 +7,8 @@ import { useAuth } from "@/context/AuthContext";
 import { getProduct } from "@/lib/api/product";
 import { toggleWishlist } from "@/lib/api/wishlist";
 import { addToCart } from "@/lib/api/cart";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 
 interface Review {
     id: string;
@@ -23,6 +25,7 @@ interface ProductDetail {
     category: string;
     images: string[];
     stock?: number;
+    isSoldOut?: boolean;
     specs?: Record<string, unknown>;
 }
 
@@ -131,6 +134,8 @@ export default function ProductDetailPage() {
 
     const images = product.images?.length ? product.images : [];
 
+    const isOutOfStock = product.isSoldOut || (product.stock ?? 0) <= 0;
+
     return (
         <div
             style={{
@@ -139,38 +144,13 @@ export default function ProductDetailPage() {
                 minHeight: "100vh",
             }}
         >
-            <header
-                style={{
-                    background: "rgba(17,24,39,0.8)",
-                    backdropFilter: "blur(12px)",
-                    borderBottom: "1px solid rgba(255,255,255,0.06)",
-                    position: "sticky",
-                    top: 0,
-                    zIndex: 100,
-                }}
-            >
-                <div
-                    style={{
-                        maxWidth: 1440,
-                        margin: "0 auto",
-                        padding: "16px 32px",
-                        display: "flex",
-                        alignItems: "center",
-                    }}
-                >
-                    <Link
-                        href="/catalogue"
-                        style={{
-                            color: "#4dd9e8",
-                            fontSize: 13,
-                            fontWeight: 600,
-                            textDecoration: "none",
-                        }}
-                    >
-                        ← Back to Catalogue
-                    </Link>
-                </div>
-            </header>
+            <Header />
+
+            <div style={{ maxWidth: 1100, margin: "0 auto", padding: "24px 32px 0" }}>
+                <Link href="/catalogue" style={{ color: "#4dd9e8", fontSize: 13, fontWeight: 600, textDecoration: "none" }}>
+                    ← Back to Catalogue
+                </Link>
+            </div>
 
             <div style={{ maxWidth: 1100, margin: "0 auto", padding: "40px 32px", display: "grid", gridTemplateColumns: "minmax(0,1fr) minmax(0,1fr)", gap: 40 }}>
                 {/* Gallery */}
@@ -251,18 +231,20 @@ export default function ProductDetailPage() {
                     </p>
 
                     {/* Add to cart */}
-                    <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 8, marginBottom: 24 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 8, marginBottom: 8 }}>
                         <div style={{ display: "flex", alignItems: "center", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 10 }}>
                             <button
                                 onClick={() => setQty((q) => Math.max(1, q - 1))}
-                                style={{ width: 36, height: 44, background: "none", border: "none", color: "#fff", fontSize: 18, cursor: "pointer" }}
+                                disabled={isOutOfStock}
+                                style={{ width: 36, height: 44, background: "none", border: "none", color: "#fff", fontSize: 18, cursor: isOutOfStock ? "not-allowed" : "pointer" }}
                             >
                                 −
                             </button>
                             <span style={{ color: "#fff", fontWeight: 600, fontSize: 15, minWidth: 28, textAlign: "center" }}>{qty}</span>
                             <button
                                 onClick={() => setQty((q) => Math.min(product.stock ?? 99, q + 1))}
-                                style={{ width: 36, height: 44, background: "none", border: "none", color: "#fff", fontSize: 18, cursor: "pointer" }}
+                                disabled={isOutOfStock}
+                                style={{ width: 36, height: 44, background: "none", border: "none", color: "#fff", fontSize: 18, cursor: isOutOfStock ? "not-allowed" : "pointer" }}
                             >
                                 +
                             </button>
@@ -270,25 +252,33 @@ export default function ProductDetailPage() {
 
                         <button
                             onClick={handleAddToCart}
-                            disabled={adding || !user || (product.stock ?? 0) === 0}
+                            disabled={adding || !user || isOutOfStock}
                             style={{
                                 flex: 1,
-                                height: 44,
-                                background: added ? "rgba(74,222,128,0.2)" : "linear-gradient(135deg,#2d9cdb,#4dd9e8)",
-                                border: added ? "1px solid #4ade80" : "none",
-                                borderRadius: 10,
-                                color: added ? "#4ade80" : "#fff",
+                                height: 46,
+                                background: isOutOfStock
+                                    ? "rgba(255,255,255,0.05)"
+                                    : added
+                                    ? "rgba(74,222,128,0.15)"
+                                    : "linear-gradient(135deg,#2d9cdb,#4dd9e8)",
+                                border: isOutOfStock
+                                    ? "1px solid rgba(255,255,255,0.1)"
+                                    : added
+                                    ? "1px solid #4ade80"
+                                    : "none",
+                                borderRadius: 12,
+                                color: isOutOfStock ? "rgba(255,255,255,0.3)" : added ? "#4ade80" : "#fff",
                                 fontSize: 14,
                                 fontWeight: 700,
-                                cursor: !user || (product.stock ?? 0) === 0 ? "not-allowed" : "pointer",
+                                cursor: isOutOfStock ? "not-allowed" : "pointer",
                                 fontFamily: "inherit",
-                                transition: "0.2s",
+                                transition: "all 0.2s",
                                 opacity: adding ? 0.7 : 1,
                             }}
                         >
                             {!user
                                 ? "Login to Add"
-                                : (product.stock ?? 0) === 0
+                                : isOutOfStock
                                 ? "Out of Stock"
                                 : adding
                                 ? "Adding..."
@@ -297,6 +287,18 @@ export default function ProductDetailPage() {
                                 : "Add to Cart"}
                         </button>
                     </div>
+
+                    <p style={{
+                        fontSize: 12,
+                        color: (product.stock ?? 0) > 10 ? "#4ade80" : (product.stock ?? 0) > 0 ? "#fbbf24" : "#f87171",
+                        marginBottom: 16,
+                    }}>
+                        {isOutOfStock
+                            ? "✗ Out of Stock"
+                            : (product.stock ?? 0) > 10
+                            ? "✓ In Stock"
+                            : `⚠ Only ${product.stock} left`}
+                    </p>
 
                     {product.specs && Object.keys(product.specs).length > 0 && (
                         <div
@@ -394,6 +396,8 @@ export default function ProductDetailPage() {
                     </div>
                 )}
             </div>
+
+            <Footer />
         </div>
     );
 }

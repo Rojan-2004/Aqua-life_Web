@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { getCart, CartItemData } from "@/lib/api/cart";
 import { placeOrder } from "@/lib/api/order";
+import Footer from "@/components/Footer";
 
 const VAT_RATE = 0.13;
 const SHIPPING_FLAT = 500;
@@ -243,31 +244,7 @@ export default function CheckoutPage() {
                 </div>
             </div>
 
-            <footer style={{ borderTop: "1px solid rgba(255,255,255,0.06)", marginTop: 80, padding: "48px 32px 28px" }}>
-                <div style={{ maxWidth: 1200, margin: "0 auto", display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr", gap: 40 }}>
-                    <div>
-                        <p style={{ fontSize: 20, fontWeight: 800, background: "linear-gradient(135deg,#2d9cdb,#4dd9e8)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", marginBottom: 12 }}>🌊 AquaLife</p>
-                        <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 13, lineHeight: 1.7 }}>Premium aquatic systems and life support for the modern hobbyist. Engineered for excellence.</p>
-                    </div>
-                    {[
-                        { title: "Company", links: ["About Us", "Sustainability", "Privacy Policy"] },
-                        { title: "Support", links: ["Returns", "Contact Support", "Privacy Policy"] },
-                    ].map((col) => (
-                        <div key={col.title}>
-                            <p style={{ color: "#fff", fontWeight: 600, marginBottom: 14 }}>{col.title}</p>
-                            {col.links.map((l) => <p key={l} style={{ color: "rgba(255,255,255,0.4)", fontSize: 13, marginBottom: 10, cursor: "pointer" }}>{l}</p>)}
-                        </div>
-                    ))}
-                    <div>
-                        <p style={{ color: "#fff", fontWeight: 600, marginBottom: 14 }}>Newsletter</p>
-                        <div style={{ display: "flex", gap: 8 }}>
-                            <input placeholder="Email" style={{ flex: 1, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, padding: "9px 12px", color: "#fff", fontSize: 13, fontFamily: "inherit", outline: "none" }} />
-                            <button style={{ background: "linear-gradient(135deg,#2d9cdb,#4dd9e8)", border: "none", borderRadius: 8, padding: "9px 14px", color: "#fff", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>Join</button>
-                        </div>
-                    </div>
-                </div>
-                <p style={{ color: "rgba(255,255,255,0.2)", fontSize: 12, textAlign: "center", marginTop: 40 }}>© 2024 AquaLife Premium Aquatic Systems. All rights reserved.</p>
-            </footer>
+            <Footer />
         </div>
     );
 }

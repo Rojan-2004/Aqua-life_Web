@@ -7,6 +7,8 @@ import { useAuth } from "@/context/AuthContext";
 import { getUserDashboard } from "@/lib/api/dashboard";
 import { getCatalogue } from "@/lib/api/product";
 import ProductCard, { ProductCardData } from "../catalogue/_components/ProductCard";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 
 interface RecentOrder {
     id: string;
@@ -112,14 +114,6 @@ export default function DashboardPage() {
     }
 
     const name = user.firstName || user.username || user.name || user.email || "User";
-    const userInitials = `${user.firstName?.charAt(0) || ""}${user.lastName?.charAt(0) || ""}`.toUpperCase() || "U";
-    const hasProfilePic = user.profilePicture && user.profilePicture !== "default-profile.png";
-    const profilePicUrl = hasProfilePic ? `/profile_pictures/${user.profilePicture}` : null;
-
-    const handleLogout = async () => {
-        await logout();
-        router.push("/frontend/login");
-    };
 
     const stats = [
         { label: "Total Orders", value: data.orders ?? 0, icon: "📦" },
@@ -130,94 +124,7 @@ export default function DashboardPage() {
     return (
         <div style={{ fontFamily: "var(--font-outfit), 'Outfit', sans-serif", background: "#0a0e1a", minHeight: "100vh" }}>
 
-            {/* Header Navigation Bar */}
-            <header style={{
-                background: "rgba(17, 24, 39, 0.8)",
-                backdropFilter: "blur(12px)",
-                borderBottom: "1px solid rgba(255, 255, 255, 0.06)",
-                position: "sticky",
-                top: 0,
-                zIndex: 100
-            }}>
-                <div style={{ maxWidth: 1440, margin: "0 auto", padding: "16px 32px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                        <span style={{ fontSize: 24, fontWeight: 800, background: "linear-gradient(135deg, #2d9cdb, #4dd9e8)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>🌊 AquaLife</span>
-                    </div>
-
-                    <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
-                        {user.role === "admin" && (
-                            <Link
-                                href="/admin"
-                                style={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: 6,
-                                    textDecoration: "none",
-                                    background: "rgba(77, 217, 232, 0.1)",
-                                    border: "1px solid rgba(77, 217, 232, 0.3)",
-                                    padding: "6px 14px",
-                                    borderRadius: 30,
-                                    color: "#4dd9e8",
-                                    fontSize: 13,
-                                    fontWeight: 600,
-                                    transition: "0.2s all"
-                                }}
-                            >
-                                🛡️ Admin Panel
-                            </Link>
-                        )}
-
-                        <Link
-                            href="/dashboard/profile"
-                            style={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: 10,
-                                textDecoration: "none",
-                                background: "rgba(255,255,255,0.04)",
-                                border: "1px solid rgba(255,255,255,0.08)",
-                                padding: "6px 14px",
-                                borderRadius: 30,
-                                transition: "0.2s all"
-                            }}
-                        >
-                            <div style={{
-                                width: 28,
-                                height: 28,
-                                borderRadius: "50%",
-                                background: "linear-gradient(135deg, #2d9cdb, #4dd9e8)",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                overflow: "hidden"
-                            }}>
-                                {profilePicUrl ? (
-                                    <img src={profilePicUrl} alt="Avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                                ) : (
-                                    <span style={{ color: "#fff", fontSize: 10, fontWeight: 700 }}>{userInitials}</span>
-                                )}
-                            </div>
-                            <span style={{ color: "rgba(255,255,255,0.8)", fontSize: 13, fontWeight: 600 }}>Profile Settings</span>
-                        </Link>
-
-                        <button
-                            onClick={handleLogout}
-                            style={{
-                                background: "transparent",
-                                border: "none",
-                                color: "rgba(255,255,255,0.5)",
-                                fontSize: 13,
-                                fontWeight: 600,
-                                cursor: "pointer",
-                                fontFamily: "inherit",
-                                transition: "0.2s hover"
-                            }}
-                        >
-                            Logout
-                        </button>
-                    </div>
-                </div>
-            </header>
+            <Header />
 
             {/* Dashboard Content */}
             <section style={{ maxWidth: 1440, margin: "0 auto", padding: "64px 32px" }}>
@@ -320,6 +227,8 @@ export default function DashboardPage() {
                     )}
                 </div>
             </section>
+
+            <Footer />
         </div>
     );
 }

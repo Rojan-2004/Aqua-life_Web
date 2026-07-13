@@ -77,10 +77,15 @@ const corsOptions = {
       : [];
     // Allow requests with no origin (mobile apps, Postman, etc.) or matching allowed domains
     if (!origin || allowedOrigins.indexOf(origin) !== -1 || allowedOrigins.includes("*")) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
+      return callback(null, true);
     }
+    // In development the Next dev server can be reached via localhost, 127.0.0.1,
+    // or a LAN IP on a varying port. Reflect any origin so CORS preflight never
+    // fails (e.g. http://127.0.0.1:3001). Production still enforces the whitelist.
+    if (process.env.NODE_ENV !== "production") {
+      return callback(null, true);
+    }
+    callback(new Error("Not allowed by CORS"));
   },
   credentials: true, // Allow cookies
   optionsSuccessStatus: 200,

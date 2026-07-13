@@ -4,6 +4,8 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { getCatalogue } from "@/lib/api/product";
 import ProductCard from "./_components/ProductCard";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 
 const CATEGORIES = ["All", "Fish", "Food", "Equipment", "Plants", "Decoration"];
 
@@ -14,6 +16,7 @@ interface Product {
     price: number;
     category: string;
     images: string[];
+    createdAt?: string;
 }
 
 export default function CataloguePage() {
@@ -54,42 +57,18 @@ export default function CataloguePage() {
                 minHeight: "100vh",
             }}
         >
-            {/* Header */}
-            <header
-                style={{
-                    background: "rgba(17,24,39,0.8)",
-                    backdropFilter: "blur(12px)",
-                    borderBottom: "1px solid rgba(255,255,255,0.06)",
-                    position: "sticky",
-                    top: 0,
-                    zIndex: 100,
-                }}
-            >
-                <div
-                    style={{
-                        maxWidth: 1440,
-                        margin: "0 auto",
-                        padding: "16px 32px",
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        gap: 16,
-                    }}
-                >
-                    <Link
-                        href="/dashboard"
-                        style={{
-                            fontSize: 22,
-                            fontWeight: 800,
-                            background:
-                                "linear-gradient(135deg,#2d9cdb,#4dd9e8)",
-                            WebkitBackgroundClip: "text",
-                            WebkitTextFillColor: "transparent",
-                            textDecoration: "none",
-                        }}
-                    >
-                        🌊 AquaLife
-                    </Link>
+            <Header />
+
+            <div style={{ maxWidth: 1100, margin: "0 auto", padding: "40px 32px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16, marginBottom: 24, flexWrap: "wrap" }}>
+                    <div>
+                        <h1 style={{ color: "#fff", fontSize: 28, fontWeight: 700, marginBottom: 4 }}>
+                            Premium Aquatic Catalog
+                        </h1>
+                        <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 14 }}>
+                            {total} products available
+                        </p>
+                    </div>
                     <input
                         placeholder="Search products..."
                         value={search}
@@ -111,15 +90,6 @@ export default function CataloguePage() {
                         }}
                     />
                 </div>
-            </header>
-
-            <div style={{ maxWidth: 1100, margin: "0 auto", padding: "40px 32px" }}>
-                <h1 style={{ color: "#fff", fontSize: 28, fontWeight: 700, marginBottom: 8 }}>
-                    Premium Aquatic Catalog
-                </h1>
-                <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 14, marginBottom: 28 }}>
-                    {total} products available
-                </p>
 
                 {/* Category filters */}
                 <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 32 }}>
@@ -209,6 +179,8 @@ export default function CataloguePage() {
                     </div>
                 )}
             </div>
+
+            <Footer />
         </div>
     );
 }

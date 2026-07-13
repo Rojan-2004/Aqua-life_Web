@@ -58,13 +58,25 @@ router.post("/", async (req, res, next) => {
 
         const qty = Math.max(1, parseInt(quantity, 10) || 1);
 
+        // Availability / stock check
+        if (product.isSoldOut || product.stock <= 0) {
+            return res
+                .status(400)
+                .json({ success: false, message: "Product is out of stock" });
+        }
+        if (qty > product.stock) {
+            return res
+                .status(400)
+                .json({ success: false, message: `Only ${product.stock} in stock` });
+        }
+
         const existing = await CartItem.findOne({
             user: req.user._id,
             product: productId,
         });
 
         if (existing) {
-            existing.quantity = existing.quantity + qty;
+            existing.quantity = Math.min(product.stock, existing.quantity + qty);
             await existing.save();
             return res.status(200).json({ success: true, data: serialize(existing) });
         }
