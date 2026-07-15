@@ -118,7 +118,7 @@ export default function ProductFormEdit({ product }: { product: any }) {
     const errClass = "mt-2 text-sm text-rose-400 font-medium";
 
     return (
-        <form onSubmit={onSubmit} className="max-w-3xl font-sans">
+        <form onSubmit={onSubmit} className="font-sans">
             <div className="mb-10">
                 <Link
                     href="/admin/products"

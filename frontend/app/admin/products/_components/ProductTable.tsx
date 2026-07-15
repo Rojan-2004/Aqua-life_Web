@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { toast } from "react-toastify";
 import Modal from "../../_components/Modal";
+import SearchAutocomplete from "../../_components/SearchAutocomplete";
 import { handleDeleteProduct } from "@/lib/actions/admin/product-action";
 import { PRODUCT_PLACEHOLDER } from "@/lib/utils/placeholder";
 
@@ -32,12 +33,6 @@ export default function ProductTable({
         router.push(`/admin/products?${q.toString()}`);
     };
 
-    const onSearch = (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        const value = new FormData(e.currentTarget).get("search") as string;
-        setQuery({ search: value ?? "", page: 1 });
-    };
-
     const onDelete = () => {
         if (!target) return;
         startTransition(async () => {
@@ -52,7 +47,7 @@ export default function ProductTable({
     };
 
     return (
-        <div className="font-sans">
+        <div className="w-full font-sans">
             {/* Header */}
             <div className="mb-8 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
                 <div>
@@ -69,16 +64,17 @@ export default function ProductTable({
             </div>
 
             {/* Search Card */}
-            <div className="mb-6 flex flex-col gap-4 rounded-xl border border-slate-800 bg-slate-900/40 p-4 sm:flex-row sm:items-center sm:justify-between">
-                <form onSubmit={onSearch} className="relative flex-1 max-w-md">
-                    <svg className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-                    <input
-                        name="search"
-                        defaultValue={search}
-                        placeholder="Search products by name..."
-                        className="h-10 w-full rounded-lg border border-slate-800 bg-slate-900 pl-12 pr-4 text-sm text-white placeholder:text-slate-500 outline-none focus:border-cyan-500 transition-colors"
-                    />
-                </form>
+            <div className="mb-8 flex flex-col gap-4 rounded-xl border border-slate-800 bg-slate-900/40 p-4 sm:flex-row sm:items-center sm:justify-between">
+                <SearchAutocomplete
+                    key={search}
+                    name="search"
+                    defaultValue={search}
+                    placeholder="Search products by name..."
+                    items={data}
+                    getLabel={(p: any) => p.name}
+                    getKey={(p: any) => p.id || p._id}
+                    onSubmit={(value) => setQuery({ search: value, page: 1 })}
+                />
                 <div className="flex items-center gap-3">
                     <label className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[1px] text-slate-400">
                         <span className="hidden sm:inline">Rows</span>

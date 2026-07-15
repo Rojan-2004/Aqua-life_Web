@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { toast } from "react-toastify";
 import Modal from "../../_components/Modal";
+import SearchAutocomplete from "../../_components/SearchAutocomplete";
 import { handleDeleteUser } from "@/lib/actions/admin/user-action";
 
 const avatarColors = [
@@ -47,12 +48,6 @@ export default function UserTable({
         router.push(`/admin/users?${q.toString()}`);
     };
 
-    const onSearch = (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        const value = new FormData(e.currentTarget).get("search") as string;
-        setQuery({ search: value ?? "", page: 1 });
-    };
-
     const onDelete = () => {
         if (!target) return;
         startTransition(async () => {
@@ -77,7 +72,7 @@ export default function UserTable({
     };
 
     return (
-        <div className="font-sans">
+        <div className="w-full font-sans">
             {/* Header */}
             <div className="mb-8 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
                 <div>
@@ -94,16 +89,17 @@ export default function UserTable({
             </div>
 
             {/* Search Card */}
-            <div className="mb-6 flex flex-col gap-4 rounded-xl border border-slate-800 bg-slate-900/40 p-4 sm:flex-row sm:items-center sm:justify-between">
-                <form onSubmit={onSearch} className="relative flex-1 max-w-md">
-                    <svg className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-                    <input
-                        name="search"
-                        defaultValue={search}
-                        placeholder="Search users by name or email..."
-                        className="h-10 w-full rounded-lg border border-slate-800 bg-slate-900 pl-12 pr-4 text-sm text-white placeholder:text-slate-500 outline-none focus:border-cyan-500 transition-colors"
-                    />
-                </form>
+            <div className="mb-8 flex flex-col gap-4 rounded-xl border border-slate-800 bg-slate-900/40 p-4 sm:flex-row sm:items-center sm:justify-between">
+                <SearchAutocomplete
+                    key={search}
+                    name="search"
+                    defaultValue={search}
+                    placeholder="Search users by name or email..."
+                    items={data}
+                    getLabel={(u: any) => getFullName(u)}
+                    getKey={(u: any) => u.id || u._id}
+                    onSubmit={(value) => setQuery({ search: value, page: 1 })}
+                />
                 <div className="flex items-center gap-3">
                     <label className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[1px] text-slate-400">
                         <span className="hidden sm:inline">Rows</span>
@@ -140,11 +136,12 @@ export default function UserTable({
                                     <tr key={u.id || u._id} className="group transition-colors hover:bg-slate-800/30">
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-3">
-                                                <div
-                                                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white shadow-lg"
-                                                    style={{ background: getAvatarColor(getFullName(u)) }}
-                                                >
-                                                    {getInitials(u)}
+                                                <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-700 bg-slate-800">
+                                                    {u.profilePicture && u.profilePicture !== "default-profile.png" ? (
+                                                        <img src={`/profile_photos/${u.profilePicture}`} alt={getFullName(u)} className="h-full w-full object-cover" />
+                                                    ) : (
+                                                        <span className="text-sm font-bold text-white">{getInitials(u)}</span>
+                                                    )}
                                                 </div>
                                                 <span className="font-medium text-white">{getFullName(u)}</span>
                                             </div>
