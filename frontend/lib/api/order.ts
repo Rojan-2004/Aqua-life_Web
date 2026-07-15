@@ -15,18 +15,22 @@ function errorMessage(error: unknown, fallback: string): string {
     return fallback;
 }
 
-export interface ShippingInfo {
+export interface ShippingAddress {
     fullName: string;
+    email: string;
     phone: string;
-    address: string;
+    province: string;
+    district: string;
     city: string;
+    street: string;
+    postalCode: string;
     landmark?: string;
 }
 
-export const placeOrder = async (shippingInfo: ShippingInfo) => {
+export const placeOrder = async (shippingAddress: ShippingAddress) => {
     try {
         const response = await axiosInstance.post(API.ORDERS.PLACE, {
-            shippingInfo,
+            shippingAddress,
         });
         return response.data;
     } catch (error: unknown) {

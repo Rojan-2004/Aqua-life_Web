@@ -6,6 +6,22 @@ import { toast } from "react-toastify";
 import Modal from "../../_components/Modal";
 import { handleDeleteUser } from "@/lib/actions/admin/user-action";
 
+const avatarColors = [
+    "linear-gradient(135deg,#2d9cdb,#4dd9e8)",
+    "linear-gradient(135deg,#f59e0b,#ef4444)",
+    "linear-gradient(135deg,#10b981,#3b82f6)",
+    "linear-gradient(135deg,#8b5cf6,#ec4899)",
+    "linear-gradient(135deg,#f97316,#eab308)",
+];
+
+function getAvatarColor(name: string) {
+    let hash = 0;
+    for (let i = 0; i < (name || "").length; i++) {
+        hash = name.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    return avatarColors[Math.abs(hash) % avatarColors.length];
+}
+
 export default function UserTable({
     data,
     pagination,
@@ -18,7 +34,7 @@ export default function UserTable({
     const router = useRouter();
     const params = useSearchParams();
     const [isPending, startTransition] = useTransition();
-    const [target, setTarget] = useState<any | null>(null); // user pending deletion
+    const [target, setTarget] = useState<any | null>(null);
 
     const page = pagination?.page ?? 1;
     const limit = pagination?.limit ?? 10;
@@ -50,160 +66,188 @@ export default function UserTable({
         });
     };
 
+    const getInitials = (u: any) => {
+        const first = (u.firstName || u.firstName || "").charAt(0);
+        const last = (u.lastName || u.lastName || "").charAt(0);
+        return (first + last).toUpperCase() || "U";
+    };
+
+    const getFullName = (u: any) => {
+        return `${u.firstName || ""} ${u.lastName || ""}`.trim() || "User";
+    };
+
     return (
-        <div className="mx-auto w-full max-w-[1100px] py-6 font-sans">
-            <div className="mb-6 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
+        <div className="font-sans">
+            {/* Header */}
+            <div className="mb-8 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
                 <div>
-                    <Link
-                        href="/admin"
-                        className="text-xs font-semibold text-cyan-400 hover:text-cyan-300 mb-2 inline-flex items-center gap-1 no-underline"
-                    >
-                        ← Back to Admin Panel
-                    </Link>
-                    <h2 className="text-3xl font-bold text-white mt-1">Users</h2>
-                    <p className="text-sm text-slate-400">{total} total users</p>
+                    <h2 className="text-3xl font-bold text-white tracking-tight">Users</h2>
+                    <p className="mt-1 text-sm text-slate-400">Manage all registered users in the system.</p>
                 </div>
                 <Link
                     href="/admin/users/create"
-                    className="flex h-10 items-center bg-cyan-500 px-4 text-xs font-bold uppercase tracking-[1.5px] text-white hover:bg-cyan-600 transition-colors"
+                    className="inline-flex h-11 items-center gap-2 rounded-lg bg-gradient-to-r from-cyan-500 to-cyan-400 px-5 text-sm font-bold uppercase tracking-[1px] text-white shadow-lg shadow-cyan-500/20 transition-all hover:shadow-cyan-500/40 hover:brightness-110"
                 >
-                    New user
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+                    New User
                 </Link>
             </div>
 
-            <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <form onSubmit={onSearch} className="flex w-full max-w-sm gap-2">
+            {/* Search Card */}
+            <div className="mb-6 flex flex-col gap-4 rounded-xl border border-slate-800 bg-slate-900/40 p-4 sm:flex-row sm:items-center sm:justify-between">
+                <form onSubmit={onSearch} className="relative flex-1 max-w-md">
+                    <svg className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
                     <input
                         name="search"
                         defaultValue={search}
                         placeholder="Search users by name or email..."
-                        className="h-10 w-full border border-slate-800 bg-slate-900 px-3 text-sm text-white placeholder:text-slate-500 outline-none focus:border-cyan-500 transition-colors"
+                        className="h-10 w-full rounded-lg border border-slate-800 bg-slate-900 pl-12 pr-4 text-sm text-white placeholder:text-slate-500 outline-none focus:border-cyan-500 transition-colors"
                     />
-                    <button className="h-10 border border-slate-800 bg-slate-900 px-4 text-xs font-bold uppercase tracking-[1.5px] text-slate-300 hover:text-white transition-colors cursor-pointer">
-                        Search
-                    </button>
                 </form>
-
-                <label className="flex items-center gap-2 text-xs uppercase tracking-[1.5px] text-slate-400">
-                    Rows
-                    <select
-                        value={limit}
-                        onChange={(e) => setQuery({ limit: e.target.value, page: 1 })}
-                        className="h-10 border border-slate-800 bg-slate-900 px-2 text-sm text-white outline-none focus:border-cyan-500 transition-colors"
-                    >
-                        {[5, 10, 20, 50].map((n) => (
-                            <option key={n} value={n}>
-                                {n}
-                            </option>
-                        ))}
-                    </select>
-                </label>
-            </div>
-
-            <div className="overflow-x-auto border border-slate-800 rounded-lg bg-slate-900/30">
-                <table className="w-full text-left text-sm border-collapse">
-                    <thead className="border-b border-slate-800 bg-slate-900/50 text-xs uppercase tracking-[1px] text-slate-400">
-                        <tr>
-                            <th className="px-4 py-3 font-medium">ID</th>
-                            <th className="px-4 py-3 font-medium">Name</th>
-                            <th className="px-4 py-3 font-medium">Email</th>
-                            <th className="px-4 py-3 font-medium">Role</th>
-                            <th className="px-4 py-3 font-medium">Status</th>
-                            <th className="px-4 py-3 font-medium">Created Date</th>
-                            <th className="px-4 py-3 text-right font-medium">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-850">
-                        {data?.length ? (
-                            data.map((u) => (
-                                <tr key={u.id || u._id} className="hover:bg-slate-900/50 transition-colors">
-                                    <td className="px-4 py-3 text-slate-500 font-mono text-xs">
-                                        {(u.id || u._id || "").substring(0, 8)}...
-                                    </td>
-                                    <td className="px-4 py-3 text-white font-medium">
-                                        {u.firstName || ""} {u.lastName || ""}
-                                    </td>
-                                    <td className="px-4 py-3 text-slate-300">{u.email}</td>
-                                    <td className="px-4 py-3">
-                                        <span
-                                            className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold uppercase tracking-[1px] ${
-                                                u.role === "admin"
-                                                    ? "bg-cyan-500/20 text-cyan-400"
-                                                    : "bg-slate-800 text-slate-400"
-                                            }`}
-                                        >
-                                            {u.role}
-                                        </span>
-                                    </td>
-                                    <td className="px-4 py-3">
-                                        <span
-                                            className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold uppercase tracking-[1px] ${
-                                                u.status === "active" || !u.status
-                                                    ? "bg-emerald-500/20 text-emerald-400"
-                                                    : "bg-rose-500/20 text-rose-400"
-                                            }`}
-                                        >
-                                            {u.status || "active"}
-                                        </span>
-                                    </td>
-                                    <td className="px-4 py-3 text-slate-400">
-                                        {u.createdAt ? new Date(u.createdAt).toLocaleDateString() : "—"}
-                                    </td>
-                                    <td className="px-4 py-3">
-                                        <div className="flex justify-end gap-3 text-xs font-medium uppercase tracking-[1px]">
-                                            <Link href={`/admin/users/${u.id || u._id}`} className="text-slate-400 hover:text-white">
-                                                View
-                                            </Link>
-                                            <Link
-                                                href={`/admin/users/${u.id || u._id}/edit`}
-                                                className="text-slate-400 hover:text-white"
-                                            >
-                                                Edit
-                                            </Link>
-                                            <button
-                                                onClick={() => setTarget(u)}
-                                                className="text-slate-400 hover:text-rose-400 cursor-pointer"
-                                            >
-                                                Delete
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))
-                        ) : (
-                            <tr>
-                                <td colSpan={7} className="px-4 py-12 text-center text-slate-500">
-                                    No users found
-                                </td>
-                            </tr>
-                        )}
-                    </tbody>
-                </table>
-            </div>
-
-            <div className="mt-4 flex items-center justify-between text-sm text-slate-400">
-                <span>
-                    Page {page} of {totalPages}
-                </span>
-                <div className="flex gap-2">
-                    <button
-                        disabled={page <= 1}
-                        onClick={() => setQuery({ page: page - 1 })}
-                        className="h-9 border border-slate-800 px-3 text-xs uppercase tracking-[1px] text-slate-300 hover:text-white disabled:opacity-40 transition-colors cursor-pointer"
-                    >
-                        Prev
-                    </button>
-                    <button
-                        disabled={page >= totalPages}
-                        onClick={() => setQuery({ page: page + 1 })}
-                        className="h-9 border border-slate-800 px-3 text-xs uppercase tracking-[1px] text-slate-300 hover:text-white disabled:opacity-40 transition-colors cursor-pointer"
-                    >
-                        Next
-                    </button>
+                <div className="flex items-center gap-3">
+                    <label className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[1px] text-slate-400">
+                        <span className="hidden sm:inline">Rows</span>
+                        <select
+                            value={limit}
+                            onChange={(e) => setQuery({ limit: e.target.value, page: 1 })}
+                            className="h-9 rounded-lg border border-slate-800 bg-slate-900 px-3 text-sm text-white outline-none focus:border-cyan-500 transition-colors cursor-pointer"
+                        >
+                            {[10, 20, 50].map((n) => (
+                                <option key={n} value={n}>{n}</option>
+                            ))}
+                        </select>
+                    </label>
                 </div>
             </div>
 
-            <Modal open={!!target} onClose={() => setTarget(null)} title="Delete user">
+            {/* Table Card */}
+            <div className="w-full overflow-hidden rounded-xl border border-slate-800 bg-slate-900/40 shadow-xl shadow-black/10">
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left text-sm">
+                        <thead>
+                            <tr className="border-b border-slate-800 bg-slate-900/60 text-xs uppercase tracking-[1px] text-slate-400">
+                                <th className="px-6 py-4 font-semibold">User</th>
+                                <th className="px-6 py-4 font-semibold">Email</th>
+                                <th className="px-6 py-4 font-semibold">Role</th>
+                                <th className="px-6 py-4 font-semibold">Status</th>
+                                <th className="px-6 py-4 font-semibold">Created</th>
+                                <th className="px-6 py-4 text-right font-semibold">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-800/60">
+                            {data?.length ? (
+                                data.map((u) => (
+                                    <tr key={u.id || u._id} className="group transition-colors hover:bg-slate-800/30">
+                                        <td className="px-6 py-4">
+                                            <div className="flex items-center gap-3">
+                                                <div
+                                                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white shadow-lg"
+                                                    style={{ background: getAvatarColor(getFullName(u)) }}
+                                                >
+                                                    {getInitials(u)}
+                                                </div>
+                                                <span className="font-medium text-white">{getFullName(u)}</span>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 text-slate-300">{u.email}</td>
+                                        <td className="px-6 py-4">
+                                            <span
+                                                className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold uppercase tracking-[1px] ${
+                                                    u.role === "admin"
+                                                        ? "bg-cyan-500/15 text-cyan-400"
+                                                        : "bg-slate-800 text-slate-400"
+                                                }`}
+                                            >
+                                                {u.role}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <span
+                                                className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold uppercase tracking-[1px] ${
+                                                    u.status === "active" || !u.status
+                                                        ? "bg-emerald-500/15 text-emerald-400"
+                                                        : u.status === "inactive"
+                                                        ? "bg-slate-700 text-slate-400"
+                                                        : "bg-rose-500/15 text-rose-400"
+                                                }`}
+                                            >
+                                                {u.status || "active"}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 text-slate-400">
+                                            {u.createdAt ? new Date(u.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "—"}
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <div className="flex items-center justify-end gap-2">
+                                                <button
+                                                    onClick={() => router.push(`/admin/users/${u.id || u._id}`)}
+                                                    className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-800 bg-slate-900 text-slate-400 transition-all hover:border-cyan-500/40 hover:text-cyan-400"
+                                                    title="View"
+                                                >
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                                                </button>
+                                                <button
+                                                    onClick={() => router.push(`/admin/users/${u.id || u._id}/edit`)}
+                                                    className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-800 bg-slate-900 text-slate-400 transition-all hover:border-cyan-500/40 hover:text-cyan-400"
+                                                    title="Edit"
+                                                >
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+                                                </button>
+                                                <button
+                                                    onClick={() => setTarget(u)}
+                                                    className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-800 bg-slate-900 text-slate-400 transition-all hover:border-rose-500/40 hover:text-rose-400"
+                                                    title="Delete"
+                                                >
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan={6} className="px-6 py-16 text-center">
+                                        <div className="flex flex-col items-center gap-3">
+                                            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-slate-800/50 text-3xl">👤</div>
+                                            <p className="text-slate-400 font-medium">No users found</p>
+                                            <Link href="/admin/users/create" className="text-sm font-semibold text-cyan-400 hover:text-cyan-300">
+                                                Create User
+                                            </Link>
+                                        </div>
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+
+                {/* Pagination */}
+                {totalPages > 1 && (
+                    <div className="flex items-center justify-between border-t border-slate-800 px-6 py-4">
+                        <span className="text-sm text-slate-400">
+                            Page {page} of {totalPages}
+                        </span>
+                        <div className="flex gap-2">
+                            <button
+                                disabled={page <= 1}
+                                onClick={() => setQuery({ page: page - 1 })}
+                                className="h-9 rounded-lg border border-slate-800 bg-slate-900 px-4 text-xs font-semibold uppercase tracking-[1px] text-slate-300 transition-all hover:border-cyan-500/40 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                            >
+                                Prev
+                            </button>
+                            <button
+                                disabled={page >= totalPages}
+                                onClick={() => setQuery({ page: page + 1 })}
+                                className="h-9 rounded-lg border border-slate-800 bg-slate-900 px-4 text-xs font-semibold uppercase tracking-[1px] text-slate-300 transition-all hover:border-cyan-500/40 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                            >
+                                Next
+                            </button>
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            <Modal open={!!target} onClose={() => setTarget(null)} title="Delete User">
                 <p className="mb-6 text-sm text-slate-300">
                     Are you sure you want to delete{" "}
                     <span className="font-bold text-white">
@@ -214,14 +258,14 @@ export default function UserTable({
                 <div className="flex justify-end gap-3">
                     <button
                         onClick={() => setTarget(null)}
-                        className="h-10 border border-slate-700 bg-slate-900 px-4 text-xs font-bold uppercase tracking-[1.5px] text-slate-300 hover:text-white cursor-pointer"
+                        className="h-10 rounded-lg border border-slate-700 bg-slate-900 px-4 text-xs font-bold uppercase tracking-[1.5px] text-slate-300 hover:text-white cursor-pointer transition-colors"
                     >
                         Cancel
                     </button>
                     <button
                         onClick={onDelete}
                         disabled={isPending}
-                        className="h-10 bg-rose-600 px-4 text-xs font-bold uppercase tracking-[1.5px] text-white hover:bg-rose-700 disabled:opacity-50 transition-colors cursor-pointer"
+                        className="h-10 rounded-lg bg-rose-600 px-4 text-xs font-bold uppercase tracking-[1.5px] text-white hover:bg-rose-700 disabled:opacity-50 transition-colors cursor-pointer"
                     >
                         {isPending ? "Deleting..." : "Delete"}
                     </button>

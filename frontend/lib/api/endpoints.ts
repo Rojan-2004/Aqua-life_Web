@@ -29,8 +29,13 @@ export const API = {
             GET_ALL: "/api/v1/admin/products",
             GET_BY_ID: (id: string) => `/api/v1/admin/products/${id}`,
             CREATE: "/api/v1/admin/products",
-            UPDATE: (id: string) => `/api/v1/admin/products/${id}`,
-            DELETE: (id: string) => `/api/v1/admin/products/${id}`,
+            UPDATE: (id: string): string => `/api/v1/admin/products/${id}`,
+            DELETE: (id: string): string => `/api/v1/admin/products/${id}`,
+        },
+        ORDERS: {
+            GET_ALL: "/api/v1/admin/orders",
+            GET_BY_ID: (id: string) => `/api/v1/admin/orders/${id}`,
+            UPDATE_STATUS: (id: string) => `/api/v1/admin/orders/${id}/status`,
         }
     },
     DASHBOARD: {

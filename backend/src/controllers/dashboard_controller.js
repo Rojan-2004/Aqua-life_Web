@@ -16,6 +16,7 @@ function mapOrder(o) {
         total: o.total,
         status: o.status,
         createdAt: o.createdAt,
+        shippingAddress: o.shippingAddress || o.shippingInfo || null,
         items: (o.items || []).map((it) => ({
             quantity: it.quantity,
             price: it.price,
@@ -38,22 +39,51 @@ function mapOrder(o) {
 // GET /api/v1/admin/stats
 exports.getAdminStats = async (req, res, next) => {
     try {
-        const [productsLive, activeUsers, ordersToday] = await Promise.all([
-            Product.countDocuments({ isActive: true }),
-            User.countDocuments({ status: "active" }),
-            Order.countDocuments({ createdAt: { $gte: startOfToday() } }),
-        ]);
+        const monthStart = startOfToday();
+        monthStart.setDate(1);
 
-        // No delivered-order revenue recorded yet — show 0 until orders exist.
-        const revenue = 0;
+        const [productsLive, activeUsers, ordersToday, revenueResult, monthlyRevenueResult, avgResult, lowStockProducts] =
+            await Promise.all([
+                Product.countDocuments({ isActive: true }),
+                User.countDocuments({ status: "active" }),
+                Order.countDocuments({ createdAt: { $gte: startOfToday() } }),
+                Order.aggregate([
+                    { $match: { status: "delivered" } },
+                    { $group: { _id: null, totalRevenue: { $sum: "$total" } } },
+                ]),
+                Order.aggregate([
+                    { $match: { status: "delivered", createdAt: { $gte: monthStart } } },
+                    { $group: { _id: null, revenue: { $sum: "$total" } } },
+                ]),
+                Order.aggregate([
+                    { $match: { status: "delivered" } },
+                    { $group: { _id: null, avgValue: { $avg: "$total" }, count: { $sum: 1 } } },
+                ]),
+                Product.countDocuments({ stock: { $lt: 10 }, isActive: true }),
+            ]);
+
+        const totalRevenue = revenueResult[0]?.totalRevenue || 0;
+        const monthlyRevenue = monthlyRevenueResult[0]?.revenue || 0;
+        const averageOrderValue = avgResult[0]?.avgValue || 0;
+        const deliveredOrders = avgResult[0]?.count || 0;
+        const pendingOrders = await Order.countDocuments({ status: "pending" });
+        const cancelledOrders = await Order.countDocuments({ status: "cancelled" });
 
         res.status(200).json({
             success: true,
             data: {
-                revenue,
+                revenue: totalRevenue,
                 ordersToday,
                 productsLive,
                 activeUsers,
+                pendingOrders,
+                deliveredOrders,
+                cancelledOrders,
+                monthlyRevenue,
+                totalProducts: productsLive,
+                lowStockProducts,
+                totalUsers: activeUsers,
+                averageOrderValue,
             },
         });
     } catch (err) {
@@ -75,6 +105,7 @@ exports.getRecentOrders = async (req, res, next) => {
             total: o.total,
             status: o.status,
             createdAt: o.createdAt,
+            shippingAddress: o.shippingAddress || o.shippingInfo || null,
             customer:
                 [o.user?.firstName, o.user?.lastName]
                     .filter(Boolean)

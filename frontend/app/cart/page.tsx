@@ -9,7 +9,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
 const VAT_RATE = 0.13;
-const SHIPPING_FLAT = 500;
+const SHIPPING_FLAT = 50;
 const FREE_SHIPPING_THRESHOLD = 50000;
 
 export default function CartPage() {
@@ -49,13 +49,26 @@ export default function CartPage() {
         0
     );
     const shipping = subtotal > FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FLAT;
-    const vat = Math.round((subtotal + shipping) * VAT_RATE);
-    const total = subtotal + shipping + vat;
+    const vat = 0;
+    const total = subtotal + shipping;
 
     if (loading || !user) {
         return (
             <div style={{ background: "#0a0e1a", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-outfit), 'Outfit', sans-serif" }}>
                 <p style={{ color: "#4dd9e8", fontSize: 18, fontWeight: 600 }}>Loading...</p>
+            </div>
+        );
+    }
+
+    if (user.role === "admin") {
+        return (
+            <div style={{ background: "#0a0e1a", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-outfit), 'Outfit', sans-serif" }}>
+                <div style={{ textAlign: "center", padding: 40 }}>
+                    <p style={{ fontSize: 48, marginBottom: 16 }}>🔒</p>
+                    <h2 style={{ color: "#fff", fontSize: 24, fontWeight: 700, marginBottom: 12 }}>Admin accounts cannot purchase products</h2>
+                    <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 14, marginBottom: 24 }}>Please use a regular user account to shop.</p>
+                    <Link href="/dashboard" style={{ color: "#4dd9e8", fontWeight: 600, fontSize: 14, textDecoration: "none" }}>← Back to Dashboard</Link>
+                </div>
             </div>
         );
     }
@@ -112,10 +125,6 @@ export default function CartPage() {
                                 <div style={{ display: "flex", justifyContent: "space-between" }}>
                                     <span style={{ color: "rgba(255,255,255,0.5)", fontSize: 13 }}>Shipping</span>
                                     <span style={{ color: "rgba(255,255,255,0.7)", fontSize: 13 }}>{shipping === 0 ? "Free" : `Rs. ${shipping}`}</span>
-                                </div>
-                                <div style={{ display: "flex", justifyContent: "space-between" }}>
-                                    <span style={{ color: "rgba(255,255,255,0.5)", fontSize: 13 }}>VAT (13%)</span>
-                                    <span style={{ color: "rgba(255,255,255,0.7)", fontSize: 13 }}>Rs. {vat.toLocaleString()}</span>
                                 </div>
                             </div>
                             <div style={{ borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: 16, marginTop: 16 }}>

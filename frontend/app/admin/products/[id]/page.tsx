@@ -20,8 +20,8 @@ export default async function Page({
     const imageUrl = hasImage ? `/item_photos/${p.image}` : PRODUCT_PLACEHOLDER;
 
     return (
-        <div style={{ background: "#0a0e1a", minHeight: "100vh", padding: "40px 20px" }} className="font-sans text-white">
-            <div className="mx-auto w-full max-w-lg">
+        <div style={{ background: "#0a0e1a", minHeight: "100vh" }} className="font-sans text-white">
+            <div className="max-w-7xl mx-auto px-8 lg:px-10 py-8">
                 <div className="mb-6">
                     <Link
                         href="/admin/products"

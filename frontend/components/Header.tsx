@@ -49,18 +49,20 @@ export default function Header() {
                 </nav>
 
                 <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-                    <Link href="/cart" style={{
-                        textDecoration: "none",
-                        background: "rgba(255,255,255,0.05)",
-                        border: "1px solid rgba(255,255,255,0.1)",
-                        borderRadius: 30,
-                        padding: "7px 16px",
-                        color: "rgba(255,255,255,0.8)",
-                        fontSize: 13,
-                        fontWeight: 600,
-                    }}>
-                        🛒 Cart
-                    </Link>
+                    {user?.role !== "admin" && (
+                        <Link href="/cart" style={{
+                            textDecoration: "none",
+                            background: "rgba(255,255,255,0.05)",
+                            border: "1px solid rgba(255,255,255,0.1)",
+                            borderRadius: 30,
+                            padding: "7px 16px",
+                            color: "rgba(255,255,255,0.8)",
+                            fontSize: 13,
+                            fontWeight: 600,
+                        }}>
+                            🛒 Cart
+                        </Link>
+                    )}
 
                     {user?.role === "admin" && (
                         <Link href="/admin" style={{
@@ -73,7 +75,7 @@ export default function Header() {
                             fontSize: 13,
                             fontWeight: 600,
                         }}>
-                            🛡️ Admin
+                            🛡️ Admin Panel
                         </Link>
                     )}
 

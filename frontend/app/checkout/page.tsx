@@ -7,8 +7,7 @@ import { getCart, CartItemData } from "@/lib/api/cart";
 import { placeOrder } from "@/lib/api/order";
 import Footer from "@/components/Footer";
 
-const VAT_RATE = 0.13;
-const SHIPPING_FLAT = 500;
+const SHIPPING_FLAT = 50;
 const FREE_SHIPPING_THRESHOLD = 50000;
 
 export default function CheckoutPage() {
@@ -20,40 +19,66 @@ export default function CheckoutPage() {
     const [error, setError] = useState("");
     const [form, setForm] = useState({
         fullName: "",
+        email: "",
         phone: "",
-        address: "",
+        province: "",
+        district: "",
         city: "Kathmandu",
+        street: "",
+        postalCode: "",
         landmark: "",
     });
 
     useEffect(() => {
         if (!loading && !user) router.replace("/frontend/login");
-        if (user) {
-            getCart()
-                .then((res) => setCartItems(res.data ?? []))
-                .catch((e) => {
-                    console.error("Failed to load cart", e);
-                    setError("Could not load your cart.");
-                });
-        }
     }, [user, loading, router]);
+
+    useEffect(() => {
+        if (user && !form.email) {
+            setForm(f => ({
+                ...f,
+                fullName: `${user.firstName || ""} ${user.lastName || ""}`.trim(),
+                email: user.email || "",
+            }));
+        }
+    }, [user]);
+
+    useEffect(() => {
+        if (!user) return;
+        getCart()
+            .then((res) => setCartItems(res.data ?? []))
+            .catch((e) => {
+                console.error("Failed to load cart", e);
+                setError("Could not load your cart.");
+            });
+    }, [user]);
 
     const set = (k: keyof typeof form, v: string) => setForm((f) => ({ ...f, [k]: v }));
 
     const subtotal = cartItems.reduce((s, i) => s + (i.product?.price ?? 0) * i.quantity, 0);
     const shipping = subtotal > FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FLAT;
-    const vat = Math.round((subtotal + shipping) * VAT_RATE);
-    const total = subtotal + shipping + vat;
+    const total = subtotal + shipping;
 
     const placeOrderHandler = async () => {
-        if (!form.fullName || !form.phone || !form.address || !form.city) {
+        if (!form.fullName || !form.email || !form.phone || !form.province || !form.district || !form.city || !form.street || !form.postalCode) {
             setError("Please fill in all required fields.");
             return;
         }
         setPlacing(true);
         setError("");
         try {
-            const res = await placeOrder(form);
+            const shippingAddress = {
+                fullName: form.fullName,
+                email: form.email,
+                phone: form.phone,
+                province: form.province,
+                district: form.district,
+                city: form.city,
+                street: form.street,
+                postalCode: form.postalCode,
+                landmark: form.landmark,
+            };
+            const res = await placeOrder(shippingAddress);
             if (res.success && res.orderId) {
                 router.push(`/checkout/success?orderId=${res.orderId}`);
             } else {
@@ -92,6 +117,19 @@ export default function CheckoutPage() {
         return (
             <div style={{ background: "#0a0e1a", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-outfit), 'Outfit', sans-serif" }}>
                 <p style={{ color: "#4dd9e8", fontSize: 18 }}>Loading...</p>
+            </div>
+        );
+    }
+
+    if (user.role === "admin") {
+        return (
+            <div style={{ background: "#0a0e1a", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-outfit), 'Outfit', sans-serif" }}>
+                <div style={{ textAlign: "center", padding: 40 }}>
+                    <p style={{ fontSize: 48, marginBottom: 16 }}>🔒</p>
+                    <h2 style={{ color: "#fff", fontSize: 24, fontWeight: 700, marginBottom: 12 }}>Admin accounts cannot purchase products</h2>
+                    <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 14, marginBottom: 24 }}>Please use a regular user account to shop.</p>
+                    <Link href="/dashboard" style={{ color: "#4dd9e8", fontWeight: 600, fontSize: 14, textDecoration: "none" }}>← Back to Dashboard</Link>
+                </div>
             </div>
         );
     }
@@ -141,29 +179,50 @@ export default function CheckoutPage() {
 
                         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 20 }}>
                             <div>
-                                <label style={labelStyle}>Full Name</label>
+                                <label style={labelStyle}>Full Name *</label>
                                 <input value={form.fullName} onChange={(e) => set("fullName", e.target.value)} placeholder="John Doe" style={inputStyle} />
                             </div>
                             <div>
-                                <label style={labelStyle}>Phone Number</label>
-                                <input value={form.phone} onChange={(e) => set("phone", e.target.value)} placeholder="+977 9800000000" style={inputStyle} />
+                                <label style={labelStyle}>Email *</label>
+                                <input value={form.email} onChange={(e) => set("email", e.target.value)} placeholder="john@example.com" style={inputStyle} />
                             </div>
                         </div>
 
                         <div style={{ marginBottom: 20 }}>
-                            <label style={labelStyle}>Address Line 1</label>
-                            <input value={form.address} onChange={(e) => set("address", e.target.value)} placeholder="Street Name, House No." style={inputStyle} />
+                            <label style={labelStyle}>Phone Number *</label>
+                            <input value={form.phone} onChange={(e) => set("phone", e.target.value)} placeholder="+977 9800000000" style={inputStyle} />
                         </div>
 
-                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 20 }}>
                             <div>
-                                <label style={labelStyle}>City</label>
+                                <label style={labelStyle}>Province *</label>
+                                <input value={form.province} onChange={(e) => set("province", e.target.value)} placeholder="e.g. Bagmati" style={inputStyle} />
+                            </div>
+                            <div>
+                                <label style={labelStyle}>District *</label>
+                                <input value={form.district} onChange={(e) => set("district", e.target.value)} placeholder="e.g. Kathmandu" style={inputStyle} />
+                            </div>
+                        </div>
+
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 20 }}>
+                            <div>
+                                <label style={labelStyle}>City *</label>
                                 <input value={form.city} onChange={(e) => set("city", e.target.value)} placeholder="Kathmandu" style={inputStyle} />
                             </div>
                             <div>
-                                <label style={labelStyle}>Area / Landmark</label>
-                                <input value={form.landmark} onChange={(e) => set("landmark", e.target.value)} placeholder="Near Patan Durbar" style={inputStyle} />
+                                <label style={labelStyle}>Postal Code *</label>
+                                <input value={form.postalCode} onChange={(e) => set("postalCode", e.target.value)} placeholder="44600" style={inputStyle} />
                             </div>
+                        </div>
+
+                        <div style={{ marginBottom: 20 }}>
+                            <label style={labelStyle}>Street Address *</label>
+                            <input value={form.street} onChange={(e) => set("street", e.target.value)} placeholder="Street Name, House No." style={inputStyle} />
+                        </div>
+
+                        <div style={{ marginBottom: 20 }}>
+                            <label style={labelStyle}>Landmark / Area</label>
+                            <input value={form.landmark} onChange={(e) => set("landmark", e.target.value)} placeholder="Near Patan Durbar" style={inputStyle} />
                         </div>
 
                         {error && <p style={{ color: "#f87171", fontSize: 13, marginTop: 16 }}>{error}</p>}
@@ -213,16 +272,14 @@ export default function CheckoutPage() {
                                 </div>
 
                                 <div style={{ borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: 16, display: "flex", flexDirection: "column", gap: 10 }}>
-                                    {[
-                                        { label: "Subtotal", value: `Rs. ${subtotal.toLocaleString()}` },
-                                        { label: "Shipping Fee", value: shipping === 0 ? "Free" : `Rs. ${shipping}` },
-                                        { label: "VAT (13%)", value: `Rs. ${vat.toLocaleString()}` },
-                                    ].map((row) => (
-                                        <div key={row.label} style={{ display: "flex", justifyContent: "space-between" }}>
-                                            <span style={{ color: "rgba(255,255,255,0.5)", fontSize: 13 }}>{row.label}</span>
-                                            <span style={{ color: "rgba(255,255,255,0.7)", fontSize: 13 }}>{row.value}</span>
-                                        </div>
-                                    ))}
+                                    <div style={{ display: "flex", justifyContent: "space-between" }}>
+                                        <span style={{ color: "rgba(255,255,255,0.5)", fontSize: 13 }}>Subtotal</span>
+                                        <span style={{ color: "rgba(255,255,255,0.7)", fontSize: 13 }}>Rs. {subtotal.toLocaleString()}</span>
+                                    </div>
+                                    <div style={{ display: "flex", justifyContent: "space-between" }}>
+                                        <span style={{ color: "rgba(255,255,255,0.5)", fontSize: 13 }}>Delivery Fee</span>
+                                        <span style={{ color: "rgba(255,255,255,0.7)", fontSize: 13 }}>{shipping === 0 ? "Free" : `Rs. ${shipping}`}</span>
+                                    </div>
                                 </div>
 
                                 <div style={{ borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: 16, marginTop: 12 }}>

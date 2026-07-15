@@ -15,8 +15,10 @@ export default async function Page({
     }
 
     return (
-        <div style={{ background: "#0a0e1a", minHeight: "100vh", padding: "40px 20px" }}>
-            <ProductFormEdit product={result.data} />
+        <div style={{ background: "#0a0e1a", minHeight: "100vh" }}>
+            <div className="max-w-7xl mx-auto px-8 lg:px-10 py-8 font-sans">
+                <ProductFormEdit product={result.data} />
+            </div>
         </div>
     );
 }

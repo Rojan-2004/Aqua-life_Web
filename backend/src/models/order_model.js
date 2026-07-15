@@ -21,13 +21,28 @@ const orderSchema = new mongoose.Schema(
             type: Number,
             default: 0,
         },
-        shippingInfo: {
-            type: mongoose.Schema.Types.Mixed,
-            default: {},
+        subtotal: {
+            type: Number,
+            default: 0,
+        },
+        deliveryFee: {
+            type: Number,
+            default: 0,
+        },
+        shippingAddress: {
+            fullName: String,
+            email: String,
+            phone: String,
+            province: String,
+            district: String,
+            city: String,
+            street: String,
+            postalCode: String,
+            landmark: String,
         },
         status: {
             type: String,
-            enum: ["pending", "shipped", "delivered", "cancelled"],
+            enum: ["pending", "processing", "packed", "shipped", "out_for_delivery", "delivered", "cancelled"],
             default: "pending",
         },
     },
@@ -37,5 +52,9 @@ const orderSchema = new mongoose.Schema(
 orderSchema.virtual("id").get(function () {
     return this._id.toString();
 });
+
+orderSchema.index({ status: 1 });
+orderSchema.index({ createdAt: -1 });
+orderSchema.index({ user: 1 });
 
 module.exports = mongoose.model("Order", orderSchema, "orders");

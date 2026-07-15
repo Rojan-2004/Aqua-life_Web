@@ -6,8 +6,7 @@ const Order = require("../models/order_model");
 const Notification = require("../models/notification_model");
 const Product = require("../models/product_model");
 
-const VAT_RATE = 0.13;
-const SHIPPING_FLAT = 500;
+const SHIPPING_FLAT = 50;
 const FREE_SHIPPING_THRESHOLD = 50000;
 
 router.use(protect);
@@ -16,12 +15,22 @@ router.use(protect);
 router.post("/", async (req, res, next) => {
     try {
         const userId = req.user._id;
-        const { shippingInfo } = req.body;
+        const { shippingAddress } = req.body;
 
-        if (!shippingInfo || !shippingInfo.fullName || !shippingInfo.phone || !shippingInfo.address || !shippingInfo.city) {
+        if (
+            !shippingAddress ||
+            !shippingAddress.fullName ||
+            !shippingAddress.email ||
+            !shippingAddress.phone ||
+            !shippingAddress.province ||
+            !shippingAddress.district ||
+            !shippingAddress.city ||
+            !shippingAddress.street ||
+            !shippingAddress.postalCode
+        ) {
             return res
                 .status(400)
-                .json({ success: false, message: "Shipping information is required." });
+                .json({ success: false, message: "Shipping address is required." });
         }
 
         const cartItems = await CartItem.find({ user: userId }).populate("product");
@@ -38,15 +47,16 @@ router.post("/", async (req, res, next) => {
             (sum, i) => sum + i.product.price * i.quantity,
             0
         );
-        const shipping = subtotal > FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FLAT;
-        const vat = Math.round((subtotal + shipping) * VAT_RATE);
-        const total = subtotal + shipping + vat;
+        const deliveryFee = subtotal > FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FLAT;
+        const total = subtotal + deliveryFee;
 
         const order = await Order.create({
             user: userId,
             total,
+            subtotal,
+            deliveryFee,
             status: "pending",
-            shippingInfo,
+            shippingAddress,
             items: validItems.map((i) => ({
                 product: i.product._id,
                 quantity: i.quantity,
@@ -75,7 +85,7 @@ router.post("/", async (req, res, next) => {
         await Notification.create({
             type: "new_order",
             orderId: order._id.toString(),
-            message: `New order #${shortId} from ${shippingInfo.fullName} — ${itemNames} — Rs. ${total.toLocaleString()}`,
+            message: `New order #${shortId} from ${shippingAddress.fullName} — ${itemNames} — Rs. ${total.toLocaleString()}`,
         });
 
         res.status(201).json({ success: true, orderId: order._id.toString() });
