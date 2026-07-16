@@ -6,27 +6,41 @@ import OrderDetailModal from "./OrderDetailModal";
 import SearchAutocomplete from "../../_components/SearchAutocomplete";
 import { handleUpdateOrderStatus } from "@/lib/actions/admin/order-action";
 
-const STATUSES = ["All", "Pending", "Processing", "Packed", "Shipped", "Out for Delivery", "Delivered", "Cancelled"];
+const FILTER_STATUSES = [
+    { value: "All", label: "All Statuses" },
+    { value: "pending", label: "Pending" },
+    { value: "processing", label: "Processing" },
+    { value: "packed", label: "Packed" },
+    { value: "shipped", label: "Shipped" },
+    { value: "out_for_delivery", label: "Out for Delivery" },
+    { value: "delivered", label: "Delivered" },
+    { value: "cancelled", label: "Cancelled" },
+];
 
-const statusColors: Record<string, { bg: string; text: string }> = {
-    Delivered: { bg: "rgba(74,222,128,0.15)", text: "#4ade80" },
-    Shipped: { bg: "rgba(77,217,232,0.15)", text: "#4dd9e8" },
-    "Out for Delivery": { bg: "rgba(129,140,248,0.15)", text: "#818cf8" },
-    Packed: { bg: "rgba(251,191,36,0.15)", text: "#fbbf24" },
-    Processing: { bg: "rgba(96,165,250,0.15)", text: "#60a5fa" },
-    Pending: { bg: "rgba(251,191,36,0.15)", text: "#fbbf24" },
-    Cancelled: { bg: "rgba(248,113,113,0.15)", text: "#f87171" },
+const statusColors: Record<string, { bg: string; text: string; label: string }> = {
+    delivered: { bg: "rgba(74,222,128,0.15)", text: "#4ade80", label: "Delivered" },
+    shipped: { bg: "rgba(77,217,232,0.15)", text: "#4dd9e8", label: "Shipped" },
+    out_for_delivery: { bg: "rgba(129,140,248,0.15)", text: "#818cf8", label: "Out for Delivery" },
+    packed: { bg: "rgba(251,191,36,0.15)", text: "#fbbf24", label: "Packed" },
+    processing: { bg: "rgba(96,165,250,0.15)", text: "#60a5fa", label: "Processing" },
+    pending: { bg: "rgba(251,191,36,0.15)", text: "#fbbf24", label: "Pending" },
+    cancelled: { bg: "rgba(248,113,113,0.15)", text: "#f87171", label: "Cancelled" },
 };
 
-const ALLOWED_TRANSITIONS: Record<string, string[]> = {
-    Pending: ["Processing", "Cancelled"],
-    Processing: ["Packed", "Cancelled"],
-    Packed: ["Shipped", "Cancelled"],
-    Shipped: ["Out for Delivery", "Cancelled"],
-    "Out for Delivery": ["Delivered", "Cancelled"],
-    Delivered: [],
-    Cancelled: [],
+const getStatusDetails = (status?: string) => {
+    const s = (status || "pending").toLowerCase();
+    return statusColors[s] || { bg: "rgba(255,255,255,0.1)", text: "rgba(255,255,255,0.6)", label: status || "Pending" };
 };
+
+const STATUS_OPTIONS = [
+    { value: "pending", label: "Pending" },
+    { value: "processing", label: "Processing" },
+    { value: "packed", label: "Packed" },
+    { value: "shipped", label: "Shipped" },
+    { value: "out_for_delivery", label: "Out for Delivery" },
+    { value: "delivered", label: "Delivered" },
+    { value: "cancelled", label: "Cancelled" },
+];
 
 export default function OrderTable({ data, pagination, search, statusFilter, sortFilter }: {
     data: any[];
@@ -71,6 +85,7 @@ export default function OrderTable({ data, pagination, search, statusFilter, sor
             const result = await handleUpdateOrderStatus(orderId, newStatus);
             if (result.success) {
                 toast.success(`Order status updated to ${newStatus}`);
+                router.refresh();
             } else {
                 toast.error(result.message || "Failed to update status");
             }
@@ -110,8 +125,8 @@ export default function OrderTable({ data, pagination, search, statusFilter, sor
                             onChange={onStatusChange}
                             className="h-10 rounded-lg border border-slate-800 bg-slate-900 px-3 text-sm text-white outline-none focus:border-cyan-500 transition-colors cursor-pointer"
                         >
-                            {STATUSES.map((s) => (
-                                <option key={s} value={s}>{s === "All" ? "All Statuses" : s}</option>
+                            {FILTER_STATUSES.map((s) => (
+                                <option key={s.value} value={s.value}>{s.label}</option>
                             ))}
                         </select>
                         <select
@@ -134,58 +149,58 @@ export default function OrderTable({ data, pagination, search, statusFilter, sor
                     <table className="w-full text-left text-sm">
                         <thead>
                             <tr className="border-b border-slate-800 bg-slate-900/60 text-xs uppercase tracking-[1px] text-slate-400">
-                                <th className="px-6 py-4 font-semibold">Order ID</th>
-                                <th className="px-6 py-4 font-semibold">Customer</th>
-                                <th className="px-6 py-4 font-semibold">Email</th>
-                                <th className="px-6 py-4 font-semibold">Phone</th>
-                                <th className="px-6 py-4 font-semibold text-center">Items</th>
-                                <th className="px-6 py-4 font-semibold text-right">Subtotal</th>
-                                <th className="px-6 py-4 font-semibold text-right">Delivery</th>
-                                <th className="px-6 py-4 font-semibold text-right">Total</th>
-                                <th className="px-6 py-4 font-semibold">Status</th>
-                                <th className="px-6 py-4 font-semibold">Date</th>
-                                <th className="px-6 py-4 text-right font-semibold">Actions</th>
+                                <th style={{ padding: "14px 16px" }} className="font-semibold">Order ID</th>
+                                <th style={{ padding: "14px 16px" }} className="font-semibold">Customer</th>
+                                <th style={{ padding: "14px 16px" }} className="font-semibold">Email</th>
+                                <th style={{ padding: "14px 16px" }} className="font-semibold">Phone</th>
+                                <th style={{ padding: "14px 16px" }} className="font-semibold text-center">Items</th>
+                                <th style={{ padding: "14px 16px" }} className="font-semibold text-right">Subtotal</th>
+                                <th style={{ padding: "14px 16px" }} className="font-semibold text-right">Delivery</th>
+                                <th style={{ padding: "14px 16px" }} className="font-semibold text-right">Total</th>
+                                <th style={{ padding: "14px 16px" }} className="font-semibold">Status</th>
+                                <th style={{ padding: "14px 16px" }} className="font-semibold">Date</th>
+                                <th style={{ padding: "14px 16px" }} className="text-right font-semibold">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-800/60">
                             {data?.length ? (
                                 data.map((o) => (
                                     <tr key={o.id || o._id} className="group transition-colors hover:bg-slate-800/30">
-                                        <td className="px-6 py-4 font-mono text-xs text-slate-400">
+                                        <td style={{ padding: "14px 16px" }} className="font-mono text-xs text-slate-400">
                                             #{(o.id || o._id || "").substring(0, 8)}
                                         </td>
-                                        <td className="px-6 py-4 font-medium text-white">
+                                        <td style={{ padding: "14px 16px" }} className="font-medium text-white">
                                             {o.customerName || o.customer || "—"}
                                         </td>
-                                        <td className="px-6 py-4 text-slate-300 text-xs">{o.email || "—"}</td>
-                                        <td className="px-6 py-4 text-slate-300 text-xs">{o.phone || "—"}</td>
-                                        <td className="px-6 py-4 text-center text-slate-300">
+                                        <td style={{ padding: "14px 16px" }} className="text-slate-300 text-xs">{o.email || "—"}</td>
+                                        <td style={{ padding: "14px 16px" }} className="text-slate-300 text-xs">{o.phone || "—"}</td>
+                                        <td style={{ padding: "14px 16px" }} className="text-center text-slate-300">
                                             {o.items?.length || o.itemCount || 0}
                                         </td>
-                                        <td className="px-6 py-4 text-right text-slate-300">
+                                        <td style={{ padding: "14px 16px" }} className="text-right text-slate-300">
                                             Rs. {(o.subtotal || 0)?.toLocaleString()}
                                         </td>
-                                        <td className="px-6 py-4 text-right text-slate-300">
+                                        <td style={{ padding: "14px 16px" }} className="text-right text-slate-300">
                                             Rs. {(o.deliveryFee || 0)?.toLocaleString()}
                                         </td>
-                                        <td className="px-6 py-4 text-right font-semibold text-cyan-400">
+                                        <td style={{ padding: "14px 16px" }} className="text-right font-semibold text-cyan-400">
                                             Rs. {(o.total || o.grandTotal || 0)?.toLocaleString()}
                                         </td>
-                                        <td className="px-6 py-4">
+                                        <td style={{ padding: "14px 16px" }}>
                                             <span
                                                 className="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold uppercase tracking-[1px]"
                                                 style={{
-                                                    background: statusColors[o.status]?.bg || "rgba(255,255,255,0.1)",
-                                                    color: statusColors[o.status]?.text || "rgba(255,255,255,0.6)",
+                                                    background: getStatusDetails(o.status).bg,
+                                                    color: getStatusDetails(o.status).text,
                                                 }}
                                             >
-                                                {o.status || "Pending"}
+                                                {getStatusDetails(o.status).label}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4 text-slate-400 text-xs">
+                                        <td style={{ padding: "14px 16px" }} className="text-slate-400 text-xs">
                                             {o.createdAt ? new Date(o.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "—"}
                                         </td>
-                                        <td className="px-6 py-4">
+                                        <td style={{ padding: "14px 16px" }}>
                                             <div className="flex items-center justify-end gap-2">
                                                 <button
                                                     onClick={() => setSelectedOrder(o)}
@@ -194,21 +209,18 @@ export default function OrderTable({ data, pagination, search, statusFilter, sor
                                                 >
                                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
                                                 </button>
-                                                {ALLOWED_TRANSITIONS[o.status]?.length > 0 && (
-                                                    <select
-                                                        value=""
-                                                        onChange={(e) => {
-                                                            if (e.target.value) onUpdateStatus(o.id || o._id, e.target.value);
-                                                        }}
-                                                        disabled={isPending && updatingId === o.id}
-                                                        className="h-8 rounded-lg border border-slate-800 bg-slate-900 px-2 text-xs text-white outline-none focus:border-cyan-500 transition-colors cursor-pointer disabled:opacity-50"
-                                                    >
-                                                        <option value="">Update</option>
-                                                        {ALLOWED_TRANSITIONS[o.status]?.map((s) => (
-                                                            <option key={s} value={s}>{s}</option>
-                                                        ))}
-                                                    </select>
-                                                )}
+                                                <select
+                                                    value={(o.status || "pending").toLowerCase()}
+                                                    onChange={(e) => {
+                                                        if (e.target.value) onUpdateStatus(o.id || o._id, e.target.value);
+                                                    }}
+                                                    disabled={isPending && updatingId === o.id}
+                                                    className="h-8 rounded-lg border border-slate-800 bg-slate-900 px-2 text-xs text-white outline-none focus:border-cyan-500 transition-colors cursor-pointer disabled:opacity-50"
+                                                >
+                                                    {STATUS_OPTIONS.map((opt) => (
+                                                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                                    ))}
+                                                </select>
                                             </div>
                                         </td>
                                     </tr>

@@ -90,44 +90,23 @@ const getAdminOrderById = async (req, res, next) => {
 // PATCH /api/v1/admin/orders/:id/status - update order status
 const updateOrderStatus = async (req, res, next) => {
     try {
-        const { status } = req.body;
+        let { status } = req.body;
 
-        if (
-            !status ||
-            !["pending", "processing", "packed", "shipped", "out_for_delivery", "delivered", "cancelled"].includes(
-                status
-            )
-        ) {
-            return res.status(400).json({ success: false, message: "Invalid status" });
+        if (!status) {
+            return res.status(400).json({ success: false, message: "Status is required" });
+        }
+
+        // Normalize status string
+        status = status.toLowerCase().trim().replace(/\s+/g, "_");
+
+        const validStatuses = ["pending", "processing", "packed", "shipped", "out_for_delivery", "delivered", "cancelled"];
+        if (!validStatuses.includes(status)) {
+            return res.status(400).json({ success: false, message: "Invalid status: " + status });
         }
 
         const order = await Order.findById(req.params.id);
         if (!order) {
             return res.status(404).json({ success: false, message: "Order not found" });
-        }
-
-        // Validate status transitions
-        const validTransitions = {
-            pending: ["processing", "cancelled"],
-            processing: ["packed", "cancelled"],
-            packed: ["shipped", "cancelled"],
-            shipped: ["out_for_delivery", "cancelled"],
-            out_for_delivery: ["delivered", "cancelled"],
-        };
-
-        if (order.status !== status && order.status !== "delivered" && order.status !== "cancelled") {
-            const allowed = validTransitions[order.status] || [];
-            if (!allowed.includes(status)) {
-                return res.status(400).json({
-                    success: false,
-                    message: `Cannot transition from ${order.status} to ${status}`,
-                });
-            }
-        }
-
-        // If delivered, you might want to update stock or trigger notifications
-        if (status === "delivered") {
-            // Mark as delivered - stock already decremented on order creation
         }
 
         order.status = status;

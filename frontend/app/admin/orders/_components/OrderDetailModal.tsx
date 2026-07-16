@@ -1,16 +1,26 @@
 "use client";
 import { useEffect } from "react";
 
-const STATUS_FLOW = ["Pending", "Processing", "Packed", "Shipped", "Out for Delivery", "Delivered"];
+const STATUS_FLOW = ["pending", "processing", "packed", "shipped", "out_for_delivery", "delivered"];
 
-const statusColors: Record<string, { bg: string; text: string }> = {
-    Delivered: { bg: "rgba(74,222,128,0.15)", text: "#4ade80" },
-    Shipped: { bg: "rgba(77,217,232,0.15)", text: "#4dd9e8" },
-    "Out for Delivery": { bg: "rgba(129,140,248,0.15)", text: "#818cf8" },
-    Packed: { bg: "rgba(251,191,36,0.15)", text: "#fbbf24" },
-    Processing: { bg: "rgba(96,165,250,0.15)", text: "#60a5fa" },
-    Pending: { bg: "rgba(251,191,36,0.15)", text: "#fbbf24" },
-    Cancelled: { bg: "rgba(248,113,113,0.15)", text: "#f87171" },
+const statusColors: Record<string, { bg: string; text: string; label: string }> = {
+    delivered: { bg: "rgba(74,222,128,0.15)", text: "#4ade80", label: "Delivered" },
+    shipped: { bg: "rgba(77,217,232,0.15)", text: "#4dd9e8", label: "Shipped" },
+    out_for_delivery: { bg: "rgba(129,140,248,0.15)", text: "#818cf8", label: "Out for Delivery" },
+    packed: { bg: "rgba(251,191,36,0.15)", text: "#fbbf24", label: "Packed" },
+    processing: { bg: "rgba(96,165,250,0.15)", text: "#60a5fa", label: "Processing" },
+    pending: { bg: "rgba(251,191,36,0.15)", text: "#fbbf24", label: "Pending" },
+    cancelled: { bg: "rgba(248,113,113,0.15)", text: "#f87171", label: "Cancelled" },
+};
+
+const statusLabels: Record<string, string> = {
+    pending: "Pending",
+    processing: "Processing",
+    packed: "Packed",
+    shipped: "Shipped",
+    out_for_delivery: "Out for Delivery",
+    delivered: "Delivered",
+    cancelled: "Cancelled"
 };
 
 export default function OrderDetailModal({ open, onClose, order }: { open: boolean; onClose: () => void; order: any }) {
@@ -27,7 +37,7 @@ export default function OrderDetailModal({ open, onClose, order }: { open: boole
     const customerName = order.customerName || order.customer || [order.user?.firstName, order.user?.lastName].filter(Boolean).join(" ") || "—";
     const customerEmail = order.email || sa.email || order.user?.email || "—";
     const customerPhone = order.phone || sa.phone || order.user?.phoneNumber || "—";
-    const currentStatus = order.status || "Pending";
+    const currentStatus = (order.status || "pending").toLowerCase();
     const currentStatusIndex = STATUS_FLOW.indexOf(currentStatus);
 
     const sectionStyle = {
@@ -93,7 +103,7 @@ export default function OrderDetailModal({ open, onClose, order }: { open: boole
                                     color: statusColors[currentStatus]?.text || "rgba(255,255,255,0.6)",
                                 }}
                             >
-                                {currentStatus}
+                                {statusLabels[currentStatus] || currentStatus}
                             </span>
                             <span className="text-xs text-slate-500">Order #{order.id?.substring(0, 8)}</span>
                         </div>
@@ -237,7 +247,7 @@ export default function OrderDetailModal({ open, onClose, order }: { open: boole
                                                     fontWeight: isCurrent ? 700 : 400,
                                                 }}
                                             >
-                                                {step}
+                                                {statusLabels[step] || step}
                                             </span>
                                         </div>
                                     );

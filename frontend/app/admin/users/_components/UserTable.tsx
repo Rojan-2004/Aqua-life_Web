@@ -122,19 +122,19 @@ export default function UserTable({
                     <table className="w-full text-left text-sm">
                         <thead>
                             <tr className="border-b border-slate-800 bg-slate-900/60 text-xs uppercase tracking-[1px] text-slate-400">
-                                <th className="px-6 py-4 font-semibold">User</th>
-                                <th className="px-6 py-4 font-semibold">Email</th>
-                                <th className="px-6 py-4 font-semibold">Role</th>
-                                <th className="px-6 py-4 font-semibold">Status</th>
-                                <th className="px-6 py-4 font-semibold">Created</th>
-                                <th className="px-6 py-4 text-right font-semibold">Actions</th>
+                                <th style={{ padding: "14px 16px" }} className="font-semibold">User</th>
+                                <th style={{ padding: "14px 16px" }} className="font-semibold">Email</th>
+                                <th style={{ padding: "14px 16px" }} className="font-semibold">Role</th>
+                                <th style={{ padding: "14px 16px" }} className="font-semibold">Status</th>
+                                <th style={{ padding: "14px 16px" }} className="font-semibold">Created</th>
+                                <th style={{ padding: "14px 16px" }} className="text-right font-semibold">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-800/60">
                             {data?.length ? (
                                 data.map((u) => (
                                     <tr key={u.id || u._id} className="group transition-colors hover:bg-slate-800/30">
-                                        <td className="px-6 py-4">
+                                        <td style={{ padding: "14px 16px" }}>
                                             <div className="flex items-center gap-3">
                                                 <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-700 bg-slate-800">
                                                     {u.profilePicture && u.profilePicture !== "default-profile.png" ? (
@@ -146,8 +146,8 @@ export default function UserTable({
                                                 <span className="font-medium text-white">{getFullName(u)}</span>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4 text-slate-300">{u.email}</td>
-                                        <td className="px-6 py-4">
+                                        <td style={{ padding: "14px 16px" }} className="text-slate-300">{u.email}</td>
+                                        <td style={{ padding: "14px 16px" }}>
                                             <span
                                                 className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold uppercase tracking-[1px] ${
                                                     u.role === "admin"
@@ -158,7 +158,7 @@ export default function UserTable({
                                                 {u.role}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4">
+                                        <td style={{ padding: "14px 16px" }}>
                                             <span
                                                 className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold uppercase tracking-[1px] ${
                                                     u.status === "active" || !u.status
@@ -171,10 +171,10 @@ export default function UserTable({
                                                 {u.status || "active"}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4 text-slate-400">
+                                        <td style={{ padding: "14px 16px" }} className="text-slate-400">
                                             {u.createdAt ? new Date(u.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "—"}
                                         </td>
-                                        <td className="px-6 py-4">
+                                        <td style={{ padding: "14px 16px" }}>
                                             <div className="flex items-center justify-end gap-2">
                                                 <button
                                                     onClick={() => router.push(`/admin/users/${u.id || u._id}`)}

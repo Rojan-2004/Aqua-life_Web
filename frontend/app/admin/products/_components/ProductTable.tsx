@@ -177,13 +177,13 @@ export default function ProductTable({
                     <table className="w-full text-left text-sm">
                         <thead>
                             <tr className="border-b border-slate-800 bg-slate-900/60 text-xs uppercase tracking-[1.5px] text-slate-400">
-                                <th className="px-6 py-4.5 font-bold">Image</th>
-                                <th className="px-6 py-4.5 font-bold">Name</th>
-                                <th className="px-6 py-4.5 font-bold">Price</th>
-                                <th className="px-6 py-4.5 font-bold">Category</th>
-                                <th className="px-6 py-4.5 font-bold">Stock</th>
-                                <th className="px-6 py-4.5 font-bold">Status</th>
-                                <th className="px-6 py-4.5 text-right font-bold">Actions</th>
+                                <th style={{ padding: "14px 16px" }} className="font-bold">Image</th>
+                                <th style={{ padding: "14px 16px" }} className="font-bold">Name</th>
+                                <th style={{ padding: "14px 16px" }} className="font-bold">Price</th>
+                                <th style={{ padding: "14px 16px" }} className="font-bold">Category</th>
+                                <th style={{ padding: "14px 16px" }} className="font-bold">Stock</th>
+                                <th style={{ padding: "14px 16px" }} className="font-bold">Status</th>
+                                <th style={{ padding: "14px 16px" }} className="text-right font-bold">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-800/40">
@@ -196,7 +196,7 @@ export default function ProductTable({
 
                                     return (
                                         <tr key={p.id || p._id} className="group transition-colors hover:bg-slate-800/20">
-                                            <td className="px-6 py-4.5">
+                                            <td style={{ padding: "14px 16px" }}>
                                                 <div className="h-14 w-14 overflow-hidden rounded-xl border border-slate-800 bg-slate-950 transition-transform group-hover:scale-105">
                                                     <img
                                                         src={imageUrl}
@@ -208,16 +208,16 @@ export default function ProductTable({
                                                     />
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4.5">
+                                            <td style={{ padding: "14px 16px" }}>
                                                 <span className="font-semibold text-white text-base group-hover:text-cyan-400 transition-colors">{p.name}</span>
                                             </td>
-                                            <td className="px-6 py-4.5 font-bold text-cyan-400 text-base">
+                                            <td style={{ padding: "14px 16px" }} className="font-bold text-cyan-400 text-base">
                                                 Rs. {p.price?.toLocaleString()}
                                             </td>
-                                            <td className="px-6 py-4.5">
+                                            <td style={{ padding: "14px 16px" }}>
                                                 <span className="text-xs uppercase tracking-wider font-bold bg-slate-900 border border-slate-800 text-slate-300 px-2.5 py-1 rounded-md">{p.category || "—"}</span>
                                             </td>
-                                            <td className="px-6 py-4.5">
+                                            <td style={{ padding: "14px 16px" }}>
                                                 <div className="flex flex-col gap-1.5">
                                                     <span className="text-sm font-semibold text-slate-200">{p.stock ?? 0}</span>
                                                     <span className={`inline-flex w-fit rounded-lg border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${stockColor}`}>
@@ -225,7 +225,7 @@ export default function ProductTable({
                                                     </span>
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4.5">
+                                            <td style={{ padding: "14px 16px" }}>
                                                 <span
                                                     className={`inline-flex items-center rounded-lg px-2.5 py-1 text-xs font-bold uppercase tracking-wider border ${
                                                         p.status === "active" || !p.status
@@ -236,25 +236,25 @@ export default function ProductTable({
                                                     {p.status || "active"}
                                                 </span>
                                             </td>
-                                            <td className="px-6 py-4.5">
+                                            <td style={{ padding: "14px 16px" }}>
                                                 <div className="flex items-center justify-end gap-2.5">
                                                     <button
                                                         onClick={() => router.push(`/admin/products/${p.id || p._id}`)}
-                                                        className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-800 bg-slate-950 text-slate-400 transition-all hover:border-cyan-500/30 hover:text-cyan-400 hover:bg-slate-900"
+                                                        className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-800 bg-slate-955 text-slate-400 transition-all hover:border-cyan-500/30 hover:text-cyan-400 hover:bg-slate-900"
                                                         title="View"
                                                     >
                                                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
                                                     </button>
                                                     <button
                                                         onClick={() => router.push(`/admin/products/${p.id || p._id}/edit`)}
-                                                        className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-800 bg-slate-950 text-slate-400 transition-all hover:border-cyan-500/30 hover:text-cyan-400 hover:bg-slate-900"
+                                                        className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-800 bg-slate-955 text-slate-400 transition-all hover:border-cyan-500/30 hover:text-cyan-400 hover:bg-slate-900"
                                                         title="Edit"
                                                     >
                                                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
                                                     </button>
                                                     <button
                                                         onClick={() => setTarget(p)}
-                                                        className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-800 bg-slate-950 text-slate-400 transition-all hover:border-rose-500/30 hover:text-rose-400 hover:bg-slate-900"
+                                                        className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-800 bg-slate-955 text-slate-400 transition-all hover:border-rose-500/30 hover:text-rose-400 hover:bg-slate-900"
                                                         title="Delete"
                                                     >
                                                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
