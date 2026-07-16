@@ -12,6 +12,9 @@ const getAllProducts = async (req, res, next) => {
     const limit = parseInt(req.query.limit, 10) || 10;
     const skip = (page - 1) * limit;
     const search = req.query.search || "";
+    const category = req.query.category || "";
+    const status = req.query.status || "";
+    const sortBy = req.query.sortBy || "";
 
     let query = {};
     if (search) {
@@ -20,10 +23,31 @@ const getAllProducts = async (req, res, next) => {
         { description: { $regex: search, $options: "i" } },
       ];
     }
+    if (category && category !== "All") {
+      query.category = category;
+    }
+    if (status && status !== "All") {
+      query.status = status;
+    }
+
+    let sort = { createdAt: -1 };
+    if (sortBy === "price_asc") {
+      sort = { price: 1 };
+    } else if (sortBy === "price_desc") {
+      sort = { price: -1 };
+    } else if (sortBy === "stock_asc") {
+      sort = { stock: 1 };
+    } else if (sortBy === "stock_desc") {
+      sort = { stock: -1 };
+    } else if (sortBy === "name_asc") {
+      sort = { name: 1 };
+    } else if (sortBy === "name_desc") {
+      sort = { name: -1 };
+    }
 
     const total = await Product.countDocuments(query);
     const products = await Product.find(query)
-      .sort({ createdAt: -1 })
+      .sort(sort)
       .skip(skip)
       .limit(limit);
 

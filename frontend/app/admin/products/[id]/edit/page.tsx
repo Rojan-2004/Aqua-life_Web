@@ -16,7 +16,7 @@ export default async function Page({
 
     return (
         <div style={{ background: "#0a0e1a", minHeight: "100vh" }}>
-            <div className="mx-auto max-w-3xl px-8 lg:px-10 py-10 font-sans">
+            <div className="mx-auto max-w-7xl px-6 lg:px-8 py-10 font-sans">
                 <ProductFormEdit product={result.data} />
             </div>
         </div>

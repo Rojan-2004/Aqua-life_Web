@@ -15,7 +15,7 @@ function errorMessage(error: unknown, fallback: string): string {
     return fallback;
 }
 
-export const getAllProducts = async (params: { page?: number; limit?: number; search?: string }) => {
+export const getAllProducts = async (params: { page?: number; limit?: number; search?: string; category?: string; status?: string; sortBy?: string }) => {
     try {
         const response = await axiosInstance.get(API.ADMIN.PRODUCTS.GET_ALL, { params });
         return response.data;

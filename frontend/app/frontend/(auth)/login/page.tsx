@@ -8,6 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { handleLoginUser } from "@/lib/actions/auth-action";
 import { LoginFormData, loginSchema } from "../_components/schema";
 import { useAuth } from "@/context/AuthContext";
+import Image from "next/image";
 
 export default function LoginPage() {
     const router = useRouter();
@@ -84,10 +85,15 @@ export default function LoginPage() {
             }}>
 
                 {/* Logo */}
-                <div style={{ textAlign: "center", marginBottom: 32 }}>
-                    <p style={{ fontSize: 26, fontWeight: 800, background: "linear-gradient(135deg,#2d9cdb,#4dd9e8)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", marginBottom: 6 }}>
-                        🌊 AquaLife
-                    </p>
+                <div style={{ textAlign: "center", marginBottom: 32, display: "flex", flexDirection: "column", alignItems: "center" }}>
+                    <Image
+                        src="/logo/Aqua_life_logo.png"
+                        alt="AquaLife Logo"
+                        width={140}
+                        height={42}
+                        style={{ objectFit: "contain", marginBottom: 12 }}
+                        priority
+                    />
                     <h1 style={{ color: "#fff", fontSize: 22, fontWeight: 700, marginBottom: 6 }}>Welcome back</h1>
                     <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 14 }}>Sign in to your account</p>
                 </div>

@@ -107,6 +107,7 @@ const cartRoute = require("./routes/cart_route");
 const orderRoute = require("./routes/order_route");
 const adminNotificationRoute = require("./routes/admin_notification_route");
 const adminOrderRoute = require("./routes/admin_order_route");
+const reviewRoute = require("./routes/review_route");
 
 app.use("/api/v1/auth", authRoute);
 app.use("/api/v1/categories", categoryRoute);
@@ -119,6 +120,7 @@ app.use("/api/v1/cart", cartRoute);
 app.use("/api/v1/orders", orderRoute);
 app.use("/api/v1/admin/notifications", adminNotificationRoute);
 app.use("/api/v1/admin/orders", adminOrderRoute);
+app.use("/api/v1/reviews", reviewRoute);
 
 // 404 handler
 app.use((req, res, next) => {

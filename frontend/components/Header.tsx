@@ -4,6 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 
+import Image from "next/image";
+
 const NAV = [
     { label: "Home", href: "/dashboard" },
     { label: "Catalog", href: "/catalogue" },
@@ -25,10 +27,18 @@ export default function Header() {
             zIndex: 100,
         }}>
             <div style={{ maxWidth: 1200, margin: "0 auto", padding: "14px 32px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <Link href="/dashboard" style={{ textDecoration: "none" }}>
-                    <span style={{ fontSize: 22, fontWeight: 800, background: "linear-gradient(135deg,#2d9cdb,#4dd9e8)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-                        🌊 AquaLife
-                    </span>
+                <Link href={user?.role === "admin" ? "/admin" : "/dashboard"} style={{ textDecoration: "none", display: "flex", alignItems: "center" }}>
+                    <Image
+                        src="/logo/Aqua_life_logo.png"
+                        alt="AquaLife"
+                        width={120}
+                        height={36}
+                        style={{ objectFit: "contain" }}
+                        priority
+                        onError={(e) => {
+                            (e.target as HTMLElement).style.display = "none";
+                        }}
+                    />
                 </Link>
 
                 <nav style={{ display: "flex", gap: 6, alignItems: "center" }}>
@@ -61,21 +71,6 @@ export default function Header() {
                             fontWeight: 600,
                         }}>
                             🛒 Cart
-                        </Link>
-                    )}
-
-                    {user?.role === "admin" && (
-                        <Link href="/admin" style={{
-                            textDecoration: "none",
-                            background: "rgba(77,217,232,0.08)",
-                            border: "1px solid rgba(77,217,232,0.25)",
-                            borderRadius: 30,
-                            padding: "7px 16px",
-                            color: "#4dd9e8",
-                            fontSize: 13,
-                            fontWeight: 600,
-                        }}>
-                            🛡️ Admin Panel
                         </Link>
                     )}
 

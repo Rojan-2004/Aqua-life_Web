@@ -3,7 +3,7 @@
 import { getAllProducts, getProductById, createProduct, updateProduct, deleteProduct } from "@/lib/api/admin/product";
 import { revalidatePath } from "next/cache";
 
-export const handleGetAllProducts = async (params: { page?: number; limit?: number; search?: string }) => {
+export const handleGetAllProducts = async (params: { page?: number; limit?: number; search?: string; category?: string; status?: string; sortBy?: string }) => {
     try {
         const result = await getAllProducts(params);
         if (result.success) {

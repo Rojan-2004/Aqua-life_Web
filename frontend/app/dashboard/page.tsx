@@ -4,11 +4,13 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { getUserDashboard } from "@/lib/api/dashboard";
+import { getUserDashboard, getAdminStats } from "@/lib/api/dashboard";
 import { getCatalogue } from "@/lib/api/product";
 import ProductCard, { ProductCardData } from "../catalogue/_components/ProductCard";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import Image from "next/image";
+import { getAdminNotifications, markNotificationsRead, AdminNotification } from "@/lib/api/admin/notification";
 
 interface RecentOrder {
     id: string;
@@ -38,6 +40,202 @@ export default function DashboardPage() {
     const { user, loading, logout } = useAuth();
     const router = useRouter();
 
+    useEffect(() => {
+        if (!loading && !user) {
+            router.replace("/frontend/login");
+        }
+    }, [loading, user, router]);
+
+    if (loading || !user) {
+        return (
+            <div style={{ background: "#0a0e1a", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-outfit), 'Outfit', sans-serif" }}>
+                <p style={{ color: "#4dd9e8", fontSize: 18, fontWeight: 600 }}>Loading dashboard...</p>
+            </div>
+        );
+    }
+
+    return user.role === "admin" ? (
+        <AdminView user={user} logout={logout} />
+    ) : (
+        <CustomerView user={user} logout={logout} />
+    );
+}
+
+function AdminView({ user, logout }: { user: any; logout: () => void }) {
+    const [stats, setStats] = useState({
+        revenue: 0,
+        ordersToday: 0,
+        productsLive: 0,
+        activeUsers: 0,
+        pendingOrders: 0,
+        deliveredOrders: 0,
+        monthlyRevenue: 0,
+        lowStockProducts: 0
+    });
+    const [notifications, setNotifications] = useState<AdminNotification[]>([]);
+    const [loadingStats, setLoadingStats] = useState(true);
+
+    const unread = notifications.filter((n) => !n.isRead).length;
+
+    const fetchStatsAndNotifications = async () => {
+        try {
+            const [statsRes, notifRes] = await Promise.all([
+                getAdminStats(),
+                getAdminNotifications()
+            ]);
+            
+            const s = statsRes?.data;
+            setStats({
+                revenue: s?.revenue ?? 0,
+                ordersToday: s?.ordersToday ?? 0,
+                productsLive: s?.productsLive ?? s?.totalProducts ?? 0,
+                activeUsers: s?.activeUsers ?? s?.totalUsers ?? 0,
+                pendingOrders: s?.pendingOrders ?? 0,
+                deliveredOrders: s?.deliveredOrders ?? 0,
+                monthlyRevenue: s?.monthlyRevenue ?? 0,
+                lowStockProducts: s?.lowStockProducts ?? 0,
+            });
+            
+            setNotifications(notifRes.data ?? []);
+        } catch (err) {
+            console.error("Failed to load admin dashboard data", err);
+        } finally {
+            setLoadingStats(false);
+        }
+    };
+
+    const handleMarkAllRead = async () => {
+        try {
+            await markNotificationsRead();
+            setNotifications((list) => list.map((n) => ({ ...n, isRead: true })));
+        } catch (e) {
+            console.error("Failed to mark notifications read", e);
+        }
+    };
+
+    useEffect(() => {
+        fetchStatsAndNotifications();
+    }, []);
+
+    const fmt = (n: number) => {
+        if (n >= 100000) return `Rs. ${(n / 100000).toFixed(1)}L`;
+        if (n >= 1000) return `Rs. ${(n / 1000).toFixed(1)}K`;
+        return `Rs. ${n}`;
+    };
+
+    const adminStats = [
+        { label: "Total Revenue", value: fmt(stats.revenue), icon: "💰", note: "Completed orders" },
+        { label: "Monthly Revenue", value: fmt(stats.monthlyRevenue), icon: "📅", note: "Current month" },
+        { label: "Delivered Orders", value: stats.deliveredOrders, icon: "✅", note: "All time" },
+        { label: "Pending Orders", value: stats.pendingOrders, icon: "⏳", note: "Needs attention" },
+        { label: "Orders Today", value: stats.ordersToday, icon: "📦", note: "Today's volume" },
+        { label: "Products Live", value: stats.productsLive, icon: "🐠", note: "Active listings" },
+        { label: "Low Stock Alert", value: stats.lowStockProducts, icon: "⚠️", note: "Items under 10" },
+        { label: "Total Users", value: stats.activeUsers, icon: "👥", note: "Registered accounts" },
+    ];
+
+    const quickLinks = [
+        { label: "Manage Orders", href: "/admin/orders", icon: "📦", desc: "View, update, fulfil orders" },
+        { label: "Products", href: "/admin/products", icon: "🐠", desc: "Add, edit, archive listings" },
+        { label: "Add Product", href: "/admin/products/add", icon: "➕", desc: "Create a new catalogue item" },
+        { label: "Users", href: "/admin/users", icon: "👥", desc: "View accounts and roles" },
+    ];
+
+    return (
+        <div style={{ fontFamily: "var(--font-outfit), 'Outfit', sans-serif", background: "#0a0e1a", minHeight: "100vh" }}>
+            {/* Header */}
+            <header style={{ background: "rgba(10,14,26,0.9)", backdropFilter: "blur(20px)", borderBottom: "1px solid rgba(255,255,255,0.07)", position: "sticky", top: 0, zIndex: 100 }}>
+                <div style={{ maxWidth: 1200, margin: "0 auto", padding: "14px 32px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                        <Image src="/logo/Aqua_life_logo.png" alt="AquaLife" width={120} height={36} style={{ objectFit: "contain" }} priority />
+                        <span style={{ color: "rgba(255,255,255,0.3)", fontSize: 13 }}>/ Dashboard</span>
+                    </div>
+                    <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+                        <button onClick={logout} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.4)", fontSize: 13, cursor: "pointer", fontFamily: "inherit" }}>Logout</button>
+                    </div>
+                </div>
+            </header>
+
+            <div style={{ maxWidth: 1200, margin: "0 auto", padding: "48px 32px" }}>
+                <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 12, textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 }}>Admin Overview</p>
+                <h1 style={{ color: "#fff", fontSize: 30, fontWeight: 700, marginBottom: 6 }}>Store Dashboard</h1>
+                <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 14, marginBottom: 36 }}>Live business metrics and system operations.</p>
+
+                {/* Business stats grid */}
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 16, marginBottom: 48 }}>
+                    {adminStats.map(s => (
+                        <div key={s.label} style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 16, padding: 20 }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                                <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 12, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.5 }}>{s.label}</p>
+                                <p style={{ fontSize: 20 }}>{s.icon}</p>
+                            </div>
+                            <p style={{ color: "#fff", fontSize: 26, fontWeight: 800 }}>{s.value}</p>
+                            <p style={{ color: "rgba(255,255,255,0.25)", fontSize: 11, marginTop: 4 }}>{s.note}</p>
+                        </div>
+                    ))}
+                </div>
+
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: 32, alignItems: "start" }}>
+                    {/* Quick Actions (Left) */}
+                    <div>
+                        <h2 style={{ color: "#fff", fontSize: 18, fontWeight: 600, marginBottom: 18 }}>Quick Actions</h2>
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+                            {quickLinks.map(l => (
+                                <Link key={l.label} href={l.href} style={{ textDecoration: "none" }}>
+                                    <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 16, padding: 24, transition: "all 0.2s" }}
+                                        onMouseEnter={e => { e.currentTarget.style.borderColor = "rgba(77,217,232,0.3)"; e.currentTarget.style.background = "rgba(255,255,255,0.06)"; }}
+                                        onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.06)"; e.currentTarget.style.background = "rgba(255,255,255,0.03)"; }}>
+                                        <p style={{ fontSize: 26, marginBottom: 12 }}>{l.icon}</p>
+                                        <p style={{ color: "#fff", fontSize: 16, fontWeight: 700 }}>{l.label}</p>
+                                        <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 13, marginTop: 6, lineHeight: 1.4 }}>{l.desc}</p>
+                                    </div>
+                                </Link>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* System Notifications (Right Sidebar) */}
+                    <div style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 18, padding: 24 }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+                            <div>
+                                <h3 style={{ color: "#fff", fontWeight: 700, fontSize: 15 }}>Notifications</h3>
+                                {unread > 0 && <span style={{ color: "#f87171", fontSize: 12, fontWeight: 500 }}>{unread} unread</span>}
+                            </div>
+                            {unread > 0 && (
+                                <button onClick={handleMarkAllRead} style={{ background: "none", border: "none", color: "#4dd9e8", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>
+                                    Mark all read
+                                </button>
+                            )}
+                        </div>
+
+                        <div style={{ display: "flex", flexDirection: "column", gap: 12, maxHeight: 320, overflowY: "auto" }}>
+                            {notifications.length === 0 ? (
+                                <p style={{ color: "rgba(255,255,255,0.3)", fontSize: 13, textAlign: "center", padding: "20px 0" }}>No notifications yet.</p>
+                            ) : (
+                                notifications.map((n) => (
+                                    <div key={n.id} style={{
+                                        padding: "12px 14px",
+                                        borderRadius: 10,
+                                        border: "1px solid rgba(255,255,255,0.05)",
+                                        background: n.isRead ? "rgba(255,255,255,0.01)" : "rgba(77,217,232,0.03)",
+                                        transition: "all 0.2s"
+                                    }}>
+                                        <p style={{ color: n.isRead ? "rgba(255,255,255,0.6)" : "#fff", fontSize: 13, lineHeight: 1.4 }}>{n.message}</p>
+                                        <p style={{ color: "rgba(255,255,255,0.25)", fontSize: 10, marginTop: 6 }}>{new Date(n.createdAt).toLocaleString()}</p>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <Footer />
+        </div>
+    );
+}
+
+function CustomerView({ user, logout }: { user: any; logout: () => void }) {
+    const router = useRouter();
     const [data, setData] = useState<UserDashboardData>({
         orders: 0,
         wishlist: 0,
@@ -47,17 +245,7 @@ export default function DashboardPage() {
     const [featured, setFeatured] = useState<ProductCardData[]>([]);
     const [loadingData, setLoadingData] = useState(true);
 
-    // Redirect to login when there is no authenticated user.
-    // Must run inside an effect (never during render) otherwise we update
-    // the Router component while DashboardPage is still rendering.
     useEffect(() => {
-        if (!loading && !user) {
-            router.replace("/frontend/login");
-        }
-    }, [loading, user, router]);
-
-    useEffect(() => {
-        if (!user) return;
         let cancelled = false;
 
         async function load() {
@@ -81,7 +269,6 @@ export default function DashboardPage() {
                         statsRes.reason as { response?: { status?: number } }
                     )?.response?.status;
                     if (status === 401) {
-                        // Token is invalid/expired: clear auth and send to login.
                         await logout();
                         router.replace("/frontend/login");
                         return;
@@ -105,14 +292,6 @@ export default function DashboardPage() {
         };
     }, [user, logout, router]);
 
-    if (loading || !user) {
-        return (
-            <div style={{ background: "#0a0e1a", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-outfit), 'Outfit', sans-serif" }}>
-                <p style={{ color: "#4dd9e8", fontSize: 18, fontWeight: 600 }}>Loading dashboard...</p>
-            </div>
-        );
-    }
-
     const name = user.firstName || user.username || user.name || user.email || "User";
 
     const stats = [
@@ -123,10 +302,8 @@ export default function DashboardPage() {
 
     return (
         <div style={{ fontFamily: "var(--font-outfit), 'Outfit', sans-serif", background: "#0a0e1a", minHeight: "100vh" }}>
-
             <Header />
 
-            {/* Dashboard Content */}
             <section style={{ maxWidth: 1440, margin: "0 auto", padding: "64px 32px" }}>
                 <div style={{ marginBottom: 40 }}>
                     <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 12, textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 }}>

@@ -10,8 +10,11 @@ export default async function Page({
     const page = query.page ? parseInt(query.page as string, 10) : 1;
     const limit = query.limit ? parseInt(query.limit as string, 10) : 10;
     const search = query.search ? (query.search as string) : "";
+    const category = query.category ? (query.category as string) : "";
+    const status = query.status ? (query.status as string) : "";
+    const sortBy = query.sortBy ? (query.sortBy as string) : "";
     
-    const result = await handleGetAllProducts({ page, limit, search });
+    const result = await handleGetAllProducts({ page, limit, search, category, status, sortBy });
 
     if (!result.success) {
         throw new Error(result.message || "Failed to load products");
@@ -20,7 +23,14 @@ export default async function Page({
     return (
         <div style={{ background: "#0a0e1a", minHeight: "100vh" }}>
             <div className="max-w-7xl mx-auto px-8 lg:px-10 py-10 font-sans">
-                <ProductTable data={result.data || []} pagination={result.pagination} search={search} />
+                <ProductTable 
+                    data={result.data || []} 
+                    pagination={result.pagination} 
+                    search={search} 
+                    category={category}
+                    status={status}
+                    sortBy={sortBy}
+                />
             </div>
         </div>
     );

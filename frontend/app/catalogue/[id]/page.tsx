@@ -9,6 +9,7 @@ import { toggleWishlist } from "@/lib/api/wishlist";
 import { addToCart } from "@/lib/api/cart";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import ReviewSection from "@/components/ReviewSection";
 
 interface Review {
     id: string;
@@ -356,45 +357,7 @@ export default function ProductDetailPage() {
 
             {/* Reviews */}
             <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 32px 60px" }}>
-                <h2 style={{ color: "#fff", fontSize: 20, fontWeight: 600, marginBottom: 16 }}>
-                    Reviews ({reviews.length})
-                </h2>
-                {reviews.length === 0 ? (
-                    <p style={{ color: "rgba(255,255,255,0.3)", fontSize: 14 }}>
-                        No reviews yet.
-                    </p>
-                ) : (
-                    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                        {reviews.map((r) => (
-                            <div
-                                key={r.id}
-                                style={{
-                                    background: "rgba(255,255,255,0.05)",
-                                    border: "1px solid rgba(255,255,255,0.1)",
-                                    borderRadius: 12,
-                                    padding: 16,
-                                }}
-                            >
-                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                    <p style={{ color: "#fff", fontSize: 14, fontWeight: 600 }}>
-                                        {[r.user?.firstName, r.user?.lastName]
-                                            .filter(Boolean)
-                                            .join(" ") || "Anonymous"}
-                                    </p>
-                                    <span style={{ color: "#fbbf24", fontSize: 14 }}>
-                                        {"★".repeat(r.rating)}
-                                        {"☆".repeat(5 - r.rating)}
-                                    </span>
-                                </div>
-                                {r.comment && (
-                                    <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 13, marginTop: 8 }}>
-                                        {r.comment}
-                                    </p>
-                                )}
-                            </div>
-                        ))}
-                    </div>
-                )}
+                <ReviewSection productId={product.id} />
             </div>
 
             <Footer />

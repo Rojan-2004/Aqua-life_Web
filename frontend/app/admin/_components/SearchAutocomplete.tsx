@@ -77,7 +77,27 @@ export default function SearchAutocomplete<T>({
         <form onSubmit={handleSubmit} className="relative flex-1 max-w-md">
             <div ref={containerRef}>
                 <div className="relative">
-                    <svg className="pointer-events-none absolute left-5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                    <svg 
+                        style={{
+                            pointerEvents: "none",
+                            position: "absolute",
+                            left: 14,
+                            top: "50%",
+                            transform: "translateY(-50%)",
+                            height: 16,
+                            width: 16,
+                            color: "rgba(255, 255, 255, 0.4)",
+                        }}
+                        viewBox="0 0 24 24" 
+                        fill="none" 
+                        stroke="currentColor" 
+                        strokeWidth="2.5" 
+                        strokeLinecap="round" 
+                        strokeLinejoin="round"
+                    >
+                        <circle cx="11" cy="11" r="8"/>
+                        <path d="m21 21-4.3-4.3"/>
+                    </svg>
                     <input
                         name={name}
                         value={value}
@@ -91,7 +111,19 @@ export default function SearchAutocomplete<T>({
                         onKeyDown={handleKeyDown}
                         placeholder={placeholder}
                         autoComplete="off"
-                        className="h-10 w-full rounded-lg border border-slate-800 bg-slate-900 pl-14 pr-4 text-sm text-white placeholder:text-slate-500 outline-none focus:border-cyan-500 transition-colors"
+                        style={{
+                            height: 40,
+                            width: "100%",
+                            borderRadius: 10,
+                            border: "1px solid rgba(255, 255, 255, 0.1)",
+                            background: "rgba(255, 255, 255, 0.05)",
+                            paddingLeft: 42,
+                            paddingRight: 16,
+                            color: "#fff",
+                            fontSize: 14,
+                            outline: "none",
+                            boxSizing: "border-box",
+                        }}
                     />
                 </div>
 

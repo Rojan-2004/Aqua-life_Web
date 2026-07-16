@@ -7,6 +7,8 @@ import { getCart, CartItemData } from "@/lib/api/cart";
 import { placeOrder } from "@/lib/api/order";
 import Footer from "@/components/Footer";
 
+import Image from "next/image";
+
 const SHIPPING_FLAT = 50;
 const FREE_SHIPPING_THRESHOLD = 50000;
 
@@ -138,7 +140,16 @@ export default function CheckoutPage() {
         <div style={{ fontFamily: "var(--font-outfit), 'Outfit', sans-serif", background: "#0a0e1a", minHeight: "100vh" }}>
             <header style={{ background: "rgba(17,24,39,0.8)", backdropFilter: "blur(12px)", borderBottom: "1px solid rgba(255,255,255,0.06)", position: "sticky", top: 0, zIndex: 100 }}>
                 <div style={{ maxWidth: 1200, margin: "0 auto", padding: "16px 32px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <Link href="/dashboard" style={{ fontSize: 22, fontWeight: 800, background: "linear-gradient(135deg,#2d9cdb,#4dd9e8)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", textDecoration: "none" }}>🌊 AquaLife</Link>
+                    <Link href={user?.role === "admin" ? "/admin" : "/dashboard"} style={{ textDecoration: "none", display: "flex", alignItems: "center" }}>
+                        <Image
+                            src="/logo/Aqua_life_logo.png"
+                            alt="AquaLife"
+                            width={120}
+                            height={36}
+                            style={{ objectFit: "contain" }}
+                            priority
+                        />
+                    </Link>
                     <nav style={{ display: "flex", gap: 28 }}>
                         {["Catalog", "Freshwater", "Marine", "Plants", "Supplies"].map((n) => (
                             <span key={n} style={{ color: "rgba(255,255,255,0.5)", fontSize: 13, cursor: "pointer" }}>{n}</span>
