@@ -220,7 +220,7 @@ export default function ProductForm() {
                     {/* General Information Card */}
                     <div className={cardClass}>
                         <h3 className="text-sm font-bold text-cyan-400 uppercase tracking-wider mb-6 flex items-center gap-2">
-                            <span>📝</span> General Details
+                            General Details
                         </h3>
                         <div className="space-y-5">
                             <div>
@@ -282,7 +282,7 @@ export default function ProductForm() {
                     {/* Description Card */}
                     <div className={cardClass}>
                         <h3 className="text-sm font-bold text-cyan-400 uppercase tracking-wider mb-6 flex items-center gap-2">
-                            <span>📄</span> Description
+                            Description
                         </h3>
                         <div>
                             <textarea
@@ -305,7 +305,7 @@ export default function ProductForm() {
                     {/* Pricing & Stock Card */}
                     <div className={cardClass}>
                         <h3 className="text-sm font-bold text-cyan-400 uppercase tracking-wider mb-6 flex items-center gap-2">
-                            <span>💸</span> Pricing & Inventory
+                            Pricing & Inventory
                         </h3>
                         <div className="space-y-5">
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -369,7 +369,7 @@ export default function ProductForm() {
                     {/* Drag-and-drop Image Uploader */}
                     <div className={cardClass}>
                         <h3 className="text-sm font-bold text-cyan-400 uppercase tracking-wider mb-6 flex items-center gap-2">
-                            <span>🖼</span> Product Image
+                            Product Image
                         </h3>
                         
                         <div
