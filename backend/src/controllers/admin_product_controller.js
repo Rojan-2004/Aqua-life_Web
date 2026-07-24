@@ -1,4 +1,5 @@
 const Product = require("../models/product_model");
+const Review = require("../models/review_model");
 const { createProductSchema, updateProductSchema } = require("../validations/admin_product_validation");
 const fs = require("fs");
 const path = require("path");
@@ -83,9 +84,35 @@ const getProductById = async (req, res, next) => {
       });
     }
 
+    const reviews = await Review.find({ product: product._id })
+      .sort({ createdAt: -1 })
+      .populate("user", "firstName lastName email");
+
+    const avg = reviews.length
+      ? reviews.reduce((s, r) => s + r.rating, 0) / reviews.length
+      : 0;
+
+    const mappedReviews = reviews.map(r => ({
+      id: r._id.toString(),
+      userId: r.user ? r.user._id.toString() : null,
+      rating: r.rating,
+      comment: r.comment,
+      status: r.status || "published",
+      createdAt: r.createdAt,
+      updatedAt: r.updatedAt,
+      user: r.user
+        ? { firstName: r.user.firstName, lastName: r.user.lastName, email: r.user.email }
+        : { firstName: "Anonymous", lastName: "", email: "" }
+    }));
+
     res.status(200).json({
       success: true,
-      data: product,
+      data: {
+        ...product.toObject(),
+        reviews: mappedReviews,
+        averageRating: Math.round(avg * 10) / 10,
+        totalReviews: reviews.length,
+      },
     });
   } catch (error) {
     next(error);

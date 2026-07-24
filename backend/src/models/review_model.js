@@ -21,6 +21,11 @@ const reviewSchema = new mongoose.Schema(
         comment: {
             type: String,
         },
+        status: {
+            type: String,
+            enum: ["published", "hidden", "reported"],
+            default: "published",
+        },
     },
     { timestamps: true }
 );

@@ -44,6 +44,66 @@ router.get("/", async (req, res, next) => {
     }
 });
 
+// DELETE — admin only
+router.delete("/:id", protect, async (req, res, next) => {
+    try {
+        if (req.user.role !== "admin") {
+            return res.status(403).json({ error: "Only admins can delete reviews" });
+        }
+
+        const review = await Review.findById(req.params.id);
+        if (!review) {
+            return res.status(404).json({ error: "Review not found" });
+        }
+
+        await Review.findByIdAndDelete(req.params.id);
+        res.status(200).json({ success: true, message: "Review deleted successfully" });
+    } catch (err) {
+        next(err);
+    }
+});
+
+// PATCH — update review status (admin only)
+router.patch("/:id/status", protect, async (req, res, next) => {
+    try {
+        if (req.user.role !== "admin") {
+            return res.status(403).json({ error: "Only admins can moderate reviews" });
+        }
+
+        const { status } = req.body;
+        if (!["published", "hidden", "reported"].includes(status)) {
+            return res.status(400).json({ error: "Invalid status. Use published, hidden, or reported." });
+        }
+
+        const review = await Review.findById(req.params.id);
+        if (!review) {
+            return res.status(404).json({ error: "Review not found" });
+        }
+
+        review.status = status;
+        await review.save();
+
+        const populated = await Review.findById(review._id)
+            .populate("user", "firstName lastName");
+
+        res.status(200).json({
+            success: true,
+            review: {
+                id: populated._id.toString(),
+                rating: populated.rating,
+                comment: populated.comment,
+                status: populated.status,
+                createdAt: populated.createdAt,
+                user: populated.user
+                    ? { firstName: populated.user.firstName, lastName: populated.user.lastName }
+                    : { firstName: "Anonymous", lastName: "" }
+            }
+        });
+    } catch (err) {
+        next(err);
+    }
+});
+
 // POST — submit a review (logged-in non-admin users only)
 router.post("/", protect, async (req, res, next) => {
     try {

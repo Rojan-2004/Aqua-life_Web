@@ -36,6 +36,10 @@ export const API = {
             GET_ALL: "/api/v1/admin/orders",
             GET_BY_ID: (id: string) => `/api/v1/admin/orders/${id}`,
             UPDATE_STATUS: (id: string) => `/api/v1/admin/orders/${id}/status`,
+        },
+        REVIEWS: {
+            DELETE: (id: string) => `/api/v1/reviews/${id}`,
+            UPDATE_STATUS: (id: string) => `/api/v1/reviews/${id}/status`,
         }
     },
     DASHBOARD: {
