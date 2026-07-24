@@ -23,6 +23,8 @@ const statusLabels: Record<string, string> = {
     cancelled: "Cancelled"
 };
 
+import { PRODUCT_PLACEHOLDER } from "@/lib/utils/placeholder";
+
 export default function OrderDetailModal({ open, onClose, order }: { open: boolean; onClose: () => void; order: any }) {
     useEffect(() => {
         if (!open) return;
@@ -173,9 +175,9 @@ export default function OrderDetailModal({ open, onClose, order }: { open: boole
                                         <div key={idx} className="flex items-center gap-3 border-b border-slate-800/50 pb-3 last:border-0 last:pb-0">
                                             <div className="h-12 w-12 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center overflow-hidden flex-shrink-0">
                                                 {imageSrc ? (
-                                                    <img src={imageSrc} alt={itemName} className="h-full w-full object-cover" />
+                                                    <img src={imageSrc} alt={itemName} onError={(e) => { (e.target as HTMLImageElement).src = PRODUCT_PLACEHOLDER; }} className="h-full w-full object-cover" />
                                                 ) : (
-                                                    <span className="text-lg">🐟</span>
+                                                    <img src={PRODUCT_PLACEHOLDER} alt={itemName} className="h-full w-full object-cover" />
                                                 )}
                                             </div>
                                             <div className="flex-1 min-w-0">

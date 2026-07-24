@@ -22,6 +22,7 @@ export default function ProductFormEdit({ product }: { product: any }) {
     const currentImageName = product?.image || "default-product.png";
     const initialPreview = currentImageName !== "default-product.png" ? `/item_photos/${currentImageName}` : null;
     const [imagePreview, setImagePreview] = useState<string | null>(initialPreview);
+    const [imageUrl, setImageUrl] = useState(product?.images?.find((img: string) => !img.startsWith("/item_photos/") && !img.includes("default-product")) || "");
 
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [serverError, setServerError] = useState("");
@@ -118,6 +119,11 @@ export default function ProductFormEdit({ product }: { product: any }) {
             return;
         }
 
+        if (imageUrl.trim() && !imageUrl.trim().startsWith("http://") && !imageUrl.trim().startsWith("https://")) {
+            setErrors(prev => ({ ...prev, imageUrl: "Image URL must start with http:// or https://" }));
+            return;
+        }
+
         const formData = new FormData();
         formData.append("name", name);
         formData.append("price", price);
@@ -128,6 +134,9 @@ export default function ProductFormEdit({ product }: { product: any }) {
         formData.append("isFeatured", String(isFeatured));
         if (imageFile) {
             formData.append("itemPhoto", imageFile);
+        }
+        if (imageUrl.trim()) {
+            formData.append("images", imageUrl.trim());
         }
 
         startTransition(async () => {
@@ -375,56 +384,85 @@ export default function ProductFormEdit({ product }: { product: any }) {
                             Product Image
                         </h3>
                         
-                        <div
-                            onDragEnter={handleDrag}
-                            onDragLeave={handleDrag}
-                            onDragOver={handleDrag}
-                            onDrop={handleDrop}
-                            onClick={triggerFileSelect}
-                            style={{
-                                border: dragActive ? "2px dashed #4dd9e8" : "2px dashed rgba(255, 255, 255, 0.12)",
-                                background: dragActive ? "rgba(77,217,232,0.04)" : "rgba(255, 255, 255, 0.01)",
-                                minHeight: 180,
-                            }}
-                            className="rounded-2xl flex flex-col items-center justify-center cursor-pointer p-6 transition-all hover:border-cyan-400/50 hover:bg-slate-900/40 group relative"
-                        >
-                            {imagePreview ? (
-                                <div className="relative w-full max-w-[200px] h-36 rounded-xl overflow-hidden border border-slate-800">
-                                    <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
-                                    <button
-                                        type="button"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            removeSelectedImage();
+                        <div className="space-y-4">
+                            <div>
+                                <label className={labelClass}>Image URL (optional)</label>
+                                <div className={inputWrapperClass}>
+                                    <input
+                                        value={imageUrl}
+                                        onChange={(e) => setImageUrl(e.target.value)}
+                                        placeholder="https://example.com/image.jpg"
+                                        style={getFieldStyle("imageUrl")}
+                                        onFocus={(e) => e.target.style.borderColor = "rgba(77,217,232,0.5)"}
+                                        onBlur={(e) => {
+                                            const val = imageUrl.trim();
+                                            if (val && !val.startsWith("http://") && !val.startsWith("https://")) {
+                                                e.target.style.borderColor = "#f87171";
+                                            } else {
+                                                e.target.style.borderColor = errors.imageUrl ? "#f87171" : "rgba(255, 255, 255, 0.08)";
+                                            }
                                         }}
-                                        style={{ background: "rgba(239, 68, 68, 0.9)" }}
-                                        className="absolute top-2 right-2 h-7 w-7 rounded-full flex items-center justify-center text-white text-xs font-bold shadow hover:bg-red-600 transition-colors"
-                                        title="Revert image changes"
-                                    >
-                                        ✕
-                                    </button>
+                                    />
                                 </div>
-                            ) : (
-                                <div className="text-center">
-                                    <div className="text-3xl mb-3 text-slate-500 group-hover:text-cyan-400 transition-colors">📤</div>
-                                    <p className="text-sm font-semibold text-slate-300">Drag and drop your image here</p>
-                                    <p className="text-xs text-slate-500 mt-1">or click to browse files (JPEG, PNG, WEBP up to 2MB)</p>
-                                </div>
+                                {errors.imageUrl && (
+                                    <p className={errClass}>
+                                        <span>⚠</span> {errors.imageUrl}
+                                    </p>
+                                )}
+                                <p className="mt-1 text-xs text-slate-500">Leave empty to keep current image. URL must start with http:// or https://</p>
+                            </div>
+                            
+                            <div
+                                onDragEnter={handleDrag}
+                                onDragLeave={handleDrag}
+                                onDragOver={handleDrag}
+                                onDrop={handleDrop}
+                                onClick={triggerFileSelect}
+                                style={{
+                                    border: dragActive ? "2px dashed #4dd9e8" : "2px dashed rgba(255, 255, 255, 0.12)",
+                                    background: dragActive ? "rgba(77,217,232,0.04)" : "rgba(255, 255, 255, 0.01)",
+                                    minHeight: 180,
+                                }}
+                                className="rounded-2xl flex flex-col items-center justify-center cursor-pointer p-6 transition-all hover:border-cyan-400/50 hover:bg-slate-900/40 group relative"
+                            >
+                                {imagePreview ? (
+                                    <div className="relative w-full max-w-[200px] h-36 rounded-xl overflow-hidden border border-slate-800">
+                                        <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                                        <button
+                                            type="button"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                removeSelectedImage();
+                                            }}
+                                            style={{ background: "rgba(239, 68, 68, 0.9)" }}
+                                            className="absolute top-2 right-2 h-7 w-7 rounded-full flex items-center justify-center text-white text-xs font-bold shadow hover:bg-red-600 transition-colors"
+                                            title="Revert image changes"
+                                        >
+                                            ✕
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <div className="text-center">
+                                        <div className="text-3xl mb-3 text-slate-500 group-hover:text-cyan-400 transition-colors">📤</div>
+                                        <p className="text-sm font-semibold text-slate-300">Drag and drop your image here</p>
+                                        <p className="text-xs text-slate-500 mt-1">or click to browse files (JPEG, PNG, WEBP up to 2MB)</p>
+                                    </div>
+                                )}
+                            </div>
+
+                            <input
+                                type="file"
+                                ref={fileInputRef}
+                                onChange={handleImageChange}
+                                accept="image/*"
+                                className="hidden"
+                            />
+                            {errors.itemPhoto && (
+                                <p className={errClass}>
+                                    <span>⚠</span> {errors.itemPhoto}
+                                </p>
                             )}
                         </div>
-
-                        <input
-                            type="file"
-                            ref={fileInputRef}
-                            onChange={handleImageChange}
-                            accept="image/*"
-                            className="hidden"
-                        />
-                        {errors.itemPhoto && (
-                            <p className={errClass}>
-                                <span>⚠</span> {errors.itemPhoto}
-                            </p>
-                        )}
                     </div>
 
                 </div>

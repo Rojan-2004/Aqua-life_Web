@@ -78,6 +78,7 @@ router.post("/", async (req, res, next) => {
         if (existing) {
             existing.quantity = Math.min(product.stock, existing.quantity + qty);
             await existing.save();
+            await existing.populate("product");
             return res.status(200).json({ success: true, data: serialize(existing) });
         }
 
@@ -86,6 +87,7 @@ router.post("/", async (req, res, next) => {
             product: productId,
             quantity: qty,
         });
+        await item.populate("product");
         return res.status(201).json({ success: true, data: serialize(item) });
     } catch (err) {
         next(err);

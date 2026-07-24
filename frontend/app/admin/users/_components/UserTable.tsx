@@ -79,13 +79,6 @@ export default function UserTable({
                     <h2 className="text-3xl font-bold text-white tracking-tight">Users</h2>
                     <p className="mt-1 text-sm text-slate-400">Manage all registered users in the system.</p>
                 </div>
-                <Link
-                    href="/admin/users/create"
-                    className="inline-flex h-11 items-center gap-2 rounded-lg bg-gradient-to-r from-cyan-500 to-cyan-400 px-5 text-sm font-bold uppercase tracking-[1px] text-white shadow-lg shadow-cyan-500/20 transition-all hover:shadow-cyan-500/40 hover:brightness-110"
-                >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14"/></svg>
-                    New User
-                </Link>
             </div>
 
             {/* Search Card */}

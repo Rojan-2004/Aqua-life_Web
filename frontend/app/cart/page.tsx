@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { getCart, removeCartItem, CartItemData } from "@/lib/api/cart";
+import { PRODUCT_PLACEHOLDER } from "@/lib/utils/placeholder";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
@@ -19,6 +20,7 @@ export default function CartPage() {
     const [items, setItems] = useState<CartItemData[]>([]);
     const [loadingData, setLoadingData] = useState(true);
     const [removing, setRemoving] = useState<string | null>(null);
+    const [cartImgFailed, setCartImgFailed] = useState<Set<string>>(new Set());
 
     useEffect(() => {
         if (!loading && !user) router.replace("/frontend/login");
@@ -94,10 +96,10 @@ export default function CartPage() {
                             {items.map((item) => (
                                 <div key={item.id} style={{ display: "flex", gap: 16, alignItems: "center", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 14, padding: 16 }}>
                                     <div style={{ width: 72, height: 72, borderRadius: 10, background: "rgba(255,255,255,0.06)", overflow: "hidden", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                                        {item.product?.images?.[0] ? (
-                                            <img src={item.product.images[0]} alt={item.product.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                                        {item.product?.images?.[0] && !cartImgFailed.has(item.id) ? (
+                                            <img src={item.product.images[0]} alt={item.product.name} onError={() => setCartImgFailed(prev => new Set(prev).add(item.id))} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                                         ) : (
-                                            <span style={{ fontSize: 24 }}>🐟</span>
+                                            <img src={PRODUCT_PLACEHOLDER} alt={item.product?.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                                         )}
                                     </div>
                                     <div style={{ flex: 1, minWidth: 0 }}>

@@ -114,6 +114,10 @@ const createProduct = async (req, res, next) => {
       : [];
     const images = [...uploadedImages, ...bodyImages];
 
+    if (!req.file && bodyImages.length > 0) {
+      imageFilename = bodyImages[0];
+    }
+
     const product = await Product.create({
       ...validatedData,
       image: imageFilename,
@@ -190,6 +194,17 @@ const updateProduct = async (req, res, next) => {
         ? product.images.filter((img) => img && img !== product.image)
         : [];
       validatedData.images = [req.file.filename, ...existingImages];
+    } else if (req.body.images) {
+      const bodyImages = Array.isArray(req.body.images)
+        ? req.body.images
+        : [req.body.images];
+      const existingImages = Array.isArray(product.images)
+        ? product.images.filter((img) => img && img !== product.image)
+        : [];
+      validatedData.images = [...bodyImages, ...existingImages];
+      if (bodyImages.length > 0) {
+        validatedData.image = bodyImages[0];
+      }
     }
 
     product = await Product.findByIdAndUpdate(req.params.id, validatedData, {

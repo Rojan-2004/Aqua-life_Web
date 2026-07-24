@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { getCart, CartItemData } from "@/lib/api/cart";
 import { placeOrder } from "@/lib/api/order";
+import { PRODUCT_PLACEHOLDER } from "@/lib/utils/placeholder";
 import Footer from "@/components/Footer";
 
 import Image from "next/image";
@@ -30,6 +31,7 @@ export default function CheckoutPage() {
         postalCode: "",
         landmark: "",
     });
+    const [checkoutImgFailed, setCheckoutImgFailed] = useState<Set<string>>(new Set());
 
     useEffect(() => {
         if (!loading && !user) router.replace("/frontend/login");
@@ -269,9 +271,11 @@ export default function CheckoutPage() {
                                     {cartItems.map((item) => (
                                         <div key={item.id} style={{ display: "flex", gap: 12, alignItems: "center" }}>
                                             <div style={{ width: 52, height: 52, borderRadius: 8, background: "rgba(255,255,255,0.06)", overflow: "hidden", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                                                {item.product?.images?.[0]
-                                                    ? <img src={item.product.images[0]} alt={item.product.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                                                    : <span>🐟</span>}
+                                                {item.product?.images?.[0] && !checkoutImgFailed.has(item.id) ? (
+                                                    <img src={item.product.images[0]} alt={item.product.name} onError={() => setCheckoutImgFailed(prev => new Set(prev).add(item.id))} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                                                ) : (
+                                                    <img src={PRODUCT_PLACEHOLDER} alt={item.product?.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                                                )}
                                             </div>
                                             <div style={{ flex: 1, minWidth: 0 }}>
                                                 <p style={{ color: "#fff", fontSize: 13, fontWeight: 600, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{item.product?.name}</p>

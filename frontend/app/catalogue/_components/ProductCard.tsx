@@ -3,6 +3,8 @@
 import React, { useState } from "react";
 import Link from "next/link";
 
+import { PRODUCT_PLACEHOLDER } from "@/lib/utils/placeholder";
+
 export interface ProductCardData {
     id: string;
     name: string;
@@ -82,7 +84,7 @@ export default function ProductCard({ product }: { product: ProductCardData }) {
                             }}
                         />
                     ) : (
-                        <span style={{ fontSize: 40 }}>🐟</span>
+                        <img src={PRODUCT_PLACEHOLDER} alt={product.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                     )}
                 </div>
                 <div style={{ padding: 16 }}>

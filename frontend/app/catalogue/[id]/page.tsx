@@ -7,6 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import { getProduct } from "@/lib/api/product";
 import { toggleWishlist } from "@/lib/api/wishlist";
 import { addToCart } from "@/lib/api/cart";
+import { PRODUCT_PLACEHOLDER } from "@/lib/utils/placeholder";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ReviewSection from "@/components/ReviewSection";
@@ -42,6 +43,8 @@ export default function ProductDetailPage() {
     const [qty, setQty] = useState(1);
     const [adding, setAdding] = useState(false);
     const [added, setAdded] = useState(false);
+    const [mainImgFailed, setMainImgFailed] = useState(false);
+    const [thumbFails, setThumbFails] = useState<Set<number>>(new Set());
 
     const handleAddToCart = async () => {
         if (!user) return;
@@ -167,29 +170,30 @@ export default function ProductDetailPage() {
                             justifyContent: "center",
                         }}
                     >
-                        {images[activeImg] ? (
-                            <img
-                                src={images[activeImg]}
-                                alt={product.name}
-                                style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                            />
-                        ) : (
-                            <span style={{ fontSize: 64 }}>🐟</span>
-                        )}
+                    {images[activeImg] && !mainImgFailed ? (
+                        <img
+                            src={images[activeImg]}
+                            alt={product.name}
+                            onError={() => setMainImgFailed(true)}
+                            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                        />
+                    ) : (
+                        <img src={PRODUCT_PLACEHOLDER} alt={product.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    )}
                     </div>
                     {images.length > 1 && (
                         <div style={{ display: "flex", gap: 10, marginTop: 12 }}>
-                            {images.map((img, i) => (
+                    {images.map((img, i) => (
                                 <button
                                     key={i}
-                                    onClick={() => setActiveImg(i)}
+                                    onClick={() => { setActiveImg(i); setMainImgFailed(false); }}
                                     style={{
                                         width: 64,
                                         height: 64,
                                         borderRadius: 10,
                                         overflow: "hidden",
                                         border:
-                                            i === activeImg
+                                            i === activeImg && !thumbFails.has(i)
                                                 ? "2px solid #4dd9e8"
                                                 : "1px solid rgba(255,255,255,0.1)",
                                         cursor: "pointer",
@@ -197,11 +201,16 @@ export default function ProductDetailPage() {
                                         background: "rgba(255,255,255,0.03)",
                                     }}
                                 >
-                                    <img
-                                        src={img}
-                                        alt={`thumb-${i}`}
-                                        style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                                    />
+                                    {thumbFails.has(i) ? (
+                                        <img src={PRODUCT_PLACEHOLDER} alt={`thumb-${i}`} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                                    ) : (
+                                        <img
+                                            src={img}
+                                            alt={`thumb-${i}`}
+                                            onError={() => setThumbFails(prev => new Set(prev).add(i))}
+                                            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                                        />
+                                    )}
                                 </button>
                             ))}
                         </div>
