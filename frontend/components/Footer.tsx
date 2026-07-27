@@ -47,7 +47,6 @@ export default function Footer() {
 
                 <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: 24, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
                     <p style={{ color: "rgba(255,255,255,0.2)", fontSize: 12 }}>© 2024 AquaLife. All rights reserved.</p>
-                    <p style={{ color: "rgba(255,255,255,0.2)", fontSize: 12 }}>VAT included in all prices · Rs. 50 flat delivery</p>
                 </div>
             </div>
         </footer>

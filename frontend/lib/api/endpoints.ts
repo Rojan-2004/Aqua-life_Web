@@ -62,6 +62,7 @@ export const API = {
     },
     ORDERS: {
         PLACE: "/api/v1/orders",
+        GET_ALL: "/api/v1/orders",
     },
     ADMIN_NOTIFICATIONS: {
         GET_ALL: "/api/v1/admin/notifications",

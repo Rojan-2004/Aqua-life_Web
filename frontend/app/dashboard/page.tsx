@@ -175,19 +175,6 @@ function AdminView({ user, logout }: { user: any; logout: () => void }) {
 
     return (
         <div style={{ fontFamily: "var(--font-outfit), 'Outfit', sans-serif", background: "#0a0e1a", minHeight: "100vh" }}>
-            {/* Admin announcement bar */}
-            <div style={{
-                background: "linear-gradient(135deg, #2d9cdb, #4dd9e8)",
-                textAlign: "center",
-                padding: "10px 16px",
-                fontSize: 13,
-                fontWeight: 600,
-                color: "#fff",
-                letterSpacing: 0.3,
-            }}>
-                🚚 FREE DELIVERY on all orders · Rs. 50 flat delivery fee · VAT included in all prices
-            </div>
-
             {/* Header */}
             <header style={{ background: "rgba(10,14,26,0.9)", backdropFilter: "blur(20px)", borderBottom: "1px solid rgba(255,255,255,0.07)", position: "sticky", top: 0, zIndex: 100 }}>
                 <div style={{ maxWidth: 1200, margin: "0 auto", padding: "14px 32px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -386,21 +373,6 @@ function CustomerView({ user, logout }: { user: any; logout: () => void }) {
                             textAlign: "center",
                             padding: "0 24px",
                         }}>
-                            {/* Delivery banner poster */}
-                            <div style={{
-                                background: "linear-gradient(135deg, rgba(45,156,219,0.9), rgba(77,217,232,0.9))",
-                                borderRadius: 12,
-                                padding: "10px 24px",
-                                marginBottom: 24,
-                                display: "inline-flex",
-                                alignItems: "center",
-                                gap: 10,
-                                boxShadow: "0 8px 32px rgba(0,0,0,0.25)",
-                            }}>
-                                <span style={{ fontSize: 18 }}>🚚</span>
-                                <span style={{ color: "#fff", fontSize: 13, fontWeight: 700, letterSpacing: 0.3 }}>FREE DELIVERY on all orders · Rs. 50 flat delivery fee · VAT included</span>
-                            </div>
-
                             <p style={{ color: "#4dd9e8", fontSize: 13, fontWeight: 600, textTransform: "uppercase", letterSpacing: 2, marginBottom: 16 }}>AquaLife</p>
                             <h1 style={{ color: "#fff", fontSize: 48, fontWeight: 800, lineHeight: 1.15, marginBottom: 16, maxWidth: 680 }}>{slide.headline}</h1>
                             <p style={{ color: "rgba(255,255,255,0.65)", fontSize: 18, marginBottom: 32 }}>{slide.sub}</p>
@@ -452,7 +424,10 @@ function CustomerView({ user, logout }: { user: any; logout: () => void }) {
                             </div>
                         </div>
                     ))}
-                    <div style={{ marginLeft: "auto" }}>
+                    <div style={{ marginLeft: "auto", display: "flex", gap: 10 }}>
+                        <Link href="/dashboard/orders" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 20, padding: "8px 20px", color: "#fff", fontSize: 13, fontWeight: 700, textDecoration: "none" }}>
+                            Order History
+                        </Link>
                         <Link href="/catalogue" style={{ background: "linear-gradient(135deg,#2d9cdb,#4dd9e8)", borderRadius: 20, padding: "8px 20px", color: "#fff", fontSize: 13, fontWeight: 700, textDecoration: "none" }}>
                             Shop Now →
                         </Link>

@@ -10,6 +10,7 @@ import { addToCart } from "@/lib/api/cart";
 import { PRODUCT_PLACEHOLDER } from "@/lib/utils/placeholder";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import BackButton from "@/components/BackButton";
 import ReviewSection from "@/components/ReviewSection";
 
 interface Review {
@@ -151,9 +152,7 @@ export default function ProductDetailPage() {
             <Header />
 
             <div style={{ maxWidth: 1100, margin: "0 auto", padding: "24px 32px 0" }}>
-                <Link href="/catalogue" style={{ color: "#4dd9e8", fontSize: 13, fontWeight: 600, textDecoration: "none" }}>
-                    ← Back to Catalogue
-                </Link>
+                <BackButton href="/catalogue" label="← Back to Catalogue" />
             </div>
 
             <div style={{ maxWidth: 1100, margin: "0 auto", padding: "40px 32px", display: "grid", gridTemplateColumns: "minmax(0,1fr) minmax(0,1fr)", gap: 40 }}>

@@ -2,6 +2,7 @@
 import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import BackButton from "@/components/BackButton";
 
 function SuccessInner() {
     const params = useSearchParams();
@@ -9,6 +10,7 @@ function SuccessInner() {
 
     return (
         <div style={{ textAlign: "center", maxWidth: 480, padding: 40 }}>
+            <BackButton href="/dashboard" label="← Back to Dashboard" />
             <div style={{ fontSize: 64, marginBottom: 20 }}>🐠</div>
             <h1 style={{ color: "#fff", fontSize: 30, fontWeight: 700 }}>Order Placed!</h1>
             <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 15, marginTop: 10, lineHeight: 1.6 }}>
@@ -16,8 +18,8 @@ function SuccessInner() {
                 We&apos;ll get it packed and shipped to you soon.
             </p>
             <div style={{ display: "flex", gap: 12, justifyContent: "center", marginTop: 32 }}>
-                <Link href="/dashboard" style={{ background: "linear-gradient(135deg,#2d9cdb,#4dd9e8)", border: "none", borderRadius: 10, padding: "12px 28px", color: "#fff", fontSize: 14, fontWeight: 700, textDecoration: "none" }}>
-                    Go to Dashboard
+                <Link href="/dashboard/orders" style={{ background: "linear-gradient(135deg,#2d9cdb,#4dd9e8)", border: "none", borderRadius: 10, padding: "12px 28px", color: "#fff", fontSize: 14, fontWeight: 700, textDecoration: "none" }}>
+                    View Orders
                 </Link>
                 <Link href="/catalogue" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 10, padding: "12px 28px", color: "rgba(255,255,255,0.7)", fontSize: 14, textDecoration: "none" }}>
                     Continue Shopping

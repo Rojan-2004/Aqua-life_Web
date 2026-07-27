@@ -8,6 +8,7 @@ import { getCart, removeCartItem, CartItemData } from "@/lib/api/cart";
 import { PRODUCT_PLACEHOLDER } from "@/lib/utils/placeholder";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import BackButton from "@/components/BackButton";
 
 const VAT_RATE = 0.13;
 const SHIPPING_FLAT = 50;
@@ -79,7 +80,8 @@ export default function CartPage() {
         <div style={{ fontFamily: "var(--font-outfit), 'Outfit', sans-serif", background: "#0a0e1a", minHeight: "100vh" }}>
             <Header />
 
-            <div style={{ maxWidth: 1200, margin: "0 auto", padding: "40px 32px" }}>
+            <div style={{ maxWidth: 1200, margin: "0 auto", padding: "32px 32px" }}>
+                <BackButton href="/catalogue" label="← Continue Shopping" />
                 <h1 style={{ color: "#fff", fontSize: 30, fontWeight: 700, marginBottom: 28 }}>Your Cart</h1>
 
                 {loadingData ? (
@@ -136,7 +138,7 @@ export default function CartPage() {
                             </div>
                             <button
                                 onClick={() => router.push("/checkout")}
-                                style={{ marginTop: 20, width: "100%", background: "linear-gradient(135deg,#2d9cdb,#4dd9e8)", border: "none", borderRadius: 30, padding: "14px", color: "#fff", fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}
+                                style={{ marginTop: 20, width: "100%", background: "linear-gradient(135deg,#2d9cdb,#4dd9e8)", border: "none", borderRadius: 30, padding: "14px 36px", color: "#fff", fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", letterSpacing: 0.5 }}
                             >
                                 PROCEED TO CHECKOUT
                             </button>

@@ -9,6 +9,7 @@ import {
     handleUpdateUserPassword,
     handleUploadProfilePicture
 } from "@/lib/actions/auth-action";
+import BackButton from "@/components/BackButton";
 
 export default function ProfilePage() {
     const { user, loading, updateUser, refreshUser } = useAuth();
@@ -203,9 +204,7 @@ export default function ProfilePage() {
                 {/* Navigation Header */}
                 <div style={{ display: "flex", justifyItems: "center", justifyContent: "space-between", alignItems: "center", marginBottom: 32 }}>
                     <div>
-                        <Link href="/dashboard" style={{ color: "#4dd9e8", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 8, fontSize: 14, fontWeight: 600, transition: "0.2s hover" }}>
-                            ← Back to Dashboard
-                        </Link>
+                        <BackButton href="/dashboard" label="← Back to Dashboard" />
                         <h1 style={{ color: "#fff", fontSize: 32, fontWeight: 700, marginTop: 8 }}>Profile Settings</h1>
                     </div>
                     <div style={{ color: "rgba(255,255,255,0.4)", fontSize: 13 }}>

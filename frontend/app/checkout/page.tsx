@@ -7,6 +7,7 @@ import { getCart, CartItemData } from "@/lib/api/cart";
 import { placeOrder } from "@/lib/api/order";
 import { PRODUCT_PLACEHOLDER } from "@/lib/utils/placeholder";
 import Footer from "@/components/Footer";
+import BackButton from "@/components/BackButton";
 
 import Image from "next/image";
 
@@ -160,7 +161,9 @@ export default function CheckoutPage() {
                 </div>
             </header>
 
-            <div style={{ maxWidth: 1200, margin: "0 auto", padding: "40px 32px 0" }}>
+            <div style={{ maxWidth: 1200, margin: "0 auto", padding: "32px 32px 0" }}>
+                <BackButton href="/cart" label="← Back to Cart" />
+
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 0, marginBottom: 48 }}>
                     {[
                         { n: "✓", label: "CART", done: true },
@@ -248,7 +251,7 @@ export default function CheckoutPage() {
                                 style={{
                                     background: "linear-gradient(135deg,#2d9cdb,#4dd9e8)",
                                     border: "none", borderRadius: 30,
-                                    padding: "14px 48px",
+                                    padding: "14px 36px",
                                     color: "#fff", fontSize: 15, fontWeight: 700,
                                     cursor: placing ? "not-allowed" : "pointer",
                                     fontFamily: "inherit",

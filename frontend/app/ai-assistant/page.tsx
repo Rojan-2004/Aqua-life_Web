@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
+import BackButton from "@/components/BackButton";
 
 const SUGGESTIONS = [
   "What fish can I keep with a Betta?",
@@ -183,7 +184,7 @@ export default function AIAquaAssistantPage() {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <Link href="/dashboard" style={{ color: "rgba(255,255,255,0.4)", fontSize: 20, textDecoration: "none" }}>←</Link>
+          <BackButton href="/dashboard" label="← Back" />
           <div
             style={{
               width: 38,

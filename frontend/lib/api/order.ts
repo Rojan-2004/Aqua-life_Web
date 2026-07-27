@@ -27,6 +27,39 @@ export interface ShippingAddress {
     landmark?: string;
 }
 
+export interface OrderItem {
+    product: {
+        id: string;
+        name: string;
+        price: number;
+        image: string | null;
+        images: string[];
+    } | null;
+    quantity: number;
+    price: number;
+}
+
+export interface OrderData {
+    id: string;
+    total: number;
+    subtotal: number;
+    deliveryFee: number;
+    status: string;
+    shippingAddress: {
+        fullName: string;
+        email: string;
+        phone: string;
+        province: string;
+        district: string;
+        city: string;
+        street: string;
+        postalCode: string;
+        landmark?: string;
+    };
+    items: OrderItem[];
+    createdAt: string;
+}
+
 export const placeOrder = async (shippingAddress: ShippingAddress) => {
     try {
         const response = await axiosInstance.post(API.ORDERS.PLACE, {
@@ -35,5 +68,14 @@ export const placeOrder = async (shippingAddress: ShippingAddress) => {
         return response.data;
     } catch (error: unknown) {
         throw new Error(errorMessage(error, "Failed to place order"));
+    }
+};
+
+export const getOrders = async (params?: { page?: number; limit?: number; status?: string }) => {
+    try {
+        const response = await axiosInstance.get(API.ORDERS.GET_ALL, { params });
+        return response.data;
+    } catch (error: unknown) {
+        throw new Error(errorMessage(error, "Failed to load orders"));
     }
 };
