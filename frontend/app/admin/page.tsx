@@ -107,13 +107,13 @@ export default function AdminPage() {
     };
 
     const statCards = [
-        { label: "Total Revenue", value: `Rs. ${stats.revenue.toLocaleString()}`, icon: "💰" },
-        { label: "Pending Orders", value: stats.pendingOrders ?? 0, icon: "⏳" },
-        { label: "Delivered Orders", value: stats.deliveredOrders ?? 0, icon: "✅" },
-        { label: "Monthly Revenue", value: `Rs. ${(stats.monthlyRevenue ?? 0).toLocaleString()}`, icon: "📅" },
-        { label: "Total Products", value: stats.totalProducts || stats.productsLive, icon: "📦" },
-        { label: "Low Stock", value: stats.lowStockProducts ?? 0, icon: "⚠️" },
-        { label: "Total Users", value: stats.totalUsers || stats.activeUsers, icon: "👤" },
+        { label: "Total Revenue", value: `Rs. ${stats.revenue.toLocaleString()}`, icon: "💰", href: "/admin/orders", title: "View all transactions" },
+        { label: "Pending Orders", value: stats.pendingOrders ?? 0, icon: "⏳", href: "/admin/orders?status=pending", title: "View pending orders" },
+        { label: "Delivered Orders", value: stats.deliveredOrders ?? 0, icon: "✅", href: "/admin/orders?status=delivered", title: "View delivered orders" },
+        { label: "Monthly Revenue", value: `Rs. ${(stats.monthlyRevenue ?? 0).toLocaleString()}`, icon: "📅", href: "/admin/orders", title: "View monthly transactions" },
+        { label: "Total Products", value: stats.totalProducts || stats.productsLive, icon: "📦", href: "/admin/products", title: "Manage products" },
+        { label: "Low Stock", value: stats.lowStockProducts ?? 0, icon: "⚠️", href: "/admin/products", title: "View low stock products" },
+        { label: "Total Users", value: stats.totalUsers || stats.activeUsers, icon: "👤", href: "/admin/users", title: "Manage users" },
     ];
 
     const quickActions = [
@@ -241,13 +241,26 @@ export default function AdminPage() {
                 {/* Stat Cards */}
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 16, marginBottom: 40 }}>
                     {statCards.map((s) => (
-                        <div key={s.label} style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, padding: 20, transition: "0.2s all" }}>
-                            <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 12, marginBottom: 4 }}>{s.label}</p>
-                            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                                <span style={{ fontSize: 20 }}>{s.icon}</span>
-                                <p style={{ color: "#fff", fontSize: 22, fontWeight: 700 }}>{s.value}</p>
+                        <Link key={s.label} href={s.href} style={{ textDecoration: "none" }}>
+                            <div title={s.title} style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, padding: 20, transition: "0.2s all", cursor: "pointer" }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.border = "1px solid rgba(77,217,232,0.3)";
+                                    e.currentTarget.style.background = "rgba(77,217,232,0.05)";
+                                    e.currentTarget.style.transform = "translateY(-2px)";
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.border = "1px solid rgba(255,255,255,0.1)";
+                                    e.currentTarget.style.background = "rgba(255,255,255,0.05)";
+                                    e.currentTarget.style.transform = "translateY(0)";
+                                }}
+                            >
+                                <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 12, marginBottom: 4 }}>{s.label}</p>
+                                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                    <span style={{ fontSize: 20 }}>{s.icon}</span>
+                                    <p style={{ color: "#fff", fontSize: 22, fontWeight: 700 }}>{s.value}</p>
+                                </div>
                             </div>
-                        </div>
+                        </Link>
                     ))}
                 </div>
 

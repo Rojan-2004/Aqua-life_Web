@@ -156,14 +156,14 @@ function AdminView({ user, logout }: { user: any; logout: () => void }) {
     };
 
     const adminStats = [
-        { label: "Total Revenue", value: fmt(stats.revenue), icon: "💰", note: "Completed orders" },
-        { label: "Monthly Revenue", value: fmt(stats.monthlyRevenue), icon: "📅", note: "Current month" },
-        { label: "Delivered Orders", value: stats.deliveredOrders, icon: "✅", note: "All time" },
-        { label: "Pending Orders", value: stats.pendingOrders, icon: "⏳", note: "Needs attention" },
-        { label: "Orders Today", value: stats.ordersToday, icon: "📦", note: "Today's volume" },
-        { label: "Products Live", value: stats.productsLive, icon: "🐠", note: "Active listings" },
-        { label: "Low Stock Alert", value: stats.lowStockProducts, icon: "⚠️", note: "Items under 10" },
-        { label: "Total Users", value: stats.activeUsers, icon: "👥", note: "Registered accounts" },
+        { label: "Total Revenue", value: fmt(stats.revenue), icon: "💰", note: "Completed orders", href: "/admin/orders" },
+        { label: "Monthly Revenue", value: fmt(stats.monthlyRevenue), icon: "📅", note: "Current month", href: "/admin/orders" },
+        { label: "Delivered Orders", value: stats.deliveredOrders, icon: "✅", note: "All time", href: "/admin/orders?status=delivered" },
+        { label: "Pending Orders", value: stats.pendingOrders, icon: "⏳", note: "Needs attention", href: "/admin/orders?status=pending" },
+        { label: "Orders Today", value: stats.ordersToday, icon: "📦", note: "Today's volume", href: "/admin/orders" },
+        { label: "Products Live", value: stats.productsLive, icon: "🐠", note: "Active listings", href: "/admin/products" },
+        { label: "Low Stock Alert", value: stats.lowStockProducts, icon: "⚠️", note: "Items under 10", href: "/admin/products" },
+        { label: "Total Users", value: stats.activeUsers, icon: "👥", note: "Registered accounts", href: "/admin/users" },
     ];
 
     const quickLinks = [
@@ -196,14 +196,18 @@ function AdminView({ user, logout }: { user: any; logout: () => void }) {
                 {/* Business stats grid */}
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 16, marginBottom: 48 }}>
                     {adminStats.map(s => (
-                        <div key={s.label} style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 16, padding: 20 }}>
-                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-                                <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 12, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.5 }}>{s.label}</p>
-                                <p style={{ fontSize: 20 }}>{s.icon}</p>
+                        <Link key={s.label} href={s.href || "#"} style={{ textDecoration: "none" }}>
+                            <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 16, padding: 20, transition: "all 0.2s", cursor: "pointer" }}
+                                onMouseEnter={e => { e.currentTarget.style.borderColor = "rgba(77,217,232,0.3)"; e.currentTarget.style.background = "rgba(255,255,255,0.06)"; e.currentTarget.style.transform = "translateY(-2px)"; }}
+                                onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.06)"; e.currentTarget.style.background = "rgba(255,255,255,0.03)"; e.currentTarget.style.transform = "translateY(0)"; }}>
+                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                                    <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 12, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.5 }}>{s.label}</p>
+                                    <p style={{ fontSize: 20 }}>{s.icon}</p>
+                                </div>
+                                <p style={{ color: "#fff", fontSize: 26, fontWeight: 800 }}>{s.value}</p>
+                                <p style={{ color: "rgba(255,255,255,0.25)", fontSize: 11, marginTop: 4 }}>{s.note}</p>
                             </div>
-                            <p style={{ color: "#fff", fontSize: 26, fontWeight: 800 }}>{s.value}</p>
-                            <p style={{ color: "rgba(255,255,255,0.25)", fontSize: 11, marginTop: 4 }}>{s.note}</p>
-                        </div>
+                        </Link>
                     ))}
                 </div>
 
