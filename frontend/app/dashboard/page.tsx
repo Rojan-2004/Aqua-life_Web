@@ -36,6 +36,38 @@ const statusColors: Record<string, { bg: string; text: string }> = {
 const formatStatus = (s: string) =>
     s ? s.charAt(0).toUpperCase() + s.slice(1) : "Pending";
 
+const heroSlides = [
+    {
+        headline: "Premium Aquatic Ecosystems",
+        sub: "Everything you need for the perfect aquarium",
+        cta: "Shop Now",
+        href: "/catalogue",
+        image: "/assets/image/background_img2.png",
+    },
+    {
+        headline: "AI Fish Identifier",
+        sub: "Snap a photo — know your fish instantly",
+        cta: "Try It Free",
+        href: "/ai-assistant",
+        image: "/assets/image/background_img3.png",
+    },
+    {
+        headline: "Find Your Perfect Fish",
+        sub: "2,400+ species available",
+        cta: "Browse Catalogue",
+        href: "/catalogue",
+        image: "/assets/image/background_img2.png",
+    },
+];
+
+const categoryShowcase = [
+    { name: "Fish", desc: "2,400+ species", href: "/catalogue?category=Fish" },
+    { name: "Plants", desc: "120 varieties", href: "/catalogue?category=Plants" },
+    { name: "Equipment", desc: "Premium brands", href: "/catalogue?category=Equipment" },
+    { name: "Food", desc: "450 products", href: "/catalogue?category=Food" },
+    { name: "Decoration", desc: "Unique pieces", href: "/catalogue?category=Decoration" },
+];
+
 export default function DashboardPage() {
     const { user, loading, logout } = useAuth();
     const router = useRouter();
@@ -83,7 +115,7 @@ function AdminView({ user, logout }: { user: any; logout: () => void }) {
                 getAdminStats(),
                 getAdminNotifications()
             ]);
-            
+
             const s = statsRes?.data;
             setStats({
                 revenue: s?.revenue ?? 0,
@@ -95,7 +127,7 @@ function AdminView({ user, logout }: { user: any; logout: () => void }) {
                 monthlyRevenue: s?.monthlyRevenue ?? 0,
                 lowStockProducts: s?.lowStockProducts ?? 0,
             });
-            
+
             setNotifications(notifRes.data ?? []);
         } catch (err) {
             console.error("Failed to load admin dashboard data", err);
@@ -143,11 +175,24 @@ function AdminView({ user, logout }: { user: any; logout: () => void }) {
 
     return (
         <div style={{ fontFamily: "var(--font-outfit), 'Outfit', sans-serif", background: "#0a0e1a", minHeight: "100vh" }}>
+            {/* Admin announcement bar */}
+            <div style={{
+                background: "linear-gradient(135deg, #2d9cdb, #4dd9e8)",
+                textAlign: "center",
+                padding: "10px 16px",
+                fontSize: 13,
+                fontWeight: 600,
+                color: "#fff",
+                letterSpacing: 0.3,
+            }}>
+                🚚 FREE DELIVERY on all orders · Rs. 50 flat delivery fee · VAT included in all prices
+            </div>
+
             {/* Header */}
             <header style={{ background: "rgba(10,14,26,0.9)", backdropFilter: "blur(20px)", borderBottom: "1px solid rgba(255,255,255,0.07)", position: "sticky", top: 0, zIndex: 100 }}>
                 <div style={{ maxWidth: 1200, margin: "0 auto", padding: "14px 32px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                        <Image src="/logo/Aqua_life_logo.png" alt="AquaLife" width={120} height={36} style={{ objectFit: "contain" }} priority />
+                        <Image src="/assets/logo/Aqua_life_logo.png" alt="AquaLife" width={120} height={36} style={{ objectFit: "contain" }} priority />
                         <span style={{ color: "rgba(255,255,255,0.3)", fontSize: 13 }}>/ Dashboard</span>
                     </div>
                     <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
@@ -244,6 +289,12 @@ function CustomerView({ user, logout }: { user: any; logout: () => void }) {
     });
     const [featured, setFeatured] = useState<ProductCardData[]>([]);
     const [loadingData, setLoadingData] = useState(true);
+    const [activeSlide, setActiveSlide] = useState(0);
+
+    useEffect(() => {
+        const t = setInterval(() => setActiveSlide(s => (s + 1) % heroSlides.length), 5000);
+        return () => clearInterval(t);
+    }, []);
 
     useEffect(() => {
         let cancelled = false;
@@ -294,50 +345,182 @@ function CustomerView({ user, logout }: { user: any; logout: () => void }) {
 
     const name = user.firstName || user.username || user.name || user.email || "User";
 
-    const stats = [
+    const customerStats = [
         { label: "Total Orders", value: data.orders ?? 0, icon: "📦" },
-        { label: "Wishlist Items", value: data.wishlist ?? 0, icon: "❤️" },
+        { label: "Wishlist", value: data.wishlist ?? 0, icon: "❤️" },
         { label: "My Reviews", value: data.reviews ?? 0, icon: "⭐" },
     ];
 
     return (
-        <div style={{ fontFamily: "var(--font-outfit), 'Outfit', sans-serif", background: "#0a0e1a", minHeight: "100vh" }}>
+        <div style={{
+            fontFamily: "var(--font-outfit), 'Outfit', sans-serif",
+            background: "#0a0e1a",
+            minHeight: "100vh",
+        }}>
             <Header />
 
-            <section style={{ maxWidth: 1440, margin: "0 auto", padding: "64px 32px" }}>
-                <div style={{ marginBottom: 40 }}>
-                    <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 12, textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 }}>
-                        AquaLife Dashboard
-                    </p>
-                    <h1 style={{ color: "#fff", fontSize: 36, fontWeight: 700 }}>
-                        Welcome, {name}
-                    </h1>
-                    <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 14, marginTop: 8 }}>
-                        Manage your aquarium ecosystem and explore premium aquatic supplies.
-                    </p>
-                </div>
-
-                {/* Stat Cards */}
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 20, marginBottom: 40 }}>
-                    {stats.map((s) => (
-                        <div key={s.label} style={{
-                            background: "rgba(255,255,255,0.05)",
-                            border: "1px solid rgba(255,255,255,0.1)",
-                            borderRadius: 12,
-                            padding: 20
+            {/* Hero Slider */}
+            <div style={{ position: "relative", height: 520, overflow: "hidden", marginBottom: 0 }}>
+                {heroSlides.map((slide, i) => (
+                    <div key={i} style={{
+                        position: "absolute",
+                        inset: 0,
+                        opacity: i === activeSlide ? 1 : 0,
+                        transition: "opacity 0.8s ease",
+                    }}>
+                        <div style={{
+                            backgroundImage: `url(${slide.image})`,
+                            backgroundSize: "cover",
+                            backgroundPosition: "center",
+                            width: "100%",
+                            height: "100%",
+                        }} />
+                        <div style={{
+                            position: "absolute",
+                            inset: 0,
+                            background: "rgba(10,14,26,0.65)",
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            textAlign: "center",
+                            padding: "0 24px",
                         }}>
-                            <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 13 }}>{s.icon} {s.label}</p>
-                            <p style={{ color: "#fff", fontSize: 26, fontWeight: 700, marginTop: 8 }}>{s.value}</p>
+                            {/* Delivery banner poster */}
+                            <div style={{
+                                background: "linear-gradient(135deg, rgba(45,156,219,0.9), rgba(77,217,232,0.9))",
+                                borderRadius: 12,
+                                padding: "10px 24px",
+                                marginBottom: 24,
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: 10,
+                                boxShadow: "0 8px 32px rgba(0,0,0,0.25)",
+                            }}>
+                                <span style={{ fontSize: 18 }}>🚚</span>
+                                <span style={{ color: "#fff", fontSize: 13, fontWeight: 700, letterSpacing: 0.3 }}>FREE DELIVERY on all orders · Rs. 50 flat delivery fee · VAT included</span>
+                            </div>
+
+                            <p style={{ color: "#4dd9e8", fontSize: 13, fontWeight: 600, textTransform: "uppercase", letterSpacing: 2, marginBottom: 16 }}>AquaLife</p>
+                            <h1 style={{ color: "#fff", fontSize: 48, fontWeight: 800, lineHeight: 1.15, marginBottom: 16, maxWidth: 680 }}>{slide.headline}</h1>
+                            <p style={{ color: "rgba(255,255,255,0.65)", fontSize: 18, marginBottom: 32 }}>{slide.sub}</p>
+                            <Link href={slide.href} style={{
+                                background: "linear-gradient(135deg, #2d9cdb, #4dd9e8)",
+                                color: "#fff",
+                                padding: "14px 36px",
+                                borderRadius: 30,
+                                fontSize: 15,
+                                fontWeight: 700,
+                                textDecoration: "none",
+                                transition: "opacity 0.2s",
+                            }}>
+                                {slide.cta} →
+                            </Link>
                         </div>
+                    </div>
+                ))}
+
+                {/* Slide dots */}
+                <div style={{ position: "absolute", bottom: 24, left: "50%", transform: "translateX(-50%)", display: "flex", gap: 8 }}>
+                    {heroSlides.map((_, i) => (
+                        <button key={i} onClick={() => setActiveSlide(i)} style={{
+                            width: i === activeSlide ? 24 : 8,
+                            height: 8,
+                            borderRadius: 4,
+                            background: i === activeSlide ? "#4dd9e8" : "rgba(255,255,255,0.3)",
+                            border: "none",
+                            cursor: "pointer",
+                            transition: "all 0.3s",
+                        }} />
                     ))}
                 </div>
+            </div>
 
-                {/* Recent Orders */}
-                <div>
-                    <h2 style={{ color: "#fff", fontSize: 20, fontWeight: 600, marginBottom: 16 }}>Recent Orders</h2>
+            {/* Stats bar */}
+            <div style={{
+                background: "rgba(255,255,255,0.03)",
+                borderBottom: "1px solid rgba(255,255,255,0.06)",
+                padding: "20px 48px",
+            }}>
+                <div style={{ maxWidth: 1280, margin: "0 auto", display: "flex", gap: 48, alignItems: "center" }}>
+                    {customerStats.map((s) => (
+                        <div key={s.label} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                            <span style={{ fontSize: 20 }}>{s.icon}</span>
+                            <div>
+                                <p style={{ color: "#fff", fontSize: 22, fontWeight: 700, lineHeight: 1 }}>{s.value}</p>
+                                <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 12, marginTop: 2 }}>{s.label}</p>
+                            </div>
+                        </div>
+                    ))}
+                    <div style={{ marginLeft: "auto" }}>
+                        <Link href="/catalogue" style={{ background: "linear-gradient(135deg,#2d9cdb,#4dd9e8)", borderRadius: 20, padding: "8px 20px", color: "#fff", fontSize: 13, fontWeight: 700, textDecoration: "none" }}>
+                            Shop Now →
+                        </Link>
+                    </div>
+                </div>
+            </div>
+
+            {/* Category showcase */}
+            <section style={{ padding: "60px 0" }}>
+                <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 48px" }}>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 12 }}>
+                        {categoryShowcase.map((c) => (
+                            <Link key={c.name} href={c.href} style={{ textDecoration: "none" }}>
+                                <div style={{
+                                    background: "rgba(255,255,255,0.04)",
+                                    border: "1px solid rgba(255,255,255,0.07)",
+                                    borderRadius: 14,
+                                    padding: "24px 16px",
+                                    textAlign: "center",
+                                    transition: "all 0.2s",
+                                    cursor: "pointer",
+                                }}
+                                    onMouseEnter={e => { e.currentTarget.style.borderColor = "rgba(0,180,216,0.4)"; e.currentTarget.style.background = "rgba(255,255,255,0.08)"; e.currentTarget.style.transform = "translateY(-2px)"; }}
+                                    onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.07)"; e.currentTarget.style.background = "rgba(255,255,255,0.04)"; e.currentTarget.style.transform = "translateY(0)"; }}
+                                >
+                                    <p style={{ fontSize: 28, marginBottom: 8 }}>
+                                        {c.name === "Fish" ? "🐠" : c.name === "Plants" ? "🌿" : c.name === "Equipment" ? "⚙️" : c.name === "Food" ? "🍽️" : "🪸"}
+                                    </p>
+                                    <p style={{ color: "#fff", fontSize: 14, fontWeight: 600, marginBottom: 4 }}>{c.name}</p>
+                                    <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 12 }}>{c.desc}</p>
+                                </div>
+                            </Link>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* Featured Products */}
+            <section style={{ padding: "60px 0" }}>
+                <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 48px" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 28, borderBottom: "1px solid rgba(255,255,255,0.07)", paddingBottom: 16 }}>
+                        <h2 style={{ color: "#fff", fontSize: 22, fontWeight: 700 }}>Featured Products</h2>
+                        <Link href="/catalogue" style={{ color: "#4dd9e8", fontSize: 13, fontWeight: 600, textDecoration: "none" }}>
+                            View all →
+                        </Link>
+                    </div>
 
                     {loadingData ? (
-                        <div style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, padding: 24 }}>
+                        <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 14 }}>Loading products...</p>
+                    ) : featured.length === 0 ? (
+                        <p style={{ color: "rgba(255,255,255,0.3)", fontSize: 14 }}>No featured products yet.</p>
+                    ) : (
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 20 }}>
+                            {featured.map((p) => (
+                                <ProductCard key={p.id} product={p} />
+                            ))}
+                        </div>
+                    )}
+                </div>
+            </section>
+
+            {/* Recent Orders */}
+            <section style={{ padding: "60px 0" }}>
+                <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 48px" }}>
+                    <h2 style={{ color: "#fff", fontSize: 22, fontWeight: 700, marginBottom: 20 }}>Recent Orders</h2>
+
+                    {loadingData ? (
+                        <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 12, padding: 24 }}>
                             <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 14 }}>Loading your orders...</p>
                         </div>
                     ) : data.recentOrders.length === 0 ? (
@@ -346,7 +529,7 @@ function CustomerView({ user, logout }: { user: any; logout: () => void }) {
                             <p style={{ marginTop: 8 }}>No orders yet. <Link href="/catalogue" style={{ color: "#4dd9e8" }}>Start shopping</Link></p>
                         </div>
                     ) : (
-                        <div style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, overflow: "hidden" }}>
+                        <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 12, overflow: "hidden" }}>
                             {data.recentOrders.map((o, i) => (
                                 <div
                                     key={o.id}
@@ -355,7 +538,7 @@ function CustomerView({ user, logout }: { user: any; logout: () => void }) {
                                         justifyContent: "space-between",
                                         alignItems: "center",
                                         padding: "16px 20px",
-                                        borderBottom: i !== data.recentOrders.length - 1 ? "1px solid rgba(255,255,255,0.08)" : "none",
+                                        borderBottom: i !== data.recentOrders.length - 1 ? "1px solid rgba(255,255,255,0.06)" : "none",
                                     }}
                                 >
                                     <div>
@@ -384,24 +567,17 @@ function CustomerView({ user, logout }: { user: any; logout: () => void }) {
                         </div>
                     )}
                 </div>
+            </section>
 
-                {/* Featured Products / Shop */}
-                <div style={{ marginTop: 48 }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-                        <h2 style={{ color: "#fff", fontSize: 20, fontWeight: 600 }}>Featured Products</h2>
-                        <Link href="/catalogue" style={{ color: "#4dd9e8", fontSize: 13, fontWeight: 600, textDecoration: "none" }}>View all →</Link>
+            {/* Newsletter */}
+            <section style={{ background: "rgba(0,180,216,0.06)", borderTop: "1px solid rgba(0,180,216,0.15)", borderBottom: "1px solid rgba(0,180,216,0.15)", padding: "60px 48px" }}>
+                <div style={{ maxWidth: 520, margin: "0 auto", textAlign: "center" }}>
+                    <h2 style={{ color: "#fff", fontSize: 24, fontWeight: 700, marginBottom: 8 }}>Stay in the Loop</h2>
+                    <p style={{ color: "rgba(255,255,255,0.45)", fontSize: 14, marginBottom: 28 }}>Subscribe for new arrivals, care tips, and exclusive offers.</p>
+                    <div style={{ display: "flex", gap: 10 }}>
+                        <input placeholder="your@email.com" style={{ flex: 1, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 10, padding: "12px 16px", color: "#fff", fontSize: 14, fontFamily: "inherit", outline: "none" }} />
+                        <button style={{ background: "linear-gradient(135deg,#2d9cdb,#4dd9e8)", border: "none", borderRadius: 10, padding: "12px 24px", color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", whiteSpace: "nowrap" }}>Subscribe</button>
                     </div>
-                    {loadingData ? (
-                        <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 14 }}>Loading products...</p>
-                    ) : featured.length === 0 ? (
-                        <p style={{ color: "rgba(255,255,255,0.3)", fontSize: 14 }}>No featured products yet.</p>
-                    ) : (
-                        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(220px,1fr))", gap: 20 }}>
-                            {featured.map((p) => (
-                                <ProductCard key={p.id} product={p} />
-                            ))}
-                        </div>
-                    )}
                 </div>
             </section>
 
