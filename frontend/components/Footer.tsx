@@ -1,31 +1,55 @@
+import Link from "next/link";
+
 export default function Footer() {
     return (
-        <footer style={{ borderTop: "1px solid rgba(255,255,255,0.06)", marginTop: 80, padding: "48px 32px 28px", background: "#0a0e1a" }}>
-            <div style={{ maxWidth: 1200, margin: "0 auto", display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr", gap: 40 }}>
-                <div>
-                    <p style={{ fontSize: 20, fontWeight: 800, background: "linear-gradient(135deg,#2d9cdb,#4dd9e8)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", marginBottom: 12 }}>🌊 AquaLife</p>
-                    <p style={{ color: "rgba(255,255,255,0.35)", fontSize: 13, lineHeight: 1.8 }}>Premium aquatic systems and life support for the modern hobbyist. Engineered for excellence.</p>
-                </div>
-                {[
-                    { title: "Company", links: ["About Us", "Sustainability", "Shipping Policy", "Privacy Policy"] },
-                    { title: "Support", links: ["Returns", "Contact Support", "Privacy Policy"] },
-                ].map((col) => (
-                    <div key={col.title}>
-                        <p style={{ color: "#fff", fontWeight: 600, marginBottom: 16, fontSize: 14 }}>{col.title}</p>
-                        {col.links.map((l) => (
-                            <p key={l} style={{ color: "rgba(255,255,255,0.35)", fontSize: 13, marginBottom: 10, cursor: "pointer", transition: "color 0.15s" }}>{l}</p>
+        <footer style={{ background: "#070b14", borderTop: "1px solid rgba(255,255,255,0.06)", padding: "64px 48px 32px" }}>
+            <div style={{ maxWidth: 1280, margin: "0 auto" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr", gap: 48, marginBottom: 48 }}>
+
+                    {/* Brand column */}
+                    <div>
+                        <img src="/assets/logo/Aqua_life_logo.png" alt="AquaLife" style={{ height: 40, objectFit: "contain", marginBottom: 16 }} />
+                        <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 13, lineHeight: 1.8, marginBottom: 20 }}>
+                            Premium aquatic systems and life support for the modern hobbyist.<br />
+                            Lazimpat, Kathmandu, Nepal
+                        </p>
+                        <div style={{ display: "flex", gap: 12 }}>
+                            {["Instagram", "Facebook", "YouTube", "TikTok"].map((s) => (
+                                <Link key={s} href="#" style={{ color: "rgba(255,255,255,0.4)", fontSize: 12, textDecoration: "none", transition: "color 0.15s" }}>{s}</Link>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Shop column */}
+                    <div>
+                        <p style={{ color: "#fff", fontWeight: 600, fontSize: 14, marginBottom: 16 }}>Shop</p>
+                        {["Fish", "Plants", "Equipment", "Food", "Decoration"].map((l) => (
+                            <Link key={l} href={`/catalogue?category=${l}`} style={{ display: "block", color: "rgba(255,255,255,0.4)", fontSize: 13, marginBottom: 10, textDecoration: "none" }}>{l}</Link>
                         ))}
                     </div>
-                ))}
-                <div>
-                    <p style={{ color: "#fff", fontWeight: 600, marginBottom: 16, fontSize: 14 }}>Newsletter</p>
-                    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                        <input placeholder="your@email.com" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 10, padding: "10px 14px", color: "#fff", fontSize: 13, fontFamily: "inherit", outline: "none" }} />
-                        <button style={{ background: "linear-gradient(135deg,#2d9cdb,#4dd9e8)", border: "none", borderRadius: 10, padding: "10px 0", color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>Subscribe</button>
+
+                    {/* Policies column */}
+                    <div>
+                        <p style={{ color: "#fff", fontWeight: 600, fontSize: 14, marginBottom: 16 }}>Policies</p>
+                        {["Privacy Policy", "Refund Policy", "Shipping Policy", "Terms of Service"].map((l) => (
+                            <p key={l} style={{ color: "rgba(255,255,255,0.4)", fontSize: 13, marginBottom: 10, cursor: "pointer" }}>{l}</p>
+                        ))}
+                    </div>
+
+                    {/* Newsletter column */}
+                    <div>
+                        <p style={{ color: "#fff", fontWeight: 600, fontSize: 14, marginBottom: 16 }}>Newsletter</p>
+                        <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 13, marginBottom: 14, lineHeight: 1.6 }}>Subscribe for special offers and aquarium tips.</p>
+                        <input placeholder="your@email.com" style={{ width: "100%", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, padding: "10px 12px", color: "#fff", fontSize: 13, fontFamily: "inherit", outline: "none", marginBottom: 8, boxSizing: "border-box" }} />
+                        <button style={{ width: "100%", background: "linear-gradient(135deg,#2d9cdb,#4dd9e8)", border: "none", borderRadius: 8, padding: "10px 0", color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>Subscribe</button>
                     </div>
                 </div>
+
+                <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: 24, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
+                    <p style={{ color: "rgba(255,255,255,0.2)", fontSize: 12 }}>© 2024 AquaLife. All rights reserved.</p>
+                    <p style={{ color: "rgba(255,255,255,0.2)", fontSize: 12 }}>VAT included in all prices · Rs. 50 flat delivery</p>
+                </div>
             </div>
-            <p style={{ color: "rgba(255,255,255,0.2)", fontSize: 12, textAlign: "center", marginTop: 48 }}>© 2024 AquaLife Premium Aquatic Systems. All rights reserved.</p>
         </footer>
     );
 }
