@@ -7,7 +7,7 @@ export const handleCreateUser = async (data: any) => {
         const result = await createUser(data);
         if (result.success) {
             revalidatePath("/admin/users");
-            return { success: true, message: result.message, data: result.data };
+            return { success: true, message: result.message };
         }
         return { success: false, message: result.message || "User creation failed" };
     } catch (error: any) {
@@ -47,7 +47,7 @@ export const handleUpdateUser = async (id: string, data: any) => {
         const result = await updateUser(id, data);
         if (result.success) {
             revalidatePath("/admin/users");
-            return { success: true, message: result.message, data: result.data };
+            return { success: true, message: result.message };
         }
         return { success: false, message: result.message || "Failed to update user" };
     } catch (error: any) {
