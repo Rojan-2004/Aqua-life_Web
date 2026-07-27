@@ -32,7 +32,7 @@ export const handleCreateProduct = async (formData: FormData) => {
         const result = await createProduct(formData);
         if (result.success) {
             revalidatePath("/admin/products");
-            return { success: true, message: result.message, data: result.data };
+            return { success: true, message: result.message };
         }
         return { success: false, message: result.message || "Failed to create product" };
     } catch (error: any) {
@@ -46,7 +46,7 @@ export const handleUpdateProduct = async (id: string, formData: FormData) => {
         if (result.success) {
             revalidatePath("/admin/products");
             revalidatePath(`/admin/products/${id}`);
-            return { success: true, message: result.message, data: result.data };
+            return { success: true, message: result.message };
         }
         return { success: false, message: result.message || "Failed to update product" };
     } catch (error: any) {
