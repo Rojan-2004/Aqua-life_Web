@@ -6,6 +6,10 @@
   padding: 0;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   background: #0a0e1a;
   font-family: 'Outfit', sans-serif;
@@ -13,17 +17,22 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+a {
+  color: inherit;
+}
+
 /* Scrollbar */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: #0a0e1a; }
+::-webkit-scrollbar       { width: 6px; }
+::-webkit-scrollbar-track { background: #070b14; }
 ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(77,217,232,0.3); }
+::-webkit-scrollbar-thumb:hover { background: rgba(0,180,216,0.4); }
+
+/* Selection */
+::selection { background: rgba(45,156,219,0.3); color: #fff; }
 
 /* Input focus glow */
 input:focus, textarea:focus, select:focus {
-  border-color: rgba(77,217,232,0.5) !important;
-  box-shadow: 0 0 0 3px rgba(77,217,232,0.08);
+  border-color: rgba(0,180,216,0.5) !important;
+  box-shadow: 0 0 0 3px rgba(0,180,216,0.08) !important;
+  outline: none !important;
 }
-
-/* Selection color */
-::selection { background: rgba(45,156,219,0.3); color: #fff; }

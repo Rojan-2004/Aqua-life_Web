@@ -3,6 +3,9 @@ const nextConfig = {
   devIndicators: {
     appIsrStatus: false,
   },
+  serverActions: {
+    bodySizeLimit: '5mb',
+  },
   async rewrites() {
     return [
       {

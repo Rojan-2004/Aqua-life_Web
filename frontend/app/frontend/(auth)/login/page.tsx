@@ -87,7 +87,7 @@ export default function LoginPage() {
                 {/* Logo */}
                 <div style={{ textAlign: "center", marginBottom: 32, display: "flex", flexDirection: "column", alignItems: "center" }}>
                     <Image
-                        src="/logo/Aqua_life_logo.png"
+                        src="/assets/logo/Aqua_life_logo.png"
                         alt="AquaLife Logo"
                         width={140}
                         height={42}
