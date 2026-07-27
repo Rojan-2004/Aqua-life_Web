@@ -144,7 +144,7 @@ export default function CheckoutPage() {
                 <div style={{ maxWidth: 1200, margin: "0 auto", padding: "16px 32px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <Link href={user?.role === "admin" ? "/admin" : "/dashboard"} style={{ textDecoration: "none", display: "flex", alignItems: "center" }}>
                         <Image
-                            src="/logo/Aqua_life_logo.png"
+                            src="/assets/logo/Aqua_life_logo.png"
                             alt="AquaLife"
                             width={120}
                             height={36}
