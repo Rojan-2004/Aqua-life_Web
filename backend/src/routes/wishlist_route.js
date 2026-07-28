@@ -6,10 +6,18 @@ const Product = require("../models/product_model");
 
 router.use(protect);
 
+const DEFAULT_IMAGE = "default-product.png";
+
 function toImageArray(p) {
     if (Array.isArray(p.images) && p.images.length) return p.images;
     if (p.image) return [p.image];
     return [];
+}
+
+function toImageUrls(p) {
+    return toImageArray(p)
+        .filter((img) => img && img !== DEFAULT_IMAGE && !img.startsWith("http"))
+        .map((img) => `/item_photos/${img}`);
 }
 
 // POST /api/v1/wishlist  (toggle)
@@ -57,7 +65,7 @@ router.get("/", async (req, res, next) => {
                     name: i.product.name,
                     price: i.product.price,
                     category: i.product.category,
-                    images: toImageArray(i.product.toObject()),
+                    images: toImageUrls(i.product.toObject()),
                 },
             }));
 
