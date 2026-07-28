@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { getCart } from "@/lib/api/cart";
+import { getWishlist } from "@/lib/api/wishlist";
 import Image from "next/image";
 
 const NAV = [
@@ -17,6 +18,7 @@ export default function Header() {
     const { user, logout } = useAuth();
     const path = usePathname();
     const [cartCount, setCartCount] = useState(0);
+    const [wishlistCount, setWishlistCount] = useState(0);
     const [search, setSearch] = useState("");
 
     useEffect(() => {
@@ -26,6 +28,12 @@ export default function Header() {
                 const items = data?.items ?? data?.cart?.items ?? [];
                 const count = items.reduce((sum: number, item: { quantity?: number }) => sum + (item.quantity ?? 0), 0);
                 setCartCount(count);
+            })
+            .catch(() => {});
+        getWishlist()
+            .then((data) => {
+                const items = data?.data ?? [];
+                setWishlistCount(items.length);
             })
             .catch(() => {});
     }, [user]);
@@ -128,6 +136,41 @@ export default function Header() {
                                         justifyContent: "center",
                                     }}>
                                         {cartCount}
+                                    </span>
+                                )}
+                            </Link>
+                        )}
+
+                        {/* Wishlist */}
+                        {user?.role !== "admin" && (
+                            <Link href="/wishlist" style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 6,
+                                background: "rgba(255,255,255,0.06)",
+                                border: "1px solid rgba(255,255,255,0.1)",
+                                borderRadius: 20,
+                                padding: "7px 16px",
+                                color: "#fff",
+                                fontSize: 13,
+                                fontWeight: 600,
+                                textDecoration: "none",
+                            }}>
+                                🤍 Wishlist
+                                {wishlistCount > 0 && (
+                                    <span style={{
+                                        background: "#f87171",
+                                        color: "#fff",
+                                        borderRadius: "50%",
+                                        width: 18,
+                                        height: 18,
+                                        fontSize: 10,
+                                        fontWeight: 700,
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                    }}>
+                                        {wishlistCount}
                                     </span>
                                 )}
                             </Link>
