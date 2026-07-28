@@ -120,7 +120,6 @@ router.post("/", async (req, res, next) => {
             validItems.map((i) =>
                 Product.findByIdAndUpdate(i.product._id, {
                     $inc: { stock: -i.quantity },
-                    $set: { isSoldOut: i.product.stock - i.quantity <= 0 },
                 })
             )
         );

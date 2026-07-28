@@ -27,6 +27,9 @@ router.get("/", async (req, res, next) => {
         const category = req.query.category;
         const search = req.query.search;
         const featured = req.query.featured === "true";
+        const minPrice = typeof req.query.minPrice === "string" ? Number(req.query.minPrice) : NaN;
+        const maxPrice = typeof req.query.maxPrice === "string" ? Number(req.query.maxPrice) : NaN;
+        const sort = typeof req.query.sort === "string" ? req.query.sort : "";
         const page = parseInt(req.query.page, 10) || 1;
         const limit = Math.min(parseInt(req.query.limit, 10) || 12, 24);
         const skip = (page - 1) * limit;
@@ -35,10 +38,16 @@ router.get("/", async (req, res, next) => {
         if (featured) query.isFeatured = true;
         if (category && category !== "All") query.category = category;
         if (search) query.name = { $regex: search, $options: "i" };
+        if (Number.isFinite(minPrice) && minPrice >= 0) query.price = { ...(query.price || {}), $gte: minPrice };
+        if (Number.isFinite(maxPrice) && maxPrice >= 0) query.price = { ...(query.price || {}), $lte: maxPrice };
+
+        let sortOption = { createdAt: -1 };
+        if (sort === "price_asc") sortOption = { price: 1 };
+        else if (sort === "price_desc") sortOption = { price: -1 };
 
         const [products, total] = await Promise.all([
             Product.find(query)
-                .sort({ createdAt: -1 })
+                .sort(sortOption)
                 .skip(skip)
                 .limit(limit),
             Product.countDocuments(query),

@@ -245,7 +245,7 @@ export default function ProductDetailPage() {
         fontWeight: 500,
     };
 
-    const isOutOfStock = product.isSoldOut || (product.stock ?? 0) <= 0;
+    const isOutOfStock = (product.stock ?? 0) <= 0;
 
     return (
         <div style={{ background: "#0a0e1a", minHeight: "100vh", fontFamily: "var(--font-outfit), 'Outfit', sans-serif" }}>
