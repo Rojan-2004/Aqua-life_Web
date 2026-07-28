@@ -7,6 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import { getAdminStats } from "@/lib/api/dashboard";
 import { getAdminNotifications, markNotificationsRead, AdminNotification } from "@/lib/api/admin/notification";
 import Image from "next/image";
+import AdminHeader from "@/components/AdminHeader";
 import Footer from "@/components/Footer";
 import {
     Wallet,
@@ -140,6 +141,8 @@ export default function AdminPage() {
 
     return (
         <div style={{ fontFamily: "var(--font-outfit), 'Outfit', sans-serif", background: "#0a0e1a", minHeight: "100vh" }}>
+
+            <AdminHeader />
 
             {/* Header Navigation Bar */}
             <header style={{

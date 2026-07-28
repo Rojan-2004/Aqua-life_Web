@@ -5,8 +5,10 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { getProduct } from "@/lib/api/product";
+import { getCatalogue } from "@/lib/api/product";
 import { toggleWishlist } from "@/lib/api/wishlist";
 import { addToCart } from "@/lib/api/cart";
+import ProductCard, { ProductCardData } from "@/app/catalogue/_components/ProductCard";
 import { PRODUCT_PLACEHOLDER } from "@/lib/utils/placeholder";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -47,6 +49,8 @@ export default function ProductDetailPage() {
     const [added, setAdded] = useState(false);
     const [mainImgFailed, setMainImgFailed] = useState(false);
     const [thumbFails, setThumbFails] = useState<Set<number>>(new Set());
+    const [recommendations, setRecommendations] = useState<ProductDetail[]>([]);
+    const [loadingRecs, setLoadingRecs] = useState(false);
 
     const handleAddToCart = async () => {
         if (!user) return;
@@ -83,6 +87,25 @@ export default function ProductDetailPage() {
             active = false;
         };
     }, [params.id]);
+
+    useEffect(() => {
+        if (!product?.category) return;
+        let active = true;
+        setLoadingRecs(true);
+        getCatalogue({ category: product.category, limit: 8 })
+            .then((data) => {
+                if (!active) return;
+                const items = (data.products ?? []) as ProductDetail[];
+                setRecommendations(items.filter((p) => p.id !== product.id));
+            })
+            .catch((e) => console.error("Failed to load recommendations", e))
+            .finally(() => {
+                if (active) setLoadingRecs(false);
+            });
+        return () => {
+            active = false;
+        };
+    }, [product?.category, product?.id]);
 
     const handleWishlist = async () => {
         if (!user) return;
@@ -375,6 +398,37 @@ export default function ProductDetailPage() {
             {/* Reviews */}
             <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 32px 60px" }}>
                 <ReviewSection productId={product.id} />
+            </div>
+
+            {/* Recommendations */}
+            <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 32px 80px" }}>
+                <h2 style={{ color: "#fff", fontSize: 22, fontWeight: 700, marginBottom: 6 }}>You may also like</h2>
+                <p style={{ color: "rgba(255,255,255,0.45)", fontSize: 13, marginBottom: 18 }}>More from {product.category}</p>
+                {loadingRecs ? (
+                    <p style={{ color: "rgba(255,255,255,0.5)" }}>Loading recommendations...</p>
+                ) : recommendations.length === 0 ? (
+                    <p style={{ color: "rgba(255,255,255,0.35)" }}>No similar products found right now.</p>
+                ) : (
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 20 }}>
+                        {recommendations.map((p) => (
+                            <ProductCard
+                                key={p.id}
+                                product={{
+                                    id: p.id,
+                                    name: p.name,
+                                    description: p.description,
+                                    price: p.price,
+                                    category: p.category,
+                                    images: p.images,
+                                    stock: p.stock,
+                                }}
+                                onAddToCart={user ? handleAddToCart : undefined}
+                                onToggleWishlist={user ? handleWishlist : undefined}
+                                isWishlisted={wishlisted && p.id === product.id}
+                            />
+                        ))}
+                    </div>
+                )}
             </div>
 
             <Footer />

@@ -130,9 +130,9 @@ export default function UserTable({
                                         <td style={{ padding: "14px 16px" }}>
                                             <div className="flex items-center gap-3">
                                                 <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-700 bg-slate-800">
-                                                    {u.profilePicture && u.profilePicture !== "default-profile.png" ? (
-                                                        <img src={`/profile_photos/${u.profilePicture}`} alt={getFullName(u)} className="h-full w-full object-cover" />
-                                                    ) : (
+                                                     {u.profilePicture && u.profilePicture !== "default-profile.png" ? (
+                                                         <img src={`/profile_pictures/${u.profilePicture}`} alt={getFullName(u)} className="h-full w-full object-cover" />
+                                                     ) : (
                                                         <span className="text-sm font-bold text-white">{getInitials(u)}</span>
                                                     )}
                                                 </div>
