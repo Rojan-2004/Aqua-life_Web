@@ -65,6 +65,7 @@ router.get("/", async (req, res, next) => {
                     name: i.product.name,
                     price: i.product.price,
                     category: i.product.category,
+                    stock: i.product.stock ?? 0,
                     images: toImageUrls(i.product.toObject()),
                 },
             }));

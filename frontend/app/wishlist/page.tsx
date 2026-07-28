@@ -66,7 +66,7 @@ export default function WishlistPage() {
         price: i.product.price,
         category: i.product.category,
         images: i.product.images || [],
-        stock: 0,
+        stock: (i.product as any).stock ?? 0,
     }));
 
     return (
