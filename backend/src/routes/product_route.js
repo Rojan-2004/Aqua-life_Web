@@ -109,4 +109,22 @@ router.get("/:id", async (req, res, next) => {
     }
 });
 
+// GET /api/v1/products/category-counts  (public category counts)
+router.get("/category-counts", async (req, res, next) => {
+    try {
+        const counts = await Product.aggregate([
+            { $match: { isActive: true } },
+            { $group: { _id: "$category", count: { $sum: 1 } } },
+            { $project: { category: "$_id", count: 1, _id: 0 } },
+        ]);
+
+        res.status(200).json({
+            success: true,
+            counts: counts.reduce((acc, cur) => ({ ...acc, [cur.category]: cur.count }), {}),
+        });
+    } catch (err) {
+        next(err);
+    }
+});
+
 module.exports = router;
