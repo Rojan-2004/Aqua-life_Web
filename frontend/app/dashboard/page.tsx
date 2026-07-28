@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { getUserDashboard, getAdminStats } from "@/lib/api/dashboard";
-import { getCatalogue } from "@/lib/api/product";
+import { getCatalogue, getCategoryCounts, CategoryCountResponse } from "@/lib/api/product";
 import ProductCard, { ProductCardData } from "../catalogue/_components/ProductCard";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -60,13 +60,13 @@ const heroSlides = [
     },
 ];
 
-const categoryShowcase = [
-    { name: "Fish", desc: "2,400+ species", href: "/catalogue?category=Fish" },
-    { name: "Plants", desc: "120 varieties", href: "/catalogue?category=Plants" },
-    { name: "Equipment", desc: "Premium brands", href: "/catalogue?category=Equipment" },
-    { name: "Food", desc: "450 products", href: "/catalogue?category=Food" },
-    { name: "Decoration", desc: "Unique pieces", href: "/catalogue?category=Decoration" },
-];
+    const categoryShowcase = [
+        { name: "Fish", key: "Fish", href: "/catalogue?category=Fish" },
+        { name: "Plants", key: "Plants", href: "/catalogue?category=Plants" },
+        { name: "Equipment", key: "Equipment", href: "/catalogue?category=Equipment" },
+        { name: "Food", key: "Food", href: "/catalogue?category=Food" },
+        { name: "Decoration", key: "Decoration", href: "/catalogue?category=Decoration" },
+    ];
 
 export default function DashboardPage() {
     const { user, loading, logout } = useAuth();
@@ -279,6 +279,7 @@ function CustomerView({ user, logout }: { user: any; logout: () => void }) {
         recentOrders: [],
     });
     const [featured, setFeatured] = useState<ProductCardData[]>([]);
+    const [categoryCounts, setCategoryCounts] = useState<Record<string, number>>({});
     const [loadingData, setLoadingData] = useState(true);
     const [activeSlide, setActiveSlide] = useState(0);
 
@@ -292,9 +293,10 @@ function CustomerView({ user, logout }: { user: any; logout: () => void }) {
 
         async function load() {
             try {
-                const [statsRes, catRes] = await Promise.allSettled([
+                const [statsRes, catRes, countsRes] = await Promise.allSettled([
                     getUserDashboard(),
                     getCatalogue({ limit: 4, featured: true }),
+                    getCategoryCounts(),
                 ]);
                 if (cancelled) return;
 
@@ -323,6 +325,12 @@ function CustomerView({ user, logout }: { user: any; logout: () => void }) {
                 } else {
                     console.error("Failed to load featured products", catRes.reason);
                 }
+
+                if (countsRes.status === "fulfilled") {
+                    setCategoryCounts(countsRes.value?.counts ?? {});
+                } else {
+                    console.error("Failed to load category counts", countsRes.reason);
+                }
             } finally {
                 if (!cancelled) setLoadingData(false);
             }
@@ -337,9 +345,9 @@ function CustomerView({ user, logout }: { user: any; logout: () => void }) {
     const name = user.firstName || user.username || user.name || user.email || "User";
 
     const customerStats = [
-        { label: "Total Orders", value: data.orders ?? 0, icon: "📦" },
-        { label: "Wishlist", value: data.wishlist ?? 0, icon: "❤️" },
-        { label: "My Reviews", value: data.reviews ?? 0, icon: "⭐" },
+        { label: "Total Orders", value: data.orders ?? 0, icon: "📦", href: "/dashboard/orders" },
+        { label: "Wishlist", value: data.wishlist ?? 0, icon: "❤️", href: "/wishlist" },
+        { label: "My Reviews", value: data.reviews ?? 0, icon: "⭐", href: "/dashboard/reviews" },
     ];
 
     return (
@@ -420,13 +428,17 @@ function CustomerView({ user, logout }: { user: any; logout: () => void }) {
             }}>
                 <div style={{ maxWidth: 1280, margin: "0 auto", display: "flex", gap: 48, alignItems: "center" }}>
                     {customerStats.map((s) => (
-                        <div key={s.label} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                            <span style={{ fontSize: 20 }}>{s.icon}</span>
-                            <div>
-                                <p style={{ color: "#fff", fontSize: 22, fontWeight: 700, lineHeight: 1 }}>{s.value}</p>
-                                <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 12, marginTop: 2 }}>{s.label}</p>
+                        <Link key={s.label} href={s.href || "#"} style={{ textDecoration: "none" }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderRadius: 12, background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", transition: "all 0.2s", cursor: "pointer" }}
+                                onMouseEnter={e => { e.currentTarget.style.borderColor = "rgba(77,217,232,0.3)"; e.currentTarget.style.background = "rgba(255,255,255,0.06)"; e.currentTarget.style.transform = "translateY(-2px)"; }}
+                                onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.06)"; e.currentTarget.style.background = "rgba(255,255,255,0.03)"; e.currentTarget.style.transform = "translateY(0)"; }}>
+                                <span style={{ fontSize: 20 }}>{s.icon}</span>
+                                <div>
+                                    <p style={{ color: "#fff", fontSize: 22, fontWeight: 700, lineHeight: 1 }}>{s.value}</p>
+                                    <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 12, marginTop: 2 }}>{s.label}</p>
+                                </div>
                             </div>
-                        </div>
+                        </Link>
                     ))}
                     <div style={{ marginLeft: "auto", display: "flex", gap: 10 }}>
                         <Link href="/dashboard/orders" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 20, padding: "8px 20px", color: "#fff", fontSize: 13, fontWeight: 700, textDecoration: "none" }}>
@@ -460,8 +472,8 @@ function CustomerView({ user, logout }: { user: any; logout: () => void }) {
                                     <p style={{ fontSize: 28, marginBottom: 8 }}>
                                         {c.name === "Fish" ? "🐠" : c.name === "Plants" ? "🌿" : c.name === "Equipment" ? "⚙️" : c.name === "Food" ? "🍽️" : "🪸"}
                                     </p>
-                                    <p style={{ color: "#fff", fontSize: 14, fontWeight: 600, marginBottom: 4 }}>{c.name}</p>
-                                    <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 12 }}>{c.desc}</p>
+                            <p style={{ color: "#fff", fontSize: 14, fontWeight: 600, marginBottom: 4 }}>{c.name}</p>
+                            <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 12 }}>{categoryCounts[c.key] ?? 0} products</p>
                                 </div>
                             </Link>
                         ))}

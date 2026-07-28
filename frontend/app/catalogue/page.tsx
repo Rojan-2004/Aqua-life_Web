@@ -17,13 +17,20 @@ interface Product extends ProductCardData {
     stock?: number;
 }
 
+function getCategoryFromUrl(): string {
+    if (typeof window === "undefined") return "All";
+    const params = new URLSearchParams(window.location.search);
+    const cat = params.get("category");
+    return CATEGORIES.includes(cat || "") ? (cat || "All") : "All";
+}
+
 export default function CataloguePage() {
     const { user } = useAuth();
     const [products, setProducts] = useState<Product[]>([]);
     const [total, setTotal] = useState(0);
     const [pages, setPages] = useState(1);
     const [page, setPage] = useState(1);
-    const [category, setCategory] = useState("All");
+    const [category, setCategory] = useState<string>(getCategoryFromUrl());
     const [search, setSearch] = useState("");
     const [sort, setSort] = useState("newest");
     const [minPrice, setMinPrice] = useState("");
@@ -117,6 +124,12 @@ export default function CataloguePage() {
                                     setCategory(cat);
                                     setPage(1);
                                     setLoading(true);
+                                    if (typeof window !== "undefined") {
+                                        const url = new URL(window.location.href);
+                                        if (cat === "All") url.searchParams.delete("category");
+                                        else url.searchParams.set("category", cat);
+                                        window.history.replaceState({}, "", url.toString());
+                                    }
                                 }}
                                 style={{
                                     display: "block",
