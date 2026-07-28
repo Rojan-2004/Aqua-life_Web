@@ -12,6 +12,7 @@ const createProductSchema = z.object({
     .string({ required_error: "Product description is required" })
     .min(5, "Description must be at least 5 characters long"),
   status: z.enum(["active", "inactive"]).optional(),
+  stock: z.coerce.number().min(0, "Stock cannot be negative").default(100),
 });
 
 const updateProductSchema = z.object({
@@ -28,6 +29,7 @@ const updateProductSchema = z.object({
     .min(5, "Description must be at least 5 characters long")
     .optional(),
   status: z.enum(["active", "inactive"]).optional(),
+  stock: z.coerce.number().min(0, "Stock cannot be negative").optional(),
 });
 
 module.exports = {

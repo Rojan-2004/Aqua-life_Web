@@ -11,6 +11,54 @@ const FREE_SHIPPING_THRESHOLD = 50000;
 
 router.use(protect);
 
+// GET /api/v1/orders  (user's own orders)
+router.get("/", async (req, res, next) => {
+    try {
+        const userId = req.user._id;
+        const page = parseInt(req.query.page, 10) || 1;
+        const limit = parseInt(req.query.limit, 10) || 10;
+        const skip = (page - 1) * limit;
+        const status = (req.query.status || "").trim();
+
+        let query = { user: userId };
+        if (status) {
+            query.status = status;
+        }
+
+        const total = await Order.countDocuments(query);
+        const orders = await Order.find(query)
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit)
+            .populate("items.product", "name image images price")
+            .lean();
+
+        const totalPages = Math.ceil(total / limit);
+
+        res.status(200).json({
+            success: true,
+            data: orders.map((o) => ({
+                ...o,
+                id: o._id.toString(),
+                items: (o.items || []).map((it) => ({
+                    ...it,
+                    product: it.product
+                        ? {
+                            ...it.product,
+                            id: it.product._id.toString(),
+                            image: it.product.image || null,
+                            images: it.product.images || [],
+                        }
+                        : null,
+                })),
+            })),
+            pagination: { page, limit, total, totalPages },
+        });
+    } catch (err) {
+        next(err);
+    }
+});
+
 // POST /api/v1/orders  (place order, clear cart, notify admin)
 router.post("/", async (req, res, next) => {
     try {
