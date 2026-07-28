@@ -26,21 +26,22 @@ export default function CataloguePage() {
     const [category, setCategory] = useState("All");
     const [search, setSearch] = useState("");
     const [sort, setSort] = useState("newest");
+    const [minPrice, setMinPrice] = useState("");
+    const [maxPrice, setMaxPrice] = useState("");
     const [loading, setLoading] = useState(true);
     const [addingId, setAddingId] = useState<string | null>(null);
     const [wishlistBusyId, setWishlistBusyId] = useState<string | null>(null);
 
-    const sortedProducts = React.useMemo(() => {
-        const list = [...products];
-        if (sort === "price_asc") list.sort((a, b) => a.price - b.price);
-        else if (sort === "price_desc") list.sort((a, b) => b.price - a.price);
-        else list.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
-        return list;
-    }, [products, sort]);
-
     useEffect(() => {
         let active = true;
-        getCatalogue({ page, category, search })
+        getCatalogue({
+                page,
+                category,
+                search,
+                minPrice: minPrice ? Number(minPrice) : undefined,
+                maxPrice: maxPrice ? Number(maxPrice) : undefined,
+                sort: sort === "newest" ? undefined : sort,
+            })
             .then((data) => {
                 if (!active) return;
                 setProducts(data.products ?? []);
@@ -57,7 +58,7 @@ export default function CataloguePage() {
         return () => {
             active = false;
         };
-    }, [page, category, search]);
+    }, [page, category, search, minPrice, maxPrice, sort]);
 
     const handleAddToCart = async (id: string) => {
         if (!user) return;
@@ -146,11 +147,15 @@ export default function CataloguePage() {
                             <input
                                 type="number"
                                 placeholder="Min"
+                                value={minPrice}
+                                onChange={(e) => { setMinPrice(e.target.value); setPage(1); setLoading(true); }}
                                 style={{ width: "50%", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, padding: "7px 10px", color: "#fff", fontSize: 13, fontFamily: "inherit", outline: "none" }}
                             />
                             <input
                                 type="number"
                                 placeholder="Max"
+                                value={maxPrice}
+                                onChange={(e) => { setMaxPrice(e.target.value); setPage(1); setLoading(true); }}
                                 style={{ width: "50%", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, padding: "7px 10px", color: "#fff", fontSize: 13, fontFamily: "inherit", outline: "none" }}
                             />
                         </div>
@@ -186,7 +191,7 @@ export default function CataloguePage() {
                         </div>
                     ) : (
                         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 20 }}>
-                            {sortedProducts.map((p) => (
+                            {products.map((p) => (
                                 <ProductCard
                                     key={p.id}
                                     product={p}

@@ -7,6 +7,9 @@ export const getCatalogue = async (params: {
     search?: string;
     limit?: number;
     featured?: boolean;
+    minPrice?: number;
+    maxPrice?: number;
+    sort?: string;
 }) => {
     try {
         const response = await axiosInstance.get(API.PRODUCT.GET_ALL, { params });
