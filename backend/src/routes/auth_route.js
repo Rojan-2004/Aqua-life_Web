@@ -12,12 +12,14 @@ const {
   updateProfile,
   updatePassword,
   uploadProfilePicture,
+  googleOAuth,
 } = require("../controllers/auth_controller");
 
 // Public routes
 router.post("/register", registerLimiter, register);
 router.post("/login", authLimiter, login);
 router.post("/refresh-token", refreshToken);
+router.post("/google", googleOAuth);
 
 // Protected routes (Both Bearer Token and HttpOnly Cookie methods are supported in protect middleware)
 router.get("/me", protect, getMe);

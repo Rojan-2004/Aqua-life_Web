@@ -3,6 +3,7 @@ const { registerSchema, loginSchema } = require("../validations/auth_validation"
 const { z } = require("zod");
 const jwt = require("jsonwebtoken");
 const HttpException = require("../utils/httpException");
+const axios = require("axios");
 
 const normalizeEmail = (value) => {
   if (typeof value !== "string") return "";
@@ -393,6 +394,72 @@ const updatePassword = async (req, res, next) => {
   }
 };
 
+const verifyGoogleToken = async (credential) => {
+  try {
+    const response = await axios.get(
+      `https://oauth2.googleapis.com/tokeninfo?id_token=${credential}`
+    );
+    const clientId = process.env.GOOGLE_CLIENT_ID;
+    if (
+      response.data &&
+      response.data.email_verified === "true" &&
+      (!clientId || response.data.aud === clientId)
+    ) {
+      return response.data;
+    }
+    return null;
+  } catch (err) {
+    return null;
+  }
+};
+
+// @desc    Google OAuth login
+// @route   POST /api/v1/auth/google
+// @access  Public
+const googleOAuth = async (req, res, next) => {
+  try {
+    const { credential } = req.body;
+
+    if (!credential) {
+      return res.status(400).json({ success: false, message: "Google credential is required" });
+    }
+
+    const googleUser = await verifyGoogleToken(credential);
+    if (!googleUser) {
+      return res.status(401).json({ success: false, message: "Invalid Google credential" });
+    }
+
+    const { email, sub, name, picture, given_name, family_name } = googleUser;
+
+    let user = await User.findOne({ email }).select("+refreshToken");
+    if (!user) {
+      user = new User({
+        firstName: given_name || (name ? name.split(" ")[0] : ""),
+        lastName: family_name || (name ? name.split(" ").slice(1).join(" ") : ""),
+        email,
+        username: normalizeUsername("", email),
+        provider: "google",
+        providerId: sub,
+        profilePicture: picture || "default-profile.png",
+        role: "user",
+        status: "active",
+      });
+    } else if (!user.providerId) {
+      user.providerId = sub;
+      user.provider = "google";
+    }
+
+    const accessToken = user.getSignedJwtToken();
+    const refreshToken = user.getSignedRefreshToken();
+    user.refreshToken = refreshToken;
+    await user.save();
+
+    sendTokenResponse(user, accessToken, refreshToken, 200, res, "google");
+  } catch (err) {
+    next(err);
+  }
+};
+
 module.exports = {
   register,
   login,
@@ -402,5 +469,6 @@ module.exports = {
   updateProfile,
   uploadProfilePicture,
   updatePassword,
+  googleOAuth,
 };
 
