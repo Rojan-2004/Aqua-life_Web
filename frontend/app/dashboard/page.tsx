@@ -337,9 +337,9 @@ function CustomerView({ user, logout }: { user: any; logout: () => void }) {
     const name = user.firstName || user.username || user.name || user.email || "User";
 
     const customerStats = [
-        { label: "Total Orders", value: data.orders ?? 0, icon: "📦" },
-        { label: "Wishlist", value: data.wishlist ?? 0, icon: "❤️" },
-        { label: "My Reviews", value: data.reviews ?? 0, icon: "⭐" },
+        { label: "Total Orders", value: data.orders ?? 0, icon: "📦", href: "/dashboard/orders" },
+        { label: "Wishlist", value: data.wishlist ?? 0, icon: "❤️", href: "/wishlist" },
+        { label: "My Reviews", value: data.reviews ?? 0, icon: "⭐", href: "/dashboard/reviews" },
     ];
 
     return (
@@ -420,13 +420,17 @@ function CustomerView({ user, logout }: { user: any; logout: () => void }) {
             }}>
                 <div style={{ maxWidth: 1280, margin: "0 auto", display: "flex", gap: 48, alignItems: "center" }}>
                     {customerStats.map((s) => (
-                        <div key={s.label} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                            <span style={{ fontSize: 20 }}>{s.icon}</span>
-                            <div>
-                                <p style={{ color: "#fff", fontSize: 22, fontWeight: 700, lineHeight: 1 }}>{s.value}</p>
-                                <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 12, marginTop: 2 }}>{s.label}</p>
+                        <Link key={s.label} href={s.href || "#"} style={{ textDecoration: "none" }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderRadius: 12, background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", transition: "all 0.2s", cursor: "pointer" }}
+                                onMouseEnter={e => { e.currentTarget.style.borderColor = "rgba(77,217,232,0.3)"; e.currentTarget.style.background = "rgba(255,255,255,0.06)"; e.currentTarget.style.transform = "translateY(-2px)"; }}
+                                onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.06)"; e.currentTarget.style.background = "rgba(255,255,255,0.03)"; e.currentTarget.style.transform = "translateY(0)"; }}>
+                                <span style={{ fontSize: 20 }}>{s.icon}</span>
+                                <div>
+                                    <p style={{ color: "#fff", fontSize: 22, fontWeight: 700, lineHeight: 1 }}>{s.value}</p>
+                                    <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 12, marginTop: 2 }}>{s.label}</p>
+                                </div>
                             </div>
-                        </div>
+                        </Link>
                     ))}
                     <div style={{ marginLeft: "auto", display: "flex", gap: 10 }}>
                         <Link href="/dashboard/orders" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 20, padding: "8px 20px", color: "#fff", fontSize: 13, fontWeight: 700, textDecoration: "none" }}>
