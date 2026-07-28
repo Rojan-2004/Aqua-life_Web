@@ -560,18 +560,6 @@ function CustomerView({ user, logout }: { user: any; logout: () => void }) {
                 </div>
             </section>
 
-            {/* Newsletter */}
-            <section style={{ background: "rgba(0,180,216,0.06)", borderTop: "1px solid rgba(0,180,216,0.15)", borderBottom: "1px solid rgba(0,180,216,0.15)", padding: "60px 48px" }}>
-                <div style={{ maxWidth: 520, margin: "0 auto", textAlign: "center" }}>
-                    <h2 style={{ color: "#fff", fontSize: 24, fontWeight: 700, marginBottom: 8 }}>Stay in the Loop</h2>
-                    <p style={{ color: "rgba(255,255,255,0.45)", fontSize: 14, marginBottom: 28 }}>Subscribe for new arrivals, care tips, and exclusive offers.</p>
-                    <div style={{ display: "flex", gap: 10 }}>
-                        <input placeholder="your@email.com" style={{ flex: 1, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 10, padding: "12px 16px", color: "#fff", fontSize: 14, fontFamily: "inherit", outline: "none" }} />
-                        <button style={{ background: "linear-gradient(135deg,#2d9cdb,#4dd9e8)", border: "none", borderRadius: 10, padding: "12px 24px", color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", whiteSpace: "nowrap" }}>Subscribe</button>
-                    </div>
-                </div>
-            </section>
-
             <Footer />
         </div>
     );
