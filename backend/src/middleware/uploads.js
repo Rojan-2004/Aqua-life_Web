@@ -41,7 +41,7 @@ const fileFilter = (req, file, cb) => {
     file.fieldname === "profilePicture" ||
     file.fieldname === "itemPhoto"
   ) {
-    if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/i)) {
+    if (!file.originalname.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
       cb(new Error("Image format not supported."), false);
       return;
     }

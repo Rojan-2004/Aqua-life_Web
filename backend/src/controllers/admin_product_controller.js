@@ -153,7 +153,6 @@ const createProduct = async (req, res, next) => {
       isActive: true,
       isFeatured: req.body.isFeatured === true || req.body.isFeatured === "true",
       specs: req.body.specs && typeof req.body.specs === "object" ? req.body.specs : {},
-      stock: parseInt(req.body.stock, 10) || 0,
     });
 
     res.status(201).json({

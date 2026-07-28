@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@types/nodemailer": "^8.0.1",
+    "axios": "^1.18.1",
     "bcryptjs": "^3.0.3",
     "colors": "^1.4.0",
     "cookie-parser": "^1.4.7",
