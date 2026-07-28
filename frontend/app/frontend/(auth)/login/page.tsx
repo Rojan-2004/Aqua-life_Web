@@ -80,22 +80,42 @@ export default function LoginPage() {
             background:     "#0a0e1a",
             minHeight:      "100vh",
             display:        "flex",
-            alignItems:     "center",
+            alignItems:     "stretch",
             justifyContent: "center",
             position:       "relative",
             overflow:       "hidden",
+            padding:        "16px",
         }}>
-            <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-
-            {/* Background glow orbs */}
-            <div style={{ position: "absolute", top: "-10%", left: "-5%", width: 500, height: 500, borderRadius: "50%", background: "radial-gradient(circle, rgba(45,156,219,0.12) 0%, transparent 70%)", pointerEvents: "none" }} />
-            <div style={{ position: "absolute", bottom: "-10%", right: "-5%", width: 400, height: 400, borderRadius: "50%", background: "radial-gradient(circle, rgba(77,217,232,0.08) 0%, transparent 70%)", pointerEvents: "none" }} />
-
-            {/* Card */}
+            {/* Left visual */}
             <div style={{
-                width:          "100%",
-                maxWidth:       420,
-                margin:         "0 16px",
+                flex: "1 1 42%",
+                position: "relative",
+                borderRadius: 24,
+                overflow: "hidden",
+                display: "flex",
+                alignItems: "flex-end",
+                padding: 32,
+                minHeight: 580,
+            }}>
+                <Image
+                    src="/assets/image/sign_img.png"
+                    alt="Sign in illustration"
+                    fill
+                    style={{ objectFit: "cover" }}
+                    priority
+                />
+                <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(10,14,26,0) 0%, rgba(10,14,26,0.75) 100%)" }} />
+                <div style={{ position: "relative", zIndex: 1 }}>
+                    <p style={{ color: "#fff", fontSize: 13, fontWeight: 600, textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 }}>AquaLife</p>
+                    <h2 style={{ color: "#fff", fontSize: 28, fontWeight: 700, lineHeight: 1.2, maxWidth: 520 }}>Explore the underwater world</h2>
+                </div>
+            </div>
+
+            {/* Right form panel */}
+            <div style={{
+                width: "100%",
+                maxWidth: 460,
+                margin: "0 auto",
                 background:     "rgba(255,255,255,0.04)",
                 border:         "1px solid rgba(255,255,255,0.09)",
                 borderRadius:   24,
@@ -103,8 +123,7 @@ export default function LoginPage() {
                 backdropFilter: "blur(24px)",
                 WebkitBackdropFilter: "blur(24px)",
                 boxShadow:      "0 24px 64px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04)",
-                position:       "relative",
-                zIndex:         1,
+                alignSelf:      "center",
             }}>
 
                 {/* Logo */}
