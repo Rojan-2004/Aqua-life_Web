@@ -8,6 +8,7 @@ import { handleDeleteProduct } from "@/lib/actions/admin/product-action";
 import { handleDeleteReview, handleUpdateReviewStatus } from "@/lib/actions/admin/review-action";
 import { PRODUCT_PLACEHOLDER } from "@/lib/utils/placeholder";
 import { toast } from "react-toastify";
+import AdminHeader from "@/components/AdminHeader";
 
 interface Review {
     id: string;
@@ -249,6 +250,7 @@ export default function ProductDetailPage() {
 
     return (
         <div style={{ background: "#0a0e1a", minHeight: "100vh", fontFamily: "var(--font-outfit), 'Outfit', sans-serif" }}>
+            <AdminHeader />
             <div style={{ maxWidth: 1280, margin: "0 auto", padding: "32px" }}>
                 {/* Header */}
                 <div style={{ marginBottom: 32, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 16 }}>
