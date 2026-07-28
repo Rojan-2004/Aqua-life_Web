@@ -4,10 +4,12 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { getCatalogue } from "@/lib/api/product";
 import { addToCart } from "@/lib/api/cart";
+import { toggleWishlist } from "@/lib/api/wishlist";
 import ProductCard, { ProductCardData } from "./_components/ProductCard";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useAuth } from "@/context/AuthContext";
+import { toast } from "react-toastify";
 
 const CATEGORIES = ["All", "Fish", "Food", "Equipment", "Plants", "Decoration"];
 
@@ -26,6 +28,7 @@ export default function CataloguePage() {
     const [sort, setSort] = useState("newest");
     const [loading, setLoading] = useState(true);
     const [addingId, setAddingId] = useState<string | null>(null);
+    const [wishlistBusyId, setWishlistBusyId] = useState<string | null>(null);
 
     const sortedProducts = React.useMemo(() => {
         const list = [...products];
@@ -61,10 +64,30 @@ export default function CataloguePage() {
         setAddingId(id);
         try {
             await addToCart(id, 1);
+            toast.success("Added to cart");
         } catch (e) {
             console.error("Add to cart failed", e);
+            toast.error("Failed to add to cart");
         } finally {
             setAddingId(null);
+        }
+    };
+
+    const handleToggleWishlist = async (id: string) => {
+        if (!user) return;
+        setWishlistBusyId(id);
+        try {
+            const res = await toggleWishlist(id);
+            if (res.wishlisted) {
+                toast.success("Added to wishlist");
+            } else {
+                toast.success("Removed from wishlist");
+            }
+        } catch (e) {
+            console.error("Wishlist toggle failed", e);
+            toast.error("Failed to update wishlist");
+        } finally {
+            setWishlistBusyId(null);
         }
     };
 
@@ -168,6 +191,8 @@ export default function CataloguePage() {
                                     key={p.id}
                                     product={p}
                                     onAddToCart={user ? handleAddToCart : undefined}
+                                    onToggleWishlist={user ? handleToggleWishlist : undefined}
+                                    isWishlisted={false}
                                 />
                             ))}
                         </div>

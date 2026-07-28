@@ -12,6 +12,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import BackButton from "@/components/BackButton";
 import ReviewSection from "@/components/ReviewSection";
+import { toast } from "react-toastify";
 
 interface Review {
     id: string;
@@ -53,9 +54,11 @@ export default function ProductDetailPage() {
         try {
             await addToCart(params.id, qty);
             setAdded(true);
+            toast.success("Added to cart");
             setTimeout(() => setAdded(false), 2000);
         } catch (e) {
             console.error("Add to cart failed", e);
+            toast.error("Failed to add to cart");
         } finally {
             setAdding(false);
         }
@@ -87,8 +90,14 @@ export default function ProductDetailPage() {
         try {
             const res = await toggleWishlist(params.id);
             setWishlisted(!!res.wishlisted);
+            if (res.wishlisted) {
+                toast.success("Added to wishlist");
+            } else {
+                toast.success("Removed from wishlist");
+            }
         } catch (e) {
             console.error("Wishlist toggle failed", e);
+            toast.error("Failed to update wishlist");
         } finally {
             setBusy(false);
         }
