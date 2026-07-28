@@ -3,8 +3,8 @@ const nextConfig = {
   devIndicators: {
     appIsrStatus: false,
   },
-  serverActions: {
-    bodySizeLimit: '5mb',
+  turbopack: {
+    root: "/Users/rojanmainali/Documents/web learning/project_files_aqq/aqua_life_web_project/frontend",
   },
   async rewrites() {
     return [
