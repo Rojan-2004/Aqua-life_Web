@@ -9,8 +9,8 @@ import { handleLoginUser, handleGoogleLogin } from "@/lib/actions/auth-action";
 import { LoginFormData, loginSchema } from "../_components/schema";
 import { useAuth } from "@/context/AuthContext";
 import Image from "next/image";
-import { useGoogleLogin } from "@react-oauth/google";
 import { toast } from "react-toastify";
+import { useGoogleSignIn } from "@/lib/hooks/useGoogleSignIn";
 
 export default function LoginPage() {
     const router = useRouter();
@@ -32,10 +32,11 @@ export default function LoginPage() {
         resolver: zodResolver(loginSchema),
     });
 
-    const googleLogin = useGoogleLogin({
-        onSuccess: async (response) => {
+    const { ready, error: googleError, signIn, retry } = useGoogleSignIn(
+        process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "",
+        async (credential) => {
             try {
-                const result = await handleGoogleLogin((response as any).credential || (response as any).id_token);
+                const result = await handleGoogleLogin(credential);
                 if (result.success && result.data) {
                     login(result.data);
                     router.push("/dashboard");
@@ -46,12 +47,14 @@ export default function LoginPage() {
             } catch (err) {
                 toast.error(err instanceof Error ? err.message : "Google Sign-In failed");
             }
-        },
-        onError: (err) => {
-            toast.error("Google Sign-In failed. Please try again.");
-            console.error(err);
-        },
-    });
+        }
+    );
+
+    useEffect(() => {
+        if (googleError) {
+            toast.error(googleError);
+        }
+    }, [googleError]);
 
     const onSubmit = async (data: LoginFormData) => {
         setError("");
@@ -175,7 +178,7 @@ export default function LoginPage() {
                     <div>
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 7 }}>
                             <label style={{ color: "rgba(255,255,255,0.5)", fontSize: 12, fontWeight: 500, letterSpacing: 0.5 }}>PASSWORD</label>
-                            <Link href="/frontend/forgot-password" style={{ color: "#4dd9e8", fontSize: 12, textDecoration: "none" }}>Forgot password?</Link>
+                            <Link href="/frontend/forget_password" style={{ color: "#4dd9e8", fontSize: 12, textDecoration: "none" }}>Forgot password?</Link>
                         </div>
                         <div style={{ position: "relative" }}>
                             <input
@@ -243,7 +246,8 @@ export default function LoginPage() {
                 {/* Google Sign-In */}
                 <button
                     type="button"
-                    onClick={() => googleLogin()}
+                    onClick={signIn}
+                    disabled={!ready}
                     style={{
                         width: "100%",
                         display: "flex",
@@ -258,11 +262,12 @@ export default function LoginPage() {
                         fontSize: 14,
                         fontWeight: 600,
                         fontFamily: "inherit",
-                        cursor: "pointer",
-                        marginBottom: 18,
+                        cursor: ready ? "pointer" : "not-allowed",
+                        marginBottom: 8,
                         transition: "opacity 0.15s",
+                        opacity: ready ? 1 : 0.6,
                     }}
-                >
+               >
                     <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path d="M22.56 12.25c0-.82-.07-1.61-.2-2.37H12v4.49h5.92a5.44 5.44 0 0 1-2.36 3.58v2.97h3.83c2.24-2.07 3.54-5.12 3.54-8.67z" fill="#4285F4" />
                         <path d="M12 23c3.02 0 5.55-1 7.38-2.69l-3.83-2.97c-1 .67-2.28 1.06-3.55 1.06-2.73 0-5.04-1.84-5.87-4.32H2.16v3.07C3.94 20.52 7.69 23 12 23z" fill="#34A853" />
@@ -271,6 +276,13 @@ export default function LoginPage() {
                     </svg>
                     Continue with Google
                 </button>
+
+                {googleError && (
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: 12, padding: "10px 14px", background: "rgba(248,113,113,0.08)", border: "1px solid rgba(248,113,113,0.25)", borderRadius: 10 }}>
+                        <span style={{ color: "#f87171", fontSize: 13 }}>⚠ {googleError}</span>
+                        <button type="button" onClick={retry} style={{ whiteSpace: "nowrap", padding: "6px 12px", borderRadius: 8, border: "1px solid rgba(248,113,113,0.35)", background: "rgba(248,113,113,0.12)", color: "#fff", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>Retry</button>
+                    </div>
+                )}
 
                 {/* Sign up link */}
                 <p style={{ textAlign: "center", color: "rgba(255,255,255,0.4)", fontSize: 14 }}>
