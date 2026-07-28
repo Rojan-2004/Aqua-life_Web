@@ -68,7 +68,7 @@ export const handleRequestPasswordReset = async (email: string) => {
     try{
         const result = await requestPasswordReset(email);
         if(result.success){
-            return { success: true, message: result.message };
+            return { success: true, message: result.message, devResetUrl: (result as any).devResetUrl };
         }else{
             return { success: false, message: result.message || 'Request password reset failed' };    
         }

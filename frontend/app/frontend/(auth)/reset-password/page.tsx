@@ -6,12 +6,11 @@ export default async function Page({
 }: {
     searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-    // get the search params
     const query = await searchParams;
-    const { token } = query;
+    const token = (query.token as string) || "";
     return (
         <div>
-            <ResetPasswordForm token={token as string} />
+            <ResetPasswordForm token={token} />
         </div>
     );
 }

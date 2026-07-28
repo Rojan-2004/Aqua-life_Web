@@ -1,9 +1,10 @@
 const User = require("../models/user_model");
-const { registerSchema, loginSchema } = require("../validations/auth_validation");
+const { registerSchema, loginSchema, requestPasswordResetSchema, resetPasswordSchema } = require("../validations/auth_validation");
 const { z } = require("zod");
 const jwt = require("jsonwebtoken");
 const HttpException = require("../utils/httpException");
 const axios = require("axios");
+const { sendPasswordResetEmail } = require("../utils/email");
 
 const normalizeEmail = (value) => {
   if (typeof value !== "string") return "";
@@ -460,6 +461,111 @@ const googleOAuth = async (req, res, next) => {
   }
 };
 
+// @desc    Request password reset
+// @route   POST /api/v1/auth/request-password-reset
+// @access  Public
+const requestPasswordReset = async (req, res, next) => {
+  try {
+    const validated = requestPasswordResetSchema.safeParse(req.body);
+    if (!validated.success) {
+      return res.status(400).json({
+        success: false,
+        message: formatZodError(validated.error),
+      });
+    }
+
+    const email = normalizeEmail(validated.data.email);
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(200).json({
+        success: true,
+        message: "If an account exists with that email, a reset link has been sent.",
+      });
+    }
+
+    const resetToken = jwt.sign(
+      { id: user._id, email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+
+    user.resetPasswordToken = resetToken;
+    user.resetPasswordExpire = Date.now() + 60 * 60 * 1000; // 1 hour
+    await user.save();
+
+    try {
+      const emailResult = await sendPasswordResetEmail(user.email, resetToken);
+    } catch (emailErr) {
+      console.error("Password reset email failed:", emailErr);
+    }
+
+    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3001";
+    const devResetUrl = `${frontendUrl}/frontend/reset-password?token=${encodeURIComponent(resetToken)}`;
+    console.log(`[DEV PASSWORD RESET] Use this link: ${devResetUrl}`);
+
+    return res.status(200).json({
+      success: true,
+      message: "If an account exists with that email, a reset link has been sent.",
+      ...(process.env.NODE_ENV !== "production" ? { devResetUrl } : {}),
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// @desc    Reset password
+// @route   POST /api/v1/auth/reset-password/:token
+// @access  Public
+const resetPassword = async (req, res, next) => {
+  try {
+    const validated = resetPasswordSchema.safeParse(req.body);
+    if (!validated.success) {
+      return res.status(400).json({
+        success: false,
+        message: formatZodError(validated.error),
+      });
+    }
+
+    const token = req.params.token;
+    if (!token) {
+      return res.status(400).json({ success: false, message: "Reset token is required" });
+    }
+
+    let decoded;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET);
+    } catch (err) {
+      return res.status(400).json({ success: false, message: "Invalid or expired reset token" });
+    }
+
+    const user = await User.findOne({
+      _id: decoded.id,
+      resetPasswordToken: token,
+      resetPasswordExpire: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      return res.status(400).json({ success: false, message: "Invalid or expired reset token" });
+    }
+
+    user.password = validated.data.password;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
+    user.markModified("password");
+    user.markModified("resetPasswordToken");
+    user.markModified("resetPasswordExpire");
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Password reset successfully. You can now log in.",
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 module.exports = {
   register,
   login,
@@ -469,6 +575,8 @@ module.exports = {
   updateProfile,
   uploadProfilePicture,
   updatePassword,
+  requestPasswordReset,
+  resetPassword,
   googleOAuth,
 };
 

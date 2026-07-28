@@ -12,6 +12,8 @@ const {
   updateProfile,
   updatePassword,
   uploadProfilePicture,
+  requestPasswordReset,
+  resetPassword,
   googleOAuth,
 } = require("../controllers/auth_controller");
 
@@ -20,6 +22,8 @@ router.post("/register", registerLimiter, register);
 router.post("/login", authLimiter, login);
 router.post("/refresh-token", refreshToken);
 router.post("/google", googleOAuth);
+router.post("/request-password-reset", requestPasswordReset);
+router.post("/reset-password/:token", resetPassword);
 
 // Protected routes (Both Bearer Token and HttpOnly Cookie methods are supported in protect middleware)
 router.get("/me", protect, getMe);

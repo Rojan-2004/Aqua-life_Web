@@ -5,9 +5,11 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { handleRegisterUser } from "@/lib/actions/auth-action";
+import { handleRegisterUser, handleGoogleLogin } from "@/lib/actions/auth-action";
 import { RegisterFormData, registerSchema } from "../_components/schema";
 import { useAuth } from "@/context/AuthContext";
+import { useGoogleSignIn } from "@/lib/hooks/useGoogleSignIn";
+import { toast } from "react-toastify";
 
 type RegisterApiData = Omit<RegisterFormData, "confirmPassword">;
 
@@ -54,6 +56,32 @@ export default function RegisterPage() {
             setIsSubmitting(false);
         }
     }
+
+    const { ready, error: googleError, signIn, retry } = useGoogleSignIn(
+        process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "",
+        async (credential) => {
+            try {
+                const result = await handleGoogleLogin(credential);
+                if (result.success && result.data) {
+                    toast.success("Welcome! Signed up with Google.");
+                    router.push("/dashboard");
+                } else {
+                    toast.error(result.message || "Google Sign-In failed");
+                }
+            } catch (err) {
+                toast.error(err instanceof Error ? err.message : "Google Sign-In failed");
+            }
+        }
+    );
+
+    console.log("[Google Auth Diagnostics] NEXT_PUBLIC_GOOGLE_CLIENT_ID:", process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID);
+    console.log("[Google Auth Diagnostics] Current origin:", typeof window !== "undefined" ? window.location.origin : "server");
+
+    useEffect(() => {
+        if (googleError) {
+            toast.error(googleError);
+        }
+    }, [googleError]);
 
     const inputStyle = {
         display: "block", width: "100%", padding: "11px 14px",
@@ -179,16 +207,35 @@ export default function RegisterPage() {
                         <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.08)" }} />
                     </div>
 
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 22 }}>
-                        {["Google", "Apple"].map((provider) => (
-                            <button
-                                key={provider}
-                                style={{ padding: 10, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, color: "rgba(255,255,255,0.7)", fontSize: 13, fontFamily: "inherit", cursor: "pointer" }}
-                            >
-                                {provider}
-                            </button>
-                        ))}
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 8 }}>
+                        <button
+                            type="button"
+                            onClick={signIn}
+                            disabled={!ready}
+                            style={{ padding: 10, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, color: "#fff", fontSize: 13, fontFamily: "inherit", cursor: ready ? "pointer" : "not-allowed", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8, opacity: ready ? 1 : 0.6 }}
+                        >
+                            <svg width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M22.56 12.25c0-.82-.07-1.61-.2-2.37H12v4.49h5.92a5.44 5.44 0 0 1-2.36 3.58v2.97h3.83c2.24-2.07 3.54-5.12 3.54-8.67z" fill="#4285F4" />
+                                <path d="M12 23c3.02 0 5.55-1 7.38-2.69l-3.83-2.97c-1 .67-2.28 1.06-3.55 1.06-2.73 0-5.04-1.84-5.87-4.32H2.16v3.07C3.94 20.52 7.69 23 12 23z" fill="#34A853" />
+                                <path d="M6.13 14.09a6.92 6.92 0 0 1 0-5.18V6.84H2.16A10.94 10.94 0 0 0 1 12c0 1.78.43 3.48 1.16 5.07l3.97-3.08z" fill="#FBBC05" />
+                                <path d="M12 4.58c1.54 0 2.93.53 4.02 1.58l3.01-3.01C17.52 1.04 15.01 0 12 0 7.69 0 3.94 2.48 2.16 6.93l3.97 3.07c.83-2.48 3.14-4.42 5.87-4.42z" fill="#EA4335" />
+                            </svg>
+                            Google
+                        </button>
+                        <button
+                            disabled
+                            style={{ padding: 10, background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 8, color: "rgba(255,255,255,0.35)", fontSize: 13, fontFamily: "inherit", cursor: "not-allowed", opacity: 0.6 }}
+                        >
+                            Apple
+                        </button>
                     </div>
+
+                    {googleError && (
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: 12, padding: "10px 14px", background: "rgba(248,113,113,0.08)", border: "1px solid rgba(248,113,113,0.25)", borderRadius: 10 }}>
+                            <span style={{ color: "#f87171", fontSize: 13 }}>⚠ {googleError}</span>
+                            <button type="button" onClick={retry} style={{ whiteSpace: "nowrap", padding: "6px 12px", borderRadius: 8, border: "1px solid rgba(248,113,113,0.35)", background: "rgba(248,113,113,0.12)", color: "#fff", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>Retry</button>
+                        </div>
+                    )}
 
                     <p style={{ textAlign: "center", fontSize: 13, color: "rgba(255,255,255,0.4)" }}>
                         Already have an account?{" "}
