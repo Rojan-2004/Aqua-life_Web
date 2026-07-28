@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { getUserDashboard, getAdminStats } from "@/lib/api/dashboard";
-import { getCatalogue } from "@/lib/api/product";
+import { getCatalogue, getCategoryCounts, CategoryCountResponse } from "@/lib/api/product";
 import ProductCard, { ProductCardData } from "../catalogue/_components/ProductCard";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -60,13 +60,13 @@ const heroSlides = [
     },
 ];
 
-const categoryShowcase = [
-    { name: "Fish", desc: "2,400+ species", href: "/catalogue?category=Fish" },
-    { name: "Plants", desc: "120 varieties", href: "/catalogue?category=Plants" },
-    { name: "Equipment", desc: "Premium brands", href: "/catalogue?category=Equipment" },
-    { name: "Food", desc: "450 products", href: "/catalogue?category=Food" },
-    { name: "Decoration", desc: "Unique pieces", href: "/catalogue?category=Decoration" },
-];
+    const categoryShowcase = [
+        { name: "Fish", key: "Fish", href: "/catalogue?category=Fish" },
+        { name: "Plants", key: "Plants", href: "/catalogue?category=Plants" },
+        { name: "Equipment", key: "Equipment", href: "/catalogue?category=Equipment" },
+        { name: "Food", key: "Food", href: "/catalogue?category=Food" },
+        { name: "Decoration", key: "Decoration", href: "/catalogue?category=Decoration" },
+    ];
 
 export default function DashboardPage() {
     const { user, loading, logout } = useAuth();
@@ -279,6 +279,7 @@ function CustomerView({ user, logout }: { user: any; logout: () => void }) {
         recentOrders: [],
     });
     const [featured, setFeatured] = useState<ProductCardData[]>([]);
+    const [categoryCounts, setCategoryCounts] = useState<Record<string, number>>({});
     const [loadingData, setLoadingData] = useState(true);
     const [activeSlide, setActiveSlide] = useState(0);
 
@@ -292,9 +293,10 @@ function CustomerView({ user, logout }: { user: any; logout: () => void }) {
 
         async function load() {
             try {
-                const [statsRes, catRes] = await Promise.allSettled([
+                const [statsRes, catRes, countsRes] = await Promise.allSettled([
                     getUserDashboard(),
                     getCatalogue({ limit: 4, featured: true }),
+                    getCategoryCounts(),
                 ]);
                 if (cancelled) return;
 
@@ -322,6 +324,12 @@ function CustomerView({ user, logout }: { user: any; logout: () => void }) {
                     setFeatured(catRes.value?.products ?? []);
                 } else {
                     console.error("Failed to load featured products", catRes.reason);
+                }
+
+                if (countsRes.status === "fulfilled") {
+                    setCategoryCounts(countsRes.value?.counts ?? {});
+                } else {
+                    console.error("Failed to load category counts", countsRes.reason);
                 }
             } finally {
                 if (!cancelled) setLoadingData(false);
@@ -464,8 +472,8 @@ function CustomerView({ user, logout }: { user: any; logout: () => void }) {
                                     <p style={{ fontSize: 28, marginBottom: 8 }}>
                                         {c.name === "Fish" ? "🐠" : c.name === "Plants" ? "🌿" : c.name === "Equipment" ? "⚙️" : c.name === "Food" ? "🍽️" : "🪸"}
                                     </p>
-                                    <p style={{ color: "#fff", fontSize: 14, fontWeight: 600, marginBottom: 4 }}>{c.name}</p>
-                                    <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 12 }}>{c.desc}</p>
+                            <p style={{ color: "#fff", fontSize: 14, fontWeight: 600, marginBottom: 4 }}>{c.name}</p>
+                            <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 12 }}>{categoryCounts[c.key] ?? 0} products</p>
                                 </div>
                             </Link>
                         ))}
