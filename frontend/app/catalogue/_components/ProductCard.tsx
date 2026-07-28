@@ -32,7 +32,7 @@ export default function ProductCard({ product, onAddToCart, onToggleWishlist, is
         product.createdAt &&
         Date.now() - new Date(product.createdAt).getTime() < 7 * 24 * 60 * 60 * 1000;
 
-    const isSoldOut = (product.stock ?? 1) <= 0;
+    const isSoldOut = (product.stock ?? 0) <= 0;
 
     return (
         <div

@@ -139,7 +139,7 @@ export default function ProductDetailPage() {
 
     const images = product.images?.length ? product.images : [];
 
-    const isOutOfStock = product.isSoldOut || (product.stock ?? 0) <= 0;
+    const isOutOfStock = (product.stock ?? 0) <= 0;
 
     return (
         <div
