@@ -6,7 +6,22 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { getAdminStats } from "@/lib/api/dashboard";
 import { getAdminNotifications, markNotificationsRead, AdminNotification } from "@/lib/api/admin/notification";
+import Image from "next/image";
 import Footer from "@/components/Footer";
+import {
+    Wallet,
+    Clock,
+    CheckCircle,
+    Calendar,
+    Package,
+    AlertTriangle,
+    Users,
+    PlusCircle,
+    BarChart3,
+    Bell,
+    LogOut,
+    ChevronRight,
+} from "lucide-react";
 
 interface AdminStats {
     revenue: number;
@@ -20,6 +35,23 @@ interface AdminStats {
     lowStockProducts?: number;
     totalUsers?: number;
 }
+
+const STAT_CARDS = [
+    { label: "Total Revenue", valueKey: "revenue", icon: Wallet, format: (v: number) => `Rs. ${v.toLocaleString()}`, href: "/admin/orders", title: "View all transactions" },
+    { label: "Pending Orders", valueKey: "pendingOrders", icon: Clock, href: "/admin/orders?status=pending", title: "View pending orders" },
+    { label: "Delivered Orders", valueKey: "deliveredOrders", icon: CheckCircle, href: "/admin/orders?status=delivered", title: "View delivered orders" },
+    { label: "Monthly Revenue", valueKey: "monthlyRevenue", icon: Calendar, format: (v: number) => `Rs. ${v.toLocaleString()}`, href: "/admin/orders", title: "View monthly transactions" },
+    { label: "Total Products", valueKey: "totalProducts", icon: Package, fallbackKey: "productsLive", href: "/admin/products", title: "Manage products" },
+    { label: "Low Stock", valueKey: "lowStockProducts", icon: AlertTriangle, href: "/admin/products", title: "View low stock products" },
+    { label: "Total Users", valueKey: "totalUsers", icon: Users, fallbackKey: "activeUsers", href: "/admin/users", title: "Manage users" },
+];
+
+const QUICK_ACTIONS = [
+    { label: "Add Product", href: "/admin/products/add", icon: PlusCircle, desc: "Create a new catalogue item" },
+    { label: "Manage Orders", href: "/admin/orders", icon: Package, desc: "Fulfil and update orders" },
+    { label: "Manage Users", href: "/admin/users", icon: Users, desc: "View accounts and roles" },
+    { label: "Inventory", href: "/admin/products", icon: BarChart3, desc: "View product catalog" },
+];
 
 export default function AdminPage() {
     const { user, loading, logout } = useAuth();
@@ -106,60 +138,63 @@ export default function AdminPage() {
         router.push("/frontend/login");
     };
 
-    const statCards = [
-        { label: "Total Revenue", value: `Rs. ${stats.revenue.toLocaleString()}`, icon: "💰", href: "/admin/orders", title: "View all transactions" },
-        { label: "Pending Orders", value: stats.pendingOrders ?? 0, icon: "⏳", href: "/admin/orders?status=pending", title: "View pending orders" },
-        { label: "Delivered Orders", value: stats.deliveredOrders ?? 0, icon: "✅", href: "/admin/orders?status=delivered", title: "View delivered orders" },
-        { label: "Monthly Revenue", value: `Rs. ${(stats.monthlyRevenue ?? 0).toLocaleString()}`, icon: "📅", href: "/admin/orders", title: "View monthly transactions" },
-        { label: "Total Products", value: stats.totalProducts || stats.productsLive, icon: "📦", href: "/admin/products", title: "Manage products" },
-        { label: "Low Stock", value: stats.lowStockProducts ?? 0, icon: "⚠️", href: "/admin/products", title: "View low stock products" },
-        { label: "Total Users", value: stats.totalUsers || stats.activeUsers, icon: "👤", href: "/admin/users", title: "Manage users" },
-    ];
-
-    const quickActions = [
-        { label: "Add Product", href: "/admin/products/add", icon: "➕", desc: "Create a new catalogue item" },
-        { label: "Manage Orders", href: "/admin/orders", icon: "📦", desc: "Fulfil and update orders" },
-        { label: "Manage Users", href: "/admin/users", icon: "👤", desc: "View accounts and roles" },
-        { label: "Inventory", href: "/admin/products", icon: "📊", desc: "View product catalog" },
-    ];
-
     return (
         <div style={{ fontFamily: "var(--font-outfit), 'Outfit', sans-serif", background: "#0a0e1a", minHeight: "100vh" }}>
 
             {/* Header Navigation Bar */}
             <header style={{
-                background: "rgba(17, 24, 39, 0.8)",
-                backdropFilter: "blur(12px)",
-                borderBottom: "1px solid rgba(255, 255, 255, 0.06)",
+                background: "rgba(10,14,26,0.95)",
+                backdropFilter: "blur(20px)",
+                WebkitBackdropFilter: "blur(20px)",
+                borderBottom: "1px solid rgba(255,255,255,0.07)",
                 position: "sticky",
                 top: 0,
-                zIndex: 100
+                zIndex: 100,
             }}>
-                <div style={{ maxWidth: 1440, margin: "0 auto", padding: "16px 32px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                        <span style={{ fontSize: 24, fontWeight: 800, background: "linear-gradient(135deg, #2d9cdb, #4dd9e8)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>🌊 AquaLife</span>
-                        <span style={{ color: "rgba(255,255,255,0.3)", fontSize: 13 }}>/ Admin</span>
-                    </div>
+                <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 48px", height: 64, display: "flex", alignItems: "center", gap: 32 }}>
+                    {/* Logo */}
+                    <Link href="/admin" style={{ textDecoration: "none", flexShrink: 0 }}>
+                        <Image
+                            src="/assets/logo/Aqua_life_logo.png"
+                            alt="AquaLife"
+                            width={120}
+                            height={36}
+                            style={{ objectFit: "contain" }}
+                            priority
+                        />
+                    </Link>
 
-                    <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 12, marginLeft: "auto" }}>
                         <Link
                             href="/dashboard"
                             style={{
-                                display: "flex",
+                                display: "inline-flex",
                                 alignItems: "center",
                                 gap: 6,
                                 textDecoration: "none",
                                 background: "rgba(255,255,255,0.04)",
                                 border: "1px solid rgba(255,255,255,0.08)",
-                                padding: "6px 14px",
-                                borderRadius: 30,
-                                color: "rgba(255,255,255,0.7)",
+                                padding: "8px 16px",
+                                borderRadius: 10,
+                                color: "rgba(255,255,255,0.85)",
                                 fontSize: 13,
                                 fontWeight: 600,
+                                transition: "border-color 0.15s, background 0.15s",
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.borderColor = "rgba(255,255,255,0.2)";
+                                e.currentTarget.style.background = "rgba(255,255,255,0.06)";
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)";
+                                e.currentTarget.style.background = "rgba(255,255,255,0.04)";
                             }}
                         >
-                            ⬅ Back to Dashboard
+                            <ChevronRight size={16} strokeWidth={2.5} style={{ transform: "rotate(180deg)" }} />
+                            Dashboard
                         </Link>
+
+                        <div style={{ width: 1, height: 20, background: "rgba(255,255,255,0.08)" }} />
 
                         <div style={{ position: "relative" }}>
                             <button
@@ -168,20 +203,33 @@ export default function AdminPage() {
                                     if (!showNotif) markRead();
                                 }}
                                 style={{
-                                    background: "rgba(255,255,255,0.05)",
-                                    border: "1px solid rgba(255,255,255,0.1)",
-                                    borderRadius: 30,
-                                    padding: "7px 14px",
+                                    display: "inline-flex",
+                                    alignItems: "center",
+                                    gap: 8,
+                                    background: "rgba(255,255,255,0.04)",
+                                    border: "1px solid rgba(255,255,255,0.08)",
+                                    borderRadius: 10,
+                                    padding: "8px 14px",
                                     color: "#fff",
                                     fontSize: 13,
+                                    fontWeight: 600,
                                     cursor: "pointer",
                                     fontFamily: "inherit",
                                     position: "relative",
+                                    transition: "border-color 0.15s, background 0.15s",
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.borderColor = "rgba(255,255,255,0.2)";
+                                    e.currentTarget.style.background = "rgba(255,255,255,0.06)";
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)";
+                                    e.currentTarget.style.background = "rgba(255,255,255,0.04)";
                                 }}
                             >
-                                🔔
+                                <Bell size={16} />
                                 {unread > 0 && (
-                                    <span style={{ background: "#f87171", color: "#fff", borderRadius: "50%", fontSize: 10, fontWeight: 700, padding: "1px 5px", marginLeft: 4 }}>
+                                    <span style={{ background: "#f87171", color: "#fff", borderRadius: "50%", fontSize: 10, fontWeight: 700, padding: "0px 5px", minWidth: 18, height: 18, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
                                         {unread}
                                     </span>
                                 )}
@@ -209,15 +257,32 @@ export default function AdminPage() {
                         <button
                             onClick={handleLogout}
                             style={{
-                                background: "transparent",
-                                border: "none",
-                                color: "rgba(255,255,255,0.5)",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: 6,
+                                background: "rgba(255,255,255,0.04)",
+                                border: "1px solid rgba(255,255,255,0.08)",
+                                borderRadius: 10,
+                                padding: "8px 14px",
+                                color: "rgba(255,255,255,0.75)",
                                 fontSize: 13,
                                 fontWeight: 600,
                                 cursor: "pointer",
                                 fontFamily: "inherit",
+                                transition: "border-color 0.15s, background 0.15s",
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.borderColor = "rgba(248,113,113,0.3)";
+                                e.currentTarget.style.background = "rgba(248,113,113,0.08)";
+                                e.currentTarget.style.color = "#f87171";
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)";
+                                e.currentTarget.style.background = "rgba(255,255,255,0.04)";
+                                e.currentTarget.style.color = "rgba(255,255,255,0.75)";
                             }}
                         >
+                            <LogOut size={16} />
                             Logout
                         </button>
                     </div>
@@ -225,12 +290,12 @@ export default function AdminPage() {
             </header>
 
             {/* Admin Content */}
-            <section className="max-w-7xl mx-auto px-8 lg:px-10 py-8">
-                <div style={{ marginBottom: 40 }}>
-                    <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 12, textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 }}>
+            <section style={{ maxWidth: 1280, margin: "0 auto", padding: "32px 32px 64px" }}>
+                <div style={{ marginBottom: 32 }}>
+                    <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 12, fontWeight: 600, textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 }}>
                         Admin Panel
                     </p>
-                    <h1 style={{ color: "#fff", fontSize: 36, fontWeight: 700 }}>
+                    <h1 style={{ color: "#fff", fontSize: 30, fontWeight: 700 }}>
                         Store Overview
                     </h1>
                     <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 14, marginTop: 8 }}>
@@ -239,62 +304,115 @@ export default function AdminPage() {
                 </div>
 
                 {/* Stat Cards */}
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 16, marginBottom: 40 }}>
-                    {statCards.map((s) => (
-                        <Link key={s.label} href={s.href} style={{ textDecoration: "none" }}>
-                            <div title={s.title} style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, padding: 20, transition: "0.2s all", cursor: "pointer" }}
-                                onMouseEnter={(e) => {
-                                    e.currentTarget.style.border = "1px solid rgba(77,217,232,0.3)";
-                                    e.currentTarget.style.background = "rgba(77,217,232,0.05)";
-                                    e.currentTarget.style.transform = "translateY(-2px)";
+                <div style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(4, 1fr)",
+                    gap: 16,
+                    marginBottom: 32,
+                }}>
+                    {STAT_CARDS.map((s, idx) => {
+                        const Icon = s.icon;
+                        const raw = (stats as any)[s.valueKey];
+                        const fallback = s.fallbackKey ? (stats as any)[s.fallbackKey] : undefined;
+                        const display = typeof s.format === "function" ? s.format(raw ?? 0) : (raw ?? fallback ?? 0);
+                        return (
+                            <Link key={s.label + idx} href={s.href} style={{ textDecoration: "none" }}>
+                                <div title={s.title} style={{
+                                    background: "rgba(255,255,255,0.03)",
+                                    border: "1px solid rgba(255,255,255,0.08)",
+                                    borderRadius: 14,
+                                    padding: "18px 20px",
+                                    transition: "all 0.2s",
+                                    cursor: "pointer",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: 12,
                                 }}
-                                onMouseLeave={(e) => {
-                                    e.currentTarget.style.border = "1px solid rgba(255,255,255,0.1)";
-                                    e.currentTarget.style.background = "rgba(255,255,255,0.05)";
-                                    e.currentTarget.style.transform = "translateY(0)";
-                                }}
-                            >
-                                <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 12, marginBottom: 4 }}>{s.label}</p>
-                                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                                    <span style={{ fontSize: 20 }}>{s.icon}</span>
-                                    <p style={{ color: "#fff", fontSize: 22, fontWeight: 700 }}>{s.value}</p>
+                                    onMouseEnter={(e) => {
+                                        e.currentTarget.style.borderColor = "rgba(77,217,232,0.35)";
+                                        e.currentTarget.style.background = "rgba(77,217,232,0.06)";
+                                        e.currentTarget.style.transform = "translateY(-2px)";
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)";
+                                        e.currentTarget.style.background = "rgba(255,255,255,0.03)";
+                                        e.currentTarget.style.transform = "translateY(0)";
+                                    }}
+                                >
+                                    <span style={{
+                                        width: 36,
+                                        height: 36,
+                                        borderRadius: 10,
+                                        background: "rgba(77,217,232,0.1)",
+                                        border: "1px solid rgba(77,217,232,0.15)",
+                                        display: "inline-flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        color: "#4dd9e8",
+                                        flexShrink: 0,
+                                    }}>
+                                        <Icon size={18} strokeWidth={2} />
+                                    </span>
+                                    <div style={{ minWidth: 0 }}>
+                                        <p style={{ color: "rgba(255,255,255,0.55)", fontSize: 12, marginBottom: 2 }}>{s.label}</p>
+                                        <p style={{ color: "#fff", fontSize: 18, fontWeight: 700, letterSpacing: "-0.2px" }}>{display}</p>
+                                    </div>
                                 </div>
-                            </div>
-                        </Link>
-                    ))}
+                            </Link>
+                        );
+                    })}
                 </div>
 
                 {/* Quick Actions */}
-                <div style={{ marginBottom: 40 }}>
-                    <h2 style={{ color: "#fff", fontSize: 20, fontWeight: 600, marginBottom: 16 }}>Quick Actions</h2>
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 16 }}>
-                        {quickActions.map((q) => (
-                            <Link key={q.label} href={q.href} style={{ textDecoration: "none", display: "block" }}>
-                                <div style={{
-                                    background: "rgba(255,255,255,0.05)",
-                                    border: "1px solid rgba(255,255,255,0.1)",
-                                    borderRadius: 12,
-                                    padding: 20,
-                                    cursor: "pointer",
-                                    transition: "0.2s all",
-                                }}
-                                    onMouseEnter={(e) => {
-                                        e.currentTarget.style.border = "1px solid rgba(77,217,232,0.3)";
-                                        e.currentTarget.style.background = "rgba(77,217,232,0.05)";
+                <div style={{ marginBottom: 32 }}>
+                    <h2 style={{ color: "#fff", fontSize: 18, fontWeight: 600, marginBottom: 14 }}>Quick Actions</h2>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16 }}>
+                        {QUICK_ACTIONS.map((q) => {
+                            const Icon = q.icon;
+                            return (
+                                <Link key={q.label} href={q.href} style={{ textDecoration: "none", display: "block" }}>
+                                    <div style={{
+                                        background: "rgba(255,255,255,0.03)",
+                                        border: "1px solid rgba(255,255,255,0.08)",
+                                        borderRadius: 14,
+                                        padding: "18px 20px",
+                                        cursor: "pointer",
+                                        transition: "all 0.2s",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: 12,
                                     }}
-                                    onMouseLeave={(e) => {
-                                        e.currentTarget.style.border = "1px solid rgba(255,255,255,0.1)";
-                                        e.currentTarget.style.background = "rgba(255,255,255,0.05)";
-                                    }}
-                                >
-                                    <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
-                                        <span style={{ fontSize: 20 }}>{q.icon}</span>
-                                        <h3 style={{ color: "#fff", fontSize: 16, fontWeight: 600 }}>{q.label}</h3>
+                                        onMouseEnter={(e) => {
+                                            e.currentTarget.style.borderColor = "rgba(77,217,232,0.35)";
+                                            e.currentTarget.style.background = "rgba(77,217,232,0.06)";
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)";
+                                            e.currentTarget.style.background = "rgba(255,255,255,0.03)";
+                                        }}
+                                    >
+                                        <span style={{
+                                            width: 36,
+                                            height: 36,
+                                            borderRadius: 10,
+                                            background: "rgba(77,217,232,0.1)",
+                                            border: "1px solid rgba(77,217,232,0.15)",
+                                            display: "inline-flex",
+                                            alignItems: "center",
+                                            justifyContent: "center",
+                                            color: "#4dd9e8",
+                                            flexShrink: 0,
+                                        }}>
+                                            <Icon size={18} strokeWidth={2} />
+                                        </span>
+                                        <div style={{ minWidth: 0 }}>
+                                            <h3 style={{ color: "#fff", fontSize: 14, fontWeight: 600, marginBottom: 2 }}>{q.label}</h3>
+                                            <p style={{ color: "rgba(255,255,255,0.55)", fontSize: 12, lineHeight: 1.4 }}>{q.desc}</p>
+                                        </div>
                                     </div>
-                                    <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 13 }}>{q.desc}</p>
-                                </div>
-                            </Link>
-                        ))}
+                                </Link>
+                            );
+                        })}
                     </div>
                 </div>
 

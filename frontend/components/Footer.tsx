@@ -4,7 +4,7 @@ export default function Footer() {
     return (
         <footer style={{ background: "#070b14", borderTop: "1px solid rgba(255,255,255,0.06)", padding: "64px 48px 32px" }}>
             <div style={{ maxWidth: 1280, margin: "0 auto" }}>
-                <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr", gap: 48, marginBottom: 48 }}>
+                <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr", gap: 48, marginBottom: 48 }}>
 
                     {/* Brand column */}
                     <div>
@@ -34,14 +34,6 @@ export default function Footer() {
                         {["Privacy Policy", "Refund Policy", "Shipping Policy", "Terms of Service"].map((l) => (
                             <p key={l} style={{ color: "rgba(255,255,255,0.4)", fontSize: 13, marginBottom: 10, cursor: "pointer" }}>{l}</p>
                         ))}
-                    </div>
-
-                    {/* Newsletter column */}
-                    <div>
-                        <p style={{ color: "#fff", fontWeight: 600, fontSize: 14, marginBottom: 16 }}>Newsletter</p>
-                        <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 13, marginBottom: 14, lineHeight: 1.6 }}>Subscribe for special offers and aquarium tips.</p>
-                        <input placeholder="your@email.com" style={{ width: "100%", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, padding: "10px 12px", color: "#fff", fontSize: 13, fontFamily: "inherit", outline: "none", marginBottom: 8, boxSizing: "border-box" }} />
-                        <button style={{ width: "100%", background: "linear-gradient(135deg,#2d9cdb,#4dd9e8)", border: "none", borderRadius: 8, padding: "10px 0", color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>Subscribe</button>
                     </div>
                 </div>
 

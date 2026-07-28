@@ -198,7 +198,7 @@ export default function RegisterPage() {
             </div>
 
             <footer style={{ background: "#0d1424", borderTop: "1px solid rgba(255,255,255,0.06)", padding: "36px 32px 20px" }}>
-                <div style={{ maxWidth: 1000, margin: "0 auto", display: "grid", gridTemplateColumns: "1.5fr 1fr 1fr 1.4fr", gap: 28, marginBottom: 24 }}>
+                <div style={{ maxWidth: 1000, margin: "0 auto", display: "grid", gridTemplateColumns: "1.5fr 1fr 1fr", gap: 28, marginBottom: 24 }}>
                     <div>
                         <p style={{ color: "#4dd9e8", fontWeight: 700, marginBottom: 8 }}>AquaLife</p>
                         <p style={{ color: "rgba(255,255,255,0.3)", fontSize: 12, lineHeight: 1.6 }}>Premium aquatics and life support systems for the modern aquarist. Specializing in rare species and tech-forward reef management.</p>
@@ -214,14 +214,6 @@ export default function RegisterPage() {
                         {["Return Policy", "Terms of Service", "Privacy Policy"].map((item) => (
                             <p key={item} style={{ marginBottom: 8 }}><a href="#" style={{ color: "rgba(255,255,255,0.3)", textDecoration: "none", fontSize: 13 }}>{item}</a></p>
                         ))}
-                    </div>
-                    <div>
-                        <p style={{ color: "rgba(255,255,255,0.45)", fontSize: 10, textTransform: "uppercase", letterSpacing: 1, marginBottom: 12 }}>Newsletter</p>
-                        <p style={{ color: "rgba(255,255,255,0.3)", fontSize: 12, marginBottom: 10 }}>Stay updated on new arrivals and seasonal offers.</p>
-                        <div style={{ display: "flex", border: "1px solid rgba(255,255,255,0.09)", borderRadius: 8, overflow: "hidden" }}>
-                            <input type="email" placeholder="Your Email" style={{ flex: 1, padding: "8px 12px", background: "rgba(255,255,255,0.04)", border: "none", color: "#fff", fontSize: 12, fontFamily: "inherit", outline: "none" }} />
-                            <button style={{ padding: "8px 14px", background: "#2d9cdb", border: "none", color: "#fff", cursor: "pointer", fontWeight: 600, fontFamily: "inherit" }}>JOIN</button>
-                        </div>
                     </div>
                 </div>
                 <p style={{ maxWidth: 1000, margin: "0 auto", paddingTop: 16, borderTop: "1px solid rgba(255,255,255,0.05)", textAlign: "center", color: "rgba(255,255,255,0.18)", fontSize: 11 }}>
