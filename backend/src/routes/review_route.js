@@ -4,6 +4,48 @@ const Review = require("../models/review_model");
 const Order = require("../models/order_model");
 const { protect } = require("../middleware/auth");
 
+function toImageArray(p) {
+    if (Array.isArray(p.images) && p.images.length) return p.images;
+    if (p.image) return [p.image];
+    return [];
+}
+
+function toImageUrls(p) {
+    const DEFAULT_IMAGE = "default-product.png";
+    return toImageArray(p)
+        .filter((img) => img && img !== DEFAULT_IMAGE && !img.startsWith("http"))
+        .map((img) => `/item_photos/${img}`);
+}
+
+// GET — current user's own reviews with product info
+router.get("/my", protect, async (req, res, next) => {
+    try {
+        const reviews = await Review.find({ user: req.user._id, status: { $ne: "hidden" } })
+            .sort({ createdAt: -1 })
+            .populate("product", "name price category image images");
+
+        const mapped = reviews.map(r => {
+            const obj = r.product ? r.product.toObject() : {};
+            return {
+                id: r._id.toString(),
+                productId: obj._id ? obj._id.toString() : null,
+                productName: obj.name || "Unknown Product",
+                productPrice: obj.price || 0,
+                productCategory: obj.category || "",
+                productImages: toImageUrls(obj),
+                rating: r.rating,
+                comment: r.comment,
+                createdAt: r.createdAt,
+                status: r.status,
+            };
+        });
+
+        res.status(200).json({ success: true, reviews: mapped, total: mapped.length });
+    } catch (err) {
+        next(err);
+    }
+});
+
 // GET — fetch reviews for a product
 router.get("/", async (req, res, next) => {
     try {
