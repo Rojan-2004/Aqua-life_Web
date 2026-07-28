@@ -77,6 +77,18 @@ export const resetPassword = async (token: string, newPassword: string) => {
     }
 }
 
+export const googleAuth = async (credential: string) => {
+    try {
+        const response = await axiosInstance.post(
+            API.AUTH.GOOGLE,
+            { credential }
+        );
+        return response.data;
+    } catch (error: Error | any) {
+        throw new Error(error?.response?.data?.message || 'Google authentication failed');
+    }
+};
+
 export const updateUserProfile = async (data: any) => {
     try {
         const response = await axiosInstance.put(API.AUTH.PROFILE_UPDATE, data);

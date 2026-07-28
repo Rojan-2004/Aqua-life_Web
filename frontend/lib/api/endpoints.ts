@@ -9,6 +9,7 @@ export const API = {
         UPLOAD_PICTURE: "/api/v1/auth/upload-profile-picture",
         REQUEST_PASSWORD_RESET: "/api/v1/auth/request-password-reset",
         RESET_PASSWORD: (token: string): string => `/api/v1/auth/reset-password/${token}`,
+        GOOGLE: "/api/v1/auth/google",
     },
     ADMIN: {
         BLOG: {

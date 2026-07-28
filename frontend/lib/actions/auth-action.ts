@@ -1,5 +1,5 @@
 "use server"; // server side api call
-import { register, login, whoami, updateUser, requestPasswordReset, resetPassword, updateUserProfile, updateUserPassword, uploadProfilePicture } from "@/lib/api/auth";
+import { register, login, whoami, updateUser, requestPasswordReset, resetPassword, updateUserProfile, updateUserPassword, uploadProfilePicture, googleAuth } from "@/lib/api/auth";
 import { LoginFormData, RegisterFormData } from "@/app/frontend/(auth)/_components/schema";
 import { setTokenCookie, storeUserData } from "@/lib/cookies";
 import { revalidatePath } from "next/cache";
@@ -129,5 +129,20 @@ export const handleUploadProfilePicture = async (data: FormData) => {
         return { success: false, message: result.message || "Failed to upload image" };
     } catch (error: any) {
         return { success: false, message: error?.message || "Failed to upload image" };
+    }
+}
+
+export const handleGoogleLogin = async (credential: string) => {
+    try {
+        const result = await googleAuth(credential);
+        if (result.success && result.data) {
+            const token = result.token;
+            await setTokenCookie(token);
+            await storeUserData(result.data);
+            return { success: true, message: result.message, data: result.data };
+        }
+        return { success: false, message: result.message || "Google authentication failed" };
+    } catch (error: any) {
+        return { success: false, message: error?.message || "Google authentication failed" };
     }
 };
