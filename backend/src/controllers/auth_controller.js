@@ -552,6 +552,9 @@ const resetPassword = async (req, res, next) => {
     user.password = validated.data.password;
     user.resetPasswordToken = undefined;
     user.resetPasswordExpire = undefined;
+    user.markModified("password");
+    user.markModified("resetPasswordToken");
+    user.markModified("resetPasswordExpire");
     await user.save();
 
     return res.status(200).json({
