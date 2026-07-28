@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { getAdminStats } from "@/lib/api/dashboard";
 import { getAdminNotifications, markNotificationsRead, AdminNotification } from "@/lib/api/admin/notification";
+import Image from "next/image";
 import Footer from "@/components/Footer";
 
 interface AdminStats {
@@ -128,20 +129,28 @@ export default function AdminPage() {
 
             {/* Header Navigation Bar */}
             <header style={{
-                background: "rgba(17, 24, 39, 0.8)",
-                backdropFilter: "blur(12px)",
-                borderBottom: "1px solid rgba(255, 255, 255, 0.06)",
+                background: "rgba(10,14,26,0.95)",
+                backdropFilter: "blur(20px)",
+                WebkitBackdropFilter: "blur(20px)",
+                borderBottom: "1px solid rgba(255,255,255,0.07)",
                 position: "sticky",
                 top: 0,
-                zIndex: 100
+                zIndex: 100,
             }}>
-                <div style={{ maxWidth: 1440, margin: "0 auto", padding: "16px 32px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                        <span style={{ fontSize: 24, fontWeight: 800, background: "linear-gradient(135deg, #2d9cdb, #4dd9e8)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>🌊 AquaLife</span>
-                        <span style={{ color: "rgba(255,255,255,0.3)", fontSize: 13 }}>/ Admin</span>
-                    </div>
+                <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 48px", height: 64, display: "flex", alignItems: "center", gap: 40 }}>
+                    {/* Logo */}
+                    <Link href="/admin" style={{ textDecoration: "none", flexShrink: 0 }}>
+                        <Image
+                            src="/assets/logo/Aqua_life_logo.png"
+                            alt="AquaLife"
+                            width={120}
+                            height={36}
+                            style={{ objectFit: "contain" }}
+                            priority
+                        />
+                    </Link>
 
-                    <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 20, marginLeft: "auto" }}>
                         <Link
                             href="/dashboard"
                             style={{
