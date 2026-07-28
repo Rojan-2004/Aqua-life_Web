@@ -5,10 +5,12 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { handleLoginUser } from "@/lib/actions/auth-action";
+import { handleLoginUser, handleGoogleLogin } from "@/lib/actions/auth-action";
 import { LoginFormData, loginSchema } from "../_components/schema";
 import { useAuth } from "@/context/AuthContext";
 import Image from "next/image";
+import { useGoogleLogin } from "@react-oauth/google";
+import { toast } from "react-toastify";
 
 export default function LoginPage() {
     const router = useRouter();
@@ -28,6 +30,27 @@ export default function LoginPage() {
         formState: { errors }
     } = useForm<LoginFormData>({
         resolver: zodResolver(loginSchema),
+    });
+
+    const googleLogin = useGoogleLogin({
+        onSuccess: async (response) => {
+            try {
+                const result = await handleGoogleLogin((response as any).credential || (response as any).id_token);
+                if (result.success && result.data) {
+                    login(result.data);
+                    router.push("/dashboard");
+                    toast.success("Welcome! Logged in with Google.");
+                } else {
+                    toast.error(result.message || "Google Sign-In failed");
+                }
+            } catch (err) {
+                toast.error(err instanceof Error ? err.message : "Google Sign-In failed");
+            }
+        },
+        onError: (err) => {
+            toast.error("Google Sign-In failed. Please try again.");
+            console.error(err);
+        },
     });
 
     const onSubmit = async (data: LoginFormData) => {
@@ -197,6 +220,38 @@ export default function LoginPage() {
                     <span style={{ color: "rgba(255,255,255,0.25)", fontSize: 12 }}>or</span>
                     <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.07)" }} />
                 </div>
+
+                {/* Google Sign-In */}
+                <button
+                    type="button"
+                    onClick={() => googleLogin()}
+                    style={{
+                        width: "100%",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: 10,
+                        background: "rgba(255,255,255,0.05)",
+                        border: "1px solid rgba(255,255,255,0.12)",
+                        borderRadius: 12,
+                        padding: "12px 0",
+                        color: "#fff",
+                        fontSize: 14,
+                        fontWeight: 600,
+                        fontFamily: "inherit",
+                        cursor: "pointer",
+                        marginBottom: 18,
+                        transition: "opacity 0.15s",
+                    }}
+                >
+                    <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M22.56 12.25c0-.82-.07-1.61-.2-2.37H12v4.49h5.92a5.44 5.44 0 0 1-2.36 3.58v2.97h3.83c2.24-2.07 3.54-5.12 3.54-8.67z" fill="#4285F4" />
+                        <path d="M12 23c3.02 0 5.55-1 7.38-2.69l-3.83-2.97c-1 .67-2.28 1.06-3.55 1.06-2.73 0-5.04-1.84-5.87-4.32H2.16v3.07C3.94 20.52 7.69 23 12 23z" fill="#34A853" />
+                        <path d="M6.13 14.09a6.92 6.92 0 0 1 0-5.18V6.84H2.16A10.94 10.94 0 0 0 1 12c0 1.78.43 3.48 1.16 5.07l3.97-3.08z" fill="#FBBC05" />
+                        <path d="M12 4.58c1.54 0 2.93.53 4.02 1.58l3.01-3.01C17.52 1.04 15.01 0 12 0 7.69 0 3.94 2.48 2.16 6.93l3.97 3.07c.83-2.48 3.14-4.42 5.87-4.42z" fill="#EA4335" />
+                    </svg>
+                    Continue with Google
+                </button>
 
                 {/* Sign up link */}
                 <p style={{ textAlign: "center", color: "rgba(255,255,255,0.4)", fontSize: 14 }}>

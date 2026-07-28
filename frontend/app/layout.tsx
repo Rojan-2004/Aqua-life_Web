@@ -1,5 +1,6 @@
 import { Outfit } from "next/font/google";
 import { AuthProvider } from "@/context/AuthContext";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 import "./globals.css";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -24,10 +25,12 @@ export default function RootLayout({
   return (
     <html lang="en" className={outfit.variable}>
       <body>
-        <AuthProvider>
-          {children}
-          <ToastContainer position="top-right" theme="dark" />
-        </AuthProvider>
+        <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ""}>
+          <AuthProvider>
+            {children}
+            <ToastContainer position="top-right" theme="dark" />
+          </AuthProvider>
+        </GoogleOAuthProvider>
       </body>
     </html>
   );
