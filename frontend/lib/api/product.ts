@@ -32,6 +32,22 @@ export const getProduct = async (id: string) => {
     }
 };
 
+export interface CategoryCountResponse {
+    success: boolean;
+    counts: Record<string, number>;
+}
+
+export const getCategoryCounts = async (): Promise<CategoryCountResponse> => {
+    try {
+        const response = await axiosInstance.get(API.PRODUCT.GET_CATEGORY_COUNTS);
+        return response.data as CategoryCountResponse;
+    } catch (error: unknown) {
+        throw new Error(
+            errorMessage(error, "Failed to load category counts")
+        );
+    }
+};
+
 function errorMessage(error: unknown, fallback: string): string {
     if (
         typeof error === "object" &&
