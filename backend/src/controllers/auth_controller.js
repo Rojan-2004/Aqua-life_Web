@@ -495,13 +495,13 @@ const requestPasswordReset = async (req, res, next) => {
     await user.save();
 
     try {
-      await sendPasswordResetEmail(user.email, resetToken);
+      const emailResult = await sendPasswordResetEmail(user.email, resetToken);
     } catch (emailErr) {
       console.error("Password reset email failed:", emailErr);
     }
 
     const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3001";
-    const devResetUrl = `${frontendUrl}/frontend/reset-password/${resetToken}`;
+    const devResetUrl = `${frontendUrl}/frontend/reset-password?token=${encodeURIComponent(resetToken)}`;
     console.log(`[DEV PASSWORD RESET] Use this link: ${devResetUrl}`);
 
     return res.status(200).json({

@@ -1,11 +1,11 @@
 const nodemailer = require("nodemailer");
 
-const EMAIL_HOST = process.env.EMAIL_HOST || "smtp.gmail.com";
+const EMAIL_HOST = (process.env.EMAIL_HOST || "smtp.gmail.com").trim();
 const EMAIL_PORT = parseInt(process.env.EMAIL_PORT || "587", 10);
-const EMAIL_USER = process.env.EMAIL_USER || "";
-const EMAIL_PASS = process.env.EMAIL_PASS || "";
-const EMAIL_FROM = process.env.EMAIL_FROM || EMAIL_USER;
-const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3001";
+const EMAIL_USER = (process.env.EMAIL_USER || "").trim();
+const EMAIL_PASS = (process.env.EMAIL_PASS || "").trim();
+const EMAIL_FROM = (process.env.EMAIL_FROM || EMAIL_USER || "AquaLife Support").trim();
+const FRONTEND_URL = (process.env.FRONTEND_URL || "http://localhost:3001").trim();
 
 let transporter = null;
 
@@ -15,17 +15,21 @@ function getTransporter() {
       host: EMAIL_HOST,
       port: EMAIL_PORT,
       secure: EMAIL_PORT === 465,
-      auth: {
-        user: EMAIL_USER,
-        pass: EMAIL_PASS,
-      },
+      ...(EMAIL_USER && EMAIL_PASS
+        ? {
+            auth: {
+              user: EMAIL_USER,
+              pass: EMAIL_PASS,
+            },
+          }
+        : {}),
     });
   }
   return transporter;
 }
 
 async function sendPasswordResetEmail(toEmail, token) {
-  const resetUrl = `${FRONTEND_URL}/frontend/reset-password/${token}`;
+  const resetUrl = `${FRONTEND_URL}/frontend/reset-password?token=${encodeURIComponent(token)}`;
 
   const html = `
     <div style="font-family: Arial, sans-serif; color: #111827; max-width: 560px; margin: 0 auto; padding: 24px;">
@@ -36,13 +40,21 @@ async function sendPasswordResetEmail(toEmail, token) {
     </div>
   `;
 
-  const info = await getTransporter().sendMail({
+  const mailOptions = {
     from: EMAIL_FROM,
     to: toEmail,
     subject: "Reset your AquaLife password",
     html,
-  });
+  };
 
+  if (!EMAIL_USER || !EMAIL_PASS) {
+    console.warn("[EMAIL] Missing EMAIL_USER/EMAIL_PASS; skipping actual send.");
+    console.log(`[EMAIL] Would send reset email to: ${toEmail}`);
+    console.log(`[EMAIL] Reset URL: ${resetUrl}`);
+    return { accepted: [], rejected: [], envelope: { from: EMAIL_FROM, to: [toEmail] } };
+  }
+
+  const info = await getTransporter().sendMail(mailOptions);
   return info;
 }
 

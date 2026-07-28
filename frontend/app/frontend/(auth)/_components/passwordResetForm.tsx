@@ -73,10 +73,10 @@ export default function ResetPasswordForm({
                     )}
                 </div>
                 <div className="mb-4">
-                    <Link href="/login" className="text-sm text-blue-500 hover:underline mb-4 inline-block">
+                    <Link href="/frontend/login" className="text-sm text-blue-500 hover:underline mb-4 inline-block">
                         Back to Login
                     </Link>
-                    <Link href="/forget-password" className="text-sm text-blue-500 hover:underline mb-4 inline-block ml-4">
+                    <Link href="/frontend/forget_password" className="text-sm text-blue-500 hover:underline mb-4 inline-block ml-4">
                         Request another reset email
                     </Link>
                 </div>
