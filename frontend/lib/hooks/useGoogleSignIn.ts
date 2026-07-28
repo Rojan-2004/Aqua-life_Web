@@ -7,7 +7,7 @@ function isClient() {
 }
 
 function loadGoogleScript(clientId: string): Promise<void> {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
         if (isClient() && (window as any).google?.accounts?.id) {
             resolve();
             return;
@@ -41,7 +41,7 @@ function loadGoogleScript(clientId: string): Promise<void> {
             check();
         };
         script.onerror = () => {
-            resolve();
+            reject(new Error("Failed to load Google Identity Services script"));
         };
         document.head.appendChild(script);
     });
@@ -75,13 +75,22 @@ export function useGoogleSignIn(clientId: string, onSuccess: (credential: string
         let mounted = true;
 
         async function init() {
-            await loadGoogleScript(clientId);
+            try {
+                await loadGoogleScript(clientId);
+            } catch (err) {
+                setError(err instanceof Error ? err.message : "Google Sign-In script failed to load");
+                setReady(false);
+                return;
+            }
 
             if (!mounted) return;
 
+            const origin = isClient() ? window.location.origin : "unknown";
+            console.log("[Google Sign-In Diagnostics] Origin:", origin, "| Client ID:", clientId);
+            console.log("[Google Sign-In Diagnostics] Authorized origins must include:", origin);
+
             const google = (window as any).google;
             if (!google?.accounts?.id) {
-                const origin = isClient() ? window.location.origin : "unknown";
                 setError(`Google Sign-In is not available. Origin: ${origin}. Client ID: ${clientId ? clientId.slice(0, 20) + "..." : "missing"}. Check Google Cloud Console authorized origins.`);
                 setReady(false);
                 return;
@@ -99,7 +108,7 @@ export function useGoogleSignIn(clientId: string, onSuccess: (credential: string
                 setReady(true);
                 setError(null);
             } catch (err) {
-                const origin = isClient() ? window.location.origin : "unknown";
+                console.error("[Google Sign-In] initialize error:", err);
                 setError(`Google Sign-In initialization failed: ${err instanceof Error ? err.message : err}. Origin: ${origin}`);
                 setReady(false);
             }

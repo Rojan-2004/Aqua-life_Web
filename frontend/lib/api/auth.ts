@@ -69,7 +69,7 @@ export const resetPassword = async (token: string, newPassword: string) => {
     try {
         const response = await axiosInstance.post(
             API.AUTH.RESET_PASSWORD(token),
-            { newPassword: newPassword }
+            { password: newPassword }
         );
         return response.data;
     } catch (error: Error | any) {

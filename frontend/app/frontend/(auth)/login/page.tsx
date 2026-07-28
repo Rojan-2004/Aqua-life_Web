@@ -50,6 +50,9 @@ export default function LoginPage() {
         }
     );
 
+    console.log("[Google Auth Diagnostics] NEXT_PUBLIC_GOOGLE_CLIENT_ID:", process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID);
+    console.log("[Google Auth Diagnostics] Current origin:", typeof window !== "undefined" ? window.location.origin : "server");
+
     useEffect(() => {
         if (googleError) {
             toast.error(googleError);
