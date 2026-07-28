@@ -176,12 +176,12 @@ export default function Header() {
                             </Link>
                         )}
 
-                        {/* Profile avatar */}
+                         {/* Profile avatar */}
                         <Link href="/dashboard/profile" style={{
                             width: 34,
                             height: 34,
                             borderRadius: "50%",
-                            background: "linear-gradient(135deg,#2d9cdb,#4dd9e8)",
+                            background: "transparent",
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
@@ -189,8 +189,14 @@ export default function Header() {
                             fontWeight: 700,
                             fontSize: 13,
                             textDecoration: "none",
+                            overflow: "hidden",
+                            border: "1px solid rgba(255,255,255,0.1)",
                         }}>
-                            {user?.firstName?.charAt(0) || "U"}
+                            {user?.profilePicture && user.profilePicture !== "default-profile.png" ? (
+                                <img src={`/profile_pictures/${user.profilePicture}`} alt="Avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                            ) : (
+                                <span>{user?.firstName?.charAt(0) || "U"}</span>
+                            )}
                         </Link>
 
                         {user?.role === "admin" && (
