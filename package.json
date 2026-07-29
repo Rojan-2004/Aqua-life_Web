@@ -1,4 +1,7 @@
 {
+  "scripts": {
+    "test": "npm test --prefix backend && npm run seed:import --prefix backend && (npm run dev --prefix backend > /tmp/backend.log 2>&1 &) && sleep 5 && npm test --prefix frontend && pkill -f 'nodemon src/server.js' || true"
+  },
   "dependencies": {
     "firebase": "^12.16.0"
   }
