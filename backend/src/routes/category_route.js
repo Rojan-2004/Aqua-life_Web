@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { protect } = require("../middleware/auth");
+const { protect, authorize } = require("../middleware/auth");
 const {
   createCategory,
   getAllCategories,
@@ -14,8 +14,8 @@ router.get("/", getAllCategories);
 router.get("/:id", getCategoryById);
 
 // Protected endpoints
-router.post("/", protect, createCategory);
-router.put("/:id", protect, updateCategory);
-router.delete("/:id", protect, deleteCategory);
+router.post("/", protect, authorize("admin"), createCategory);
+router.put("/:id", protect, authorize("admin"), updateCategory);
+router.delete("/:id", protect, authorize("admin"), deleteCategory);
 
 module.exports = router;
